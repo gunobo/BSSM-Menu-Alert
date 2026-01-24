@@ -1,7 +1,6 @@
 .auth-bg {
-  width: 100vw;
   height: 100vh;
-  background: linear-gradient(135deg, #4f46e5, #3b82f6);
+  background: linear-gradient(135deg, #5b7cff, #7f9cff);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -10,34 +9,38 @@
 .auth-box {
   background: white;
   padding: 40px;
-  border-radius: 16px;
-  width: 360px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  width: 320px;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
 }
 
 .auth-box h2 {
-  text-align: center;
+  margin-bottom: 20px;
 }
 
 .auth-box input {
-  padding: 12px;
-  font-size: 14px;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
 }
 
 .auth-box button {
-  padding: 12px;
-  background: #4f46e5;
+  width: 100%;
+  padding: 10px;
+  background: #5b7cff;
   color: white;
   border: none;
   border-radius: 8px;
+  font-weight: bold;
   cursor: pointer;
 }
 
 .auth-box p {
-  text-align: center;
+  margin-top: 14px;
   font-size: 14px;
-  cursor: pointer;
   color: #555;
+  cursor: pointer;
 }

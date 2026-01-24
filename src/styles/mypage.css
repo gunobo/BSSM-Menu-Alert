@@ -1,0 +1,93 @@
+/* =====================
+   마이페이지 전체 배경
+===================== */
+.mypage-wrapper {
+  min-height: 100vh;
+  padding-top: 120px; /* navbar + 여백 */
+  background: #f4f6fa;
+}
+
+/* =====================
+   마이페이지 카드
+===================== */
+.mypage-card {
+  max-width: 600px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 36px;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.15);
+}
+
+/* 제목 */
+.mypage-card h2 {
+  font-size: 26px;
+  font-weight: 900;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+/* =====================
+   정보 박스
+===================== */
+.info-box {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 30px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: #f8f9ff;
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+.info-item span {
+  font-weight: 700;
+  color: #333;
+}
+
+/* =====================
+   버튼 영역
+===================== */
+.mypage-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.mypage-actions button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+/* 비밀번호 변경 (나중용) */
+.btn-secondary {
+  background: #e0e4ff;
+  color: #3344aa;
+}
+
+/* 로그아웃 */
+.btn-danger {
+  background: #ff6b6b;
+  color: white;
+}
+
+/* =====================
+   반응형
+===================== */
+@media (max-width: 600px) {
+  .mypage-card {
+    padding: 24px;
+  }
+
+  .mypage-card h2 {
+    font-size: 22px;
+  }
+}

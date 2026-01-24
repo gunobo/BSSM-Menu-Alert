@@ -13,8 +13,11 @@ export default function Login() {
       return;
     }
 
-    // 임시 로그인 처리
-    localStorage.setItem("user", id);
+    localStorage.setItem(
+      "user",
+      JSON.stringify({ id, role: "USER" })
+    );
+
     navigate("/");
   };
 
@@ -22,12 +25,9 @@ export default function Login() {
     <div className="auth-bg">
       <div className="auth-box">
         <h2>로그인</h2>
-
         <input placeholder="아이디" value={id} onChange={e => setId(e.target.value)} />
         <input type="password" placeholder="비밀번호" value={pw} onChange={e => setPw(e.target.value)} />
-
         <button onClick={handleLogin}>로그인</button>
-
         <p onClick={() => navigate("/signup")}>
           아직 회원이 아니신가요? 회원가입
         </p>

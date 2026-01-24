@@ -54,13 +54,18 @@ a {
 }
 
 .nav-logo img {
-  height: 22px;
+  height: 36px;
   width: auto;
 }
 
 .navbar h2 {
   font-size: 20px;
   font-weight: 800;
+}
+
+.nav-logo img:hover,
+.navbar h2 {
+  cursor: pointer;
 }
 
 .nav-buttons {
