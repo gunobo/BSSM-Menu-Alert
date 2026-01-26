@@ -85,7 +85,7 @@ export default function Home() {
           <img
             src={bssmLogo}
             alt="BSSM 로고"
-            onClick={() => window.location.href = "https://school.busanedu.net"}
+            onClick={() => window.location.href = "https://school.busanedu.net/bssm-h"}
           />
           <h2 onClick={() => navigate("/")}>BSSM 급식 알리미</h2>
         </div>
