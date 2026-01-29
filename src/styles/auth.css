@@ -44,3 +44,115 @@
   color: #555;
   cursor: pointer;
 }
+
+.section { margin-top: 25px; text-align: left; }
+.allergy-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px; }
+.allergy-item { 
+  padding: 5px; border: 1px solid #ddd; border-radius: 5px; 
+  text-align: center; cursor: pointer; font-size: 12px;
+}
+.allergy-item.active { background: #ff4d4f; color: white; border-color: #ff4d4f; }
+
+/* 1. 좋아하는 메뉴 입력 영역 가로로 넓게 배치 */
+.menu-input {
+  display: flex;
+  gap: 10px;        /* 입력창과 추가 버튼 사이 간격 */
+  margin-top: 10px;
+  width: 100%;      /* 부모 너비에 맞춤 */
+}
+
+.menu-input input {
+  flex: 3;          /* 입력창을 버튼보다 3배 더 크게 */
+  padding: 12px;    /* 위아래 높이 키움 */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.menu-input button {
+  flex: 1;          /* 추가 버튼 비율 */
+  padding: 12px;
+  background-color: #5c7cfa; /* 파란색 계열 유지 */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* 2. 저장하기 버튼과 로그아웃 버튼 사이 띄우기 */
+.btn-save {
+  background-color: #5c7cfa;
+  color: white;
+  width: 100%;
+  padding: 15px;    /* 버튼을 더 듬직하게 */
+  border: none;
+  border-radius: 8px;
+  margin-top: 40px; /* 위쪽(메뉴 리스트)과의 간격 확장 */
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.btn-logout {
+  background-color: transparent; /* 배경을 없애거나 연하게 */
+  color: #5c7cfa;               /* 글자색만 파란색으로 */
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #5c7cfa;    /* 테두리만 있는 스타일 */
+  border-radius: 8px;
+  margin-top: 15px;             /* 저장 버튼과의 확실한 간격 */
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.btn-logout:hover {
+  background-color: #f1f3f5;    /* 마우스 올렸을 때 살짝 변하게 */
+}
+
+/* 내 정보 섹션 레이아웃 */
+.user-profile-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 0;
+  margin-bottom: 10px;
+}
+
+/* 프로필 이미지 동그랗게 */
+.user-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #5c7cfa;
+}
+
+.user-text-info {
+  text-align: left;
+}
+
+.user-name {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.user-email {
+  margin: 5px 0 0 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* 구분선 스타일 */
+.divider {
+  border: 0;
+  height: 1px;
+  background: #eee;
+  margin: 20px 0;
+}
+
+/* 이전 대화에서 수정한 버튼 간격 유지 */
+.btn-save {
+  margin-top: 30px; /* 섹션들 사이 간격 확보 */
+}
