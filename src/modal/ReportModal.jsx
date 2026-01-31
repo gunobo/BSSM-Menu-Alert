@@ -33,7 +33,7 @@ export default function ReportModal({ target, onClose }) {
       });
 
       if (res.status === 200 || res.status === 201) {
-        alert("🚨 신고가 정상 접수되었습니다.");
+        alert("🚨 신고가 정상 접수되었습니다. 신고 결과는 이메일로 발송됩니다.");
         onClose();
       }
     } catch (err) {

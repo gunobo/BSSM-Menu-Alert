@@ -1,29 +1,45 @@
 import { useState } from "react";
+import "../styles/report.css";
 
 export default function NoticeModal({ notice, onClose }) {
   const [dontShowToday, setDontShowToday] = useState(false);
 
   if (!notice) return null;
 
-  /**
-   * ✅ 문제 해결의 핵심
-   * VITE_API_URL은 보통 끝에 /api가 붙어있습니다.
-   * 이미지는 API를 타지 않으므로 서버의 '순수 주소'만 필요합니다.
-   */
-  const API_URL = import.meta.env.VITE_API_URL; // 예: http://localhost:8080/api
-  const IMAGE_BASE_URL = API_URL.replace("/api", ""); // http://localhost:8080 으로 변경
+  // ✅ 이미지 경로 처리 로직 최적화
+  const getImageUrl = () => {
+    if (!notice.imageUrl) return "";
+    if (notice.imageUrl.startsWith("http")) return notice.imageUrl;
 
-  // 이미지 경로 정제
-  const imageUrl = notice.imageUrl?.startsWith('/') 
-    ? `${IMAGE_BASE_URL}${notice.imageUrl}` 
-    : `${IMAGE_BASE_URL}/${notice.imageUrl}`;
+    const API_URL = import.meta.env.VITE_API_URL || "";
+    // /api 문자열을 제거하고 기본 베이스 주소만 추출
+    const IMAGE_BASE_URL = API_URL.replace(/\/api$/, "").replace(/\/$/, "");
+    
+    // 경로 시작의 / 여부를 체크하여 결합
+    const cleanImagePath = notice.imageUrl.startsWith("/") ? notice.imageUrl : `/${notice.imageUrl}`;
+    return `${IMAGE_BASE_URL}${cleanImagePath}`;
+  };
+
+  const imageUrl = getImageUrl();
 
   return (
-    <div className="modal-overlay" onClick={() => onClose(dontShowToday)}>
-      <div className="notice-modal-content" onClick={(e) => e.stopPropagation()}>
+    <div 
+      className="modal-overlay" 
+      onClick={() => onClose(dontShowToday)} // 배경 클릭 시 닫기
+    >
+      <div 
+        className="notice-modal-content" 
+        onClick={(e) => e.stopPropagation()} // 모달 내부 클릭 시 이벤트 전파 차단
+      >
         <div className="modal-header">
           <h2>📢 공지사항</h2>
-          <button className="close-btn" onClick={() => onClose(dontShowToday)}>&times;</button>
+          <button 
+            className="close-btn" 
+            onClick={() => onClose(dontShowToday)}
+            aria-label="닫기"
+          >
+            &times;
+          </button>
         </div>
         
         <div className="notice-body">
@@ -34,15 +50,18 @@ export default function NoticeModal({ notice, onClose }) {
                 alt="공지 이미지" 
                 className="notice-img" 
                 onError={(e) => {
-                  console.error("이미지 로드 실패 주소 확인:", imageUrl);
+                  console.warn("이미지 로드 실패:", imageUrl);
                   e.target.closest('.notice-image-container').style.display = 'none';
                 }} 
               />
             </div>
           )}
           
-          <h3 className="notice-title-text">{notice.title}</h3>
-          <p className="notice-description">{notice.content}</p>
+          <h3 className="notice-title-text">{notice.title || "공지사항"}</h3>
+          {/* 💡 개행 문자(\n)를 <br/>로 바꾸지 않아도 pre-wrap 덕분에 줄바꿈이 잘 보입니다. */}
+          <p className="notice-description">
+            {notice.content}
+          </p>
         </div>
 
         <div className="notice-footer">
@@ -52,10 +71,13 @@ export default function NoticeModal({ notice, onClose }) {
               checked={dontShowToday} 
               onChange={(e) => setDontShowToday(e.target.checked)}
             />
-            오늘 하루 그만 보기
+            <span>오늘 하루 그만 보기</span>
           </label>
           
-          <button className="notice-confirm-btn" onClick={() => onClose(dontShowToday)}>
+          <button 
+            className="notice-confirm-btn" 
+            onClick={() => onClose(dontShowToday)}
+          >
             확인
           </button>
         </div>
