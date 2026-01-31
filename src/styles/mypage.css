@@ -55,8 +55,16 @@
 ===================== */
 .mypage-wrapper {
   min-height: 100vh;
-  padding-top: 120px; /* navbar + 여백 */
+  /* 160px = 네비바(64px) + 여유 간격(96px) */
+  padding-top: 180px; 
+  padding-bottom: 80px; /* 하단 여백도 추가하면 더 안정적입니다 */
   background: #f4f6fa;
+}
+
+/* 기존 .container가 중앙 정렬이 안 되어 있다면 추가 */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 /* =====================
