@@ -11,7 +11,7 @@ export default function Login() {
     if (!credentialResponse.credential) return;
 
     try {
-      const res = await fetch("http://localhost:8080/auth/google", {
+      const res = await fetch("https://api.imjemin.co.kr/auth/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: credentialResponse.credential }),

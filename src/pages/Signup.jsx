@@ -15,7 +15,7 @@ export default function Signup() {
       console.log("구글 정보 디코딩:", decoded);
 
       // 2. 백엔드 전송
-      const res = await fetch('http://localhost:8080/auth/signup/google', {
+      const res = await fetch('https://api.imjemin.co.kr/auth/signup/google', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
