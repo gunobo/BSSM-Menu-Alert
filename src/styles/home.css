@@ -86,21 +86,27 @@ button {
 
 /* MAIN CARD */
 .main-card {
-  width: 100%;
+  width: 95%;              /* 부모 컨테이너 안에서 충분한 너비 확보 */
+  max-width: 1200px;       /* 너무 퍼지지 않게 최대치 설정 */
   background: #ffffff; 
   border-radius: 24px; 
   padding: 60px 40px;
-  margin-top: -80px;
+  margin: -80px auto 0; 
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12); 
   position: relative; 
   z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;     /* 내부 요소 중앙 정렬 */
 }
 
 /* MEAL GRID & CARDS */
 .meal-grid { 
+  width: 100%;
   display: grid; 
-  grid-template-columns: repeat(3, 1fr); 
+  grid-template-columns: repeat(3, 1fr); /* 기존 3열 유지 */
   gap: 25px;
+  margin: 0 auto;
 }
 .meal-card-wrapper { 
   height: 420px;
@@ -120,6 +126,11 @@ button {
 }
 .card-front {
   background: #f8faff; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;     /* 내부 요소 가로 중앙 */
+  justify-content: flex-start;
+  min-width: 0;            /* flex 안에서 너비 깨짐 방지 */
 }
 .card-back { 
   background: #fffef2; transform: rotateY(180deg); align-items: center; justify-content: center; text-align: center; 
@@ -186,8 +197,17 @@ button {
 .flip-hint { 
   margin-top: auto; font-size: 11px; color: #adb5bd; text-align: center; 
 }
+
+/* ✅ STATUS MESSAGE: "정보가 없습니다" 메시지 중앙 정렬 (가장 중요) */
 .status-msg { 
-  text-align: center; padding: 50px; color: #888; 
+  grid-column: 1 / -1;     /* 3칸 전체를 차지해서 중앙으로 보냄 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  padding: 100px 0;
+  color: #888; 
 }
 
 /* BANNER */

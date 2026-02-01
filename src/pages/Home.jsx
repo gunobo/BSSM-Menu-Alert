@@ -39,19 +39,23 @@ export default function Home() {
   const [activeNotice, setActiveNotice] = useState(null);
   const [showNoticeModal, setShowNoticeModal] = useState(false);
 
+  // --- [수정] 학교 홈페이지 이동 함수 추가 ---
+  const handleLogoClick = () => {
+    window.open("https://school.busanedu.net/bssm-h", "_blank");
+  };
+
   const formatRankingDate = (dateStr) => {
     if (!dateStr) return "";
     const cleanDate = dateStr.replace(/-/g, "");
     return `${parseInt(cleanDate.substring(4, 6))}월 ${parseInt(cleanDate.substring(6, 8))}일`;
   };
 
-  // --- 1. 실시간 알림(SSE) : 403 에러 방지 설정 추가 ---
+  // --- 1. 실시간 알림(SSE) ---
   const subscribeToNotifications = useCallback((userId) => {
     if (!userId || userId === "undefined") return;
     try {
       if (sseRef.current) sseRef.current.close();
       
-      // ✅ withCredentials: true 설정을 추가하여 CORS 및 403 이슈 방지
       const eventSource = new EventSource(`${API_BASE_URL}/notifications/subscribe/${userId}`, {
         withCredentials: true 
       });
@@ -74,7 +78,7 @@ export default function Home() {
     }
   }, []);
 
-  // --- 2. 좋아요 목록 로드 (백엔드 List<String> 반환 대응) ---
+  // --- 2. 좋아요 목록 로드 ---
   const fetchMyLikes = useCallback(async (userId) => {
     try {
       const token = localStorage.getItem("accessToken");
@@ -83,7 +87,6 @@ export default function Home() {
         headers: { Authorization: `Bearer ${token}` },
       });
       
-      // ✅ 백엔드에서 이미 CONCAT된 문자열 리스트(["20260131_중식_메뉴"])를 주므로 그대로 저장
       if (Array.isArray(res.data)) {
         setMyLikes(res.data);
       }
@@ -106,7 +109,6 @@ export default function Home() {
           const identifier = u.id || u.email;
           if (identifier && identifier !== "undefined") {
             await fetchMyLikes(identifier); 
-            // 403 방지를 위해 약간의 지연 후 구독 시도 (선택 사항)
             setTimeout(() => subscribeToNotifications(identifier), 500);
           }
         }
@@ -270,8 +272,8 @@ export default function Home() {
   return (
     <>
       <nav className="navbar">
-        <div className="nav-logo" onClick={() => navigate("/")}>
-          <img src={bssmLogo} alt="BSSM" />
+        <div className="nav-logo" style={{ cursor: 'pointer' }}>
+          <img src={bssmLogo} alt="BSSM 홈페이지 이동" onClick={handleLogoClick}/>
           <h2>BSSM 급식알리미</h2>
         </div>
         <div className="nav-right">
