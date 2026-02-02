@@ -1,9 +1,10 @@
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import axios from "axios";
 import "../styles/home.css";
 import bssmLogo from "../assets/bssmlogo.png";
-import { getMonthMeals, extractAllergyFromDish } from "../api/NeisApi";
+import { getMonthMeals, extractAllergyFromDish, allergyMap } from "../api/NeisApi";
 import { getUser, isLoggedIn, logout } from "../api/auth";
 import ReportModal from "../modal/ReportModal";
 import NoticeModal from "../modal/NoticeModal";
@@ -39,7 +40,6 @@ export default function Home() {
   const [activeNotice, setActiveNotice] = useState(null);
   const [showNoticeModal, setShowNoticeModal] = useState(false);
 
-  // --- [수정] 학교 홈페이지 이동 함수 추가 ---
   const handleLogoClick = () => {
     window.open("https://school.busanedu.net/bssm-h", "_blank");
   };
@@ -55,7 +55,6 @@ export default function Home() {
     if (!userId || userId === "undefined") return;
     try {
       if (sseRef.current) sseRef.current.close();
-      
       const eventSource = new EventSource(`${API_BASE_URL}/notifications/subscribe/${userId}`, {
         withCredentials: true 
       });
@@ -71,7 +70,6 @@ export default function Home() {
 
       eventSource.onopen = () => console.log("✅ 알림 서버 연결 성공");
       eventSource.onerror = () => eventSource.close();
-      
       sseRef.current = eventSource;
     } catch (err) {
       console.error("SSE 구독 중 오류 발생:", err);
@@ -86,10 +84,7 @@ export default function Home() {
       const res = await axios.get(`${API_BASE_URL}/likes/user/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
-      if (Array.isArray(res.data)) {
-        setMyLikes(res.data);
-      }
+      if (Array.isArray(res.data)) setMyLikes(res.data);
     } catch (e) {
       console.error("좋아요 목록 로드 실패:", e);
     }
@@ -154,7 +149,6 @@ export default function Home() {
     setShowNoticeModal(false);
   };
 
-  // --- 5. 랭킹 데이터 ---
   const fetchRanking = useCallback(async () => {
     try {
       const res = await axios.get(`${API_BASE_URL}/likes/ranking`);
@@ -165,7 +159,6 @@ export default function Home() {
     }
   }, []);
 
-  // --- 6. 초기 데이터 로드 ---
   useEffect(() => {
     const initData = async () => {
       setLoading(true);
@@ -179,28 +172,23 @@ export default function Home() {
     return () => { if (sseRef.current) sseRef.current.close(); };
   }, [fetchRanking, fetchLatestNotice]);
 
-  // --- 7. 좋아요 토글 ---
   const handleLike = async (e, mealKey, mealType) => {
     e.stopPropagation();
     const token = localStorage.getItem("accessToken");
     const userIdentifier = user?.id || user?.email;
-    
     if (!token || !userIdentifier) {
       alert("로그인 후 이용 가능합니다!");
       navigate("/login");
       return;
     }
-
     const formattedDate = selectedDate.replace(/-/g, "");
     const currentLikeKey = `${formattedDate}_${mealType}_${mealKey}`;
-
     try {
       const res = await axios.post(
         `${API_BASE_URL}/likes/toggle`,
         { userId: String(userIdentifier), mealDate: formattedDate, mealType, mealKey },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       if (res.data === "liked") {
         setMyLikes((prev) => [...new Set([...prev, currentLikeKey])]);
       } else {
@@ -215,16 +203,13 @@ export default function Home() {
     }
   };
 
-  // --- 8. 급식 데이터 로직 ---
   useEffect(() => {
     const [year, month] = selectedDate.split("-").map(Number);
     async function fetchMonthData(y, m) {
       try {
         const data = await getMonthMeals(y, m);
         setMonthData(data || {});
-      } catch (err) {
-        console.error("급식 데이터 로드 실패:", err);
-      }
+      } catch (err) { console.error("급식 데이터 로드 실패:", err); }
     }
     fetchMonthData(year, month);
   }, [selectedDate.slice(0, 7)]);
@@ -272,10 +257,17 @@ export default function Home() {
   return (
     <>
       <nav className="navbar">
-        <div className="nav-logo" style={{ cursor: 'pointer' }}>
-          <img src={bssmLogo} alt="BSSM 홈페이지 이동" onClick={handleLogoClick}/>
-          <h2>BSSM 급식알리미</h2>
+        <div className="nav-left">
+          <div className="nav-logo" style={{ cursor: 'pointer' }} onClick={handleLogoClick}>
+            <img src={bssmLogo} alt="BSSM 홈페이지 이동" />
+            <h2>BSSM 급식알리미</h2>
+          </div>
+          <div className="nav-menu">
+            <button className="menu-item active" onClick={() => navigate("/")}>급식확인</button>
+            <button className="menu-item" onClick={() => navigate("/announcements")}>공지게시판</button>
+          </div>
         </div>
+
         <div className="nav-right">
           <input
             type="date"
@@ -339,7 +331,6 @@ export default function Home() {
                   const danger = user?.allergies ? allergyList.some((a) => user.allergies.includes(a)) : false;
                   const mealKey = meal.DDISH_NM.split("(")[0].trim();
                   const mealType = meal.MMEAL_SC_NM;
-                  
                   const cleanSelectedDate = selectedDate.replace(/-/g, "");
                   const isLiked = isAuth && myLikes.includes(`${cleanSelectedDate}_${mealType}_${mealKey}`);
 
@@ -372,12 +363,30 @@ export default function Home() {
                               );
                             })}
                           </div>
+                          {/* 📍 [추가] 성분 확인 안내 문구 */}
+                          <p className="click-info-text">💡 클릭하여 성분을 확인하세요</p>
                           {danger && <div className="danger-badge">⚠️ 알레르기 주의</div>}
-                          <div className="flip-hint">클릭해서 성분 보기</div>
                         </div>
                         <div className="card-back">
                           <h3>성분 정보</h3>
-                          <p className="allergy-list-text">{allergyList.join(", ") || "없음"}</p>
+                          <div className="allergy-list-container">
+                            {allergyList.length > 0 ? (
+                              allergyList.map((name, i) => {
+                                const allergyNum = Object.keys(allergyMap).find(
+                                  (key) => allergyMap[key] === name
+                                );
+                                return (
+                                  <div key={i} className="allergy-row">
+                                    <span className="allergy-detail-item">
+                                      {name}{allergyNum ? `(${allergyNum})` : ""}
+                                    </span>
+                                  </div>
+                                );
+                              })
+                            ) : (
+                              <p className="status-msg">없음</p>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -414,7 +423,7 @@ export default function Home() {
       </main>
 
       {showReportModal && <ReportModal target={reportTarget} onClose={() => setShowReportModal(false)} />}
-      {showNoticeModal && <NoticeModal notice={activeNotice} onClose={handleCloseNotice} />}
+      <NoticeModal notice={activeNotice} onClose={handleCloseNotice} />
     </>
   );
 }

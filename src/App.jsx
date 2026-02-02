@@ -6,6 +6,8 @@ import Signup from "./pages/Signup.jsx";
 import MyPage from "./pages/MyPage.jsx";
 import AdminRoute from "./Routes/AdminRoute.jsx"
 import AdminPage from "./pages/AdminPage.jsx";
+import Announcements from "./pages/Announcements.jsx";
+import AnnouncementDetail from "./pages/AnnouncementDetail.jsx";
 
 export default function App() {
   return (
@@ -14,6 +16,8 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/mypage" element={<MyPage />} />
+      <Route path="/announcements" element={<Announcements />} />
+      <Route path="/announcements/:id" element={<AnnouncementDetail />} />
       <Route 
         path="/adminpages" 
         element={

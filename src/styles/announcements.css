@@ -1,0 +1,143 @@
+.notice-page {
+  padding-top: 64px;
+  min-height: 100vh;
+  background-color: #f4f6fa;
+}
+
+.notice-header {
+  background: linear-gradient(135deg, #5b7cff, #7f9cff);
+  color: white;
+  padding: 60px 0;
+  text-align: center;
+}
+
+.notice-header h1 {
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.notice-list-card {
+  background: white;
+  border-radius: 20px;
+  padding: 20px;
+  margin-top: -40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 10;
+}
+
+.notice-table {
+  width: 100%;
+}
+
+.table-header {
+  display: flex;
+  padding: 15px 20px;
+  border-bottom: 2px solid #f1f5f9;
+  font-weight: 700;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.table-row {
+  display: flex;
+  padding: 20px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+  transition: all 0.2s;
+  align-items: center;
+}
+
+.table-row:hover {
+  background-color: #f8faff;
+  transform: translateX(5px);
+}
+
+.col-id { width: 10%; text-align: center; color: #94a3b8; }
+.col-title { width: 75%; font-weight: 600; color: #334155; }
+.col-date { width: 15%; text-align: right; color: #94a3b8; font-size: 14px; }
+
+.empty-notice {
+  text-align: center;
+  padding: 100px 0;
+  color: #94a3b8;
+}
+
+.loading-msg {
+  text-align: center;
+  padding: 50px;
+  color: #5b7cff;
+}
+
+/* 상세 페이지 추가 스타일 */
+.notice-header.small {
+  padding: 40px 0;
+}
+
+.notice-detail-card {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  margin-top: -40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 10;
+  min-height: 400px;
+}
+
+.detail-header {
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+}
+
+.detail-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 10px;
+}
+
+.detail-info {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.detail-content {
+  min-height: 200px;
+  line-height: 1.8;
+  color: #334155;
+  font-size: 16px;
+}
+
+.content-text {
+  white-space: pre-wrap; /* 서버에서 온 줄바꿈(\n)을 그대로 보여줌 */
+  word-break: break-all;
+}
+
+.detail-footer {
+  margin-top: 50px;
+  padding-top: 20px;
+  border-top: 1px solid #f1f5f9;
+  text-align: center;
+}
+
+.list-back-btn {
+  padding: 12px 24px;
+  background-color: #f1f5f9;
+  color: #64748b;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.list-back-btn:hover {
+  background-color: #e2e8f0;
+  color: #1e293b;
+}
+
+/* announcements.css 에 추가하면 좋은 스타일 예시 */
+.markdown-body h1 { border-bottom: 1px solid #eee; padding-bottom: 10px; }
+.markdown-body ul { padding-left: 20px; }
+.markdown-body blockquote { border-left: 4px solid #ddd; padding-left: 15px; color: #666; }

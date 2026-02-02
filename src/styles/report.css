@@ -85,6 +85,10 @@
   font-weight: bold;
 }
 
+.confirm-btn { 
+  padding: 8px 14px; border-radius: 8px; background: #5b7cff; color: #fff; font-weight: 600; 
+}
+
 /* 기존에 주신 CSS 코드들 (nav-report-btn, nav-btn 등)을 이 아래에 붙여넣으세요 */
 
 /* --- Navbar Styles --- */

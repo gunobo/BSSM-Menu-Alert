@@ -1,85 +1,87 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import "../styles/report.css";
 
-export default function NoticeModal({ notice, onClose }) {
-  const [dontShowToday, setDontShowToday] = useState(false);
+export default function NoticeModal({ notice: propsNotice, onClose }) {
+  const [localNotice, setLocalNotice] = useState(null);
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
+  const todayStr = new Date().toISOString().slice(0, 10);
 
-  if (!notice) return null;
+  useEffect(() => {
+    // 1. props로 전달받은 알림이 있으면 그걸 사용
+    if (propsNotice) {
+      setLocalNotice(propsNotice);
+      return;
+    }
 
-  // ✅ 이미지 경로 처리 로직 최적화
+    // 2. props가 없으면(새로고침 시) 서버에서 직접 조회
+    const fetchLatest = async () => {
+      try {
+        const res = await axios.get(`${API_BASE_URL}/notifications/latest`);
+        const data = res.data;
+
+        if (data && data.type === "ALARM") {
+          const dontShowUntil = localStorage.getItem("dontShowNoticeUntil");
+          const lastReadId = localStorage.getItem("lastReadNoticeId");
+
+          // 오늘 하루 안보기 체크 혹은 아예 새로운 ID의 공지라면 보여줌
+          if (dontShowUntil !== todayStr || (lastReadId && Number(data.id) > Number(lastReadId))) {
+            setLocalNotice(data);
+          }
+        }
+      } catch (err) {
+        console.error("공지 로딩 실패:", err);
+      }
+    };
+    fetchLatest();
+  }, [propsNotice, API_BASE_URL, todayStr]);
+
+  // 보여줄 공지가 없으면 렌더링 안함
+  if (!localNotice) return null;
+
+  // 이미지 경로 처리 (백엔드 URL 결합)
   const getImageUrl = () => {
-    if (!notice.imageUrl) return "";
-    if (notice.imageUrl.startsWith("http")) return notice.imageUrl;
-
-    const API_URL = import.meta.env.VITE_API_URL || "";
-    // /api 문자열을 제거하고 기본 베이스 주소만 추출
-    const IMAGE_BASE_URL = API_URL.replace(/\/api$/, "").replace(/\/$/, "");
-    
-    // 경로 시작의 / 여부를 체크하여 결합
-    const cleanImagePath = notice.imageUrl.startsWith("/") ? notice.imageUrl : `/${notice.imageUrl}`;
-    return `${IMAGE_BASE_URL}${cleanImagePath}`;
+    if (!localNotice.imageUrl) return null;
+    if (localNotice.imageUrl.startsWith("http")) return localNotice.imageUrl;
+    const SERVER_URL = API_BASE_URL.replace(/\/api$/, "");
+    return `${SERVER_URL}/${localNotice.imageUrl.replace(/^\//, "")}`;
   };
 
   const imageUrl = getImageUrl();
 
   return (
-    <div 
-      className="modal-overlay" 
-      onClick={() => onClose(dontShowToday)} // 배경 클릭 시 닫기
-    >
-      <div 
-        className="notice-modal-content" 
-        onClick={(e) => e.stopPropagation()} // 모달 내부 클릭 시 이벤트 전파 차단
-      >
+    <div className="modal-overlay" onClick={() => onClose(dontShowToday)}>
+      <div className="notice-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>📢 공지사항</h2>
-          <button 
-            className="close-btn" 
-            onClick={() => onClose(dontShowToday)}
-            aria-label="닫기"
-          >
-            &times;
-          </button>
+          <h2>📢 전체 공지사항</h2>
+          <button className="close-btn" onClick={() => onClose(false)}>&times;</button>
         </div>
         
         <div className="notice-body">
-          {notice.imageUrl && (
-            <div className="notice-image-container">
-              <img 
-                src={imageUrl} 
-                alt="공지 이미지" 
-                className="notice-img" 
-                onError={(e) => {
-                  console.warn("이미지 로드 실패:", imageUrl);
-                  e.target.closest('.notice-image-container').style.display = 'none';
-                }} 
-              />
+          {imageUrl && (
+            <div className="notice-image-area" style={{ textAlign: 'center', marginBottom: '15px' }}>
+              <img src={imageUrl} alt="공지" style={{ maxWidth: '100%', borderRadius: '8px' }} />
             </div>
           )}
-          
-          <h3 className="notice-title-text">{notice.title || "공지사항"}</h3>
-          {/* 💡 개행 문자(\n)를 <br/>로 바꾸지 않아도 pre-wrap 덕분에 줄바꿈이 잘 보입니다. */}
-          <p className="notice-description">
-            {notice.content}
-          </p>
+          <div className="notice-text-area">
+            <h3 style={{ marginBottom: '10px' }}>{localNotice.title}</h3>
+            <p style={{ whiteSpace: "pre-wrap", color: '#444' }}>{localNotice.content}</p>
+          </div>
         </div>
 
-        <div className="notice-footer">
-          <label className="dont-show-label">
-            <input 
-              type="checkbox" 
-              checked={dontShowToday} 
-              onChange={(e) => setDontShowToday(e.target.checked)}
-            />
-            <span>오늘 하루 그만 보기</span>
+        <div className="notice-footer" style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <label style={{ fontSize: '14px', cursor: 'pointer' }}>
+            <input type="checkbox" onChange={(e) => {
+              if(e.target.checked) {
+                localStorage.setItem("dontShowNoticeUntil", todayStr);
+                localStorage.setItem("lastReadNoticeId", String(localNotice.id));
+              }
+            }} /> 오늘 하루 보지 않기
           </label>
-          
-          <button 
-            className="notice-confirm-btn" 
-            onClick={() => onClose(dontShowToday)}
-          >
-            확인
-          </button>
+          <button className="confirm-btn" onClick={() => {
+             setLocalNotice(null);
+             onClose(false);
+          }}>닫기</button>
         </div>
       </div>
     </div>
