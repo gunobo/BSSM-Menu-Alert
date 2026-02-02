@@ -8,6 +8,7 @@ import { getMonthMeals, extractAllergyFromDish, allergyMap } from "../api/NeisAp
 import { getUser, isLoggedIn, logout } from "../api/auth";
 import ReportModal from "../modal/ReportModal";
 import NoticeModal from "../modal/NoticeModal";
+import Footer from "./footer";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -258,9 +259,9 @@ export default function Home() {
     <>
       <nav className="navbar">
         <div className="nav-left">
-          <div className="nav-logo" style={{ cursor: 'pointer' }} onClick={handleLogoClick}>
-            <img src={bssmLogo} alt="BSSM 홈페이지 이동" />
-            <h2>BSSM 급식알리미</h2>
+          <div className="nav-logo" style={{ cursor: 'pointer' }}>
+            <img src={bssmLogo} alt="BSSM 홈페이지 이동" onClick={handleLogoClick} />
+            <h2 onClick={() => navigate("/")}>BSSM 급식알리미</h2>
           </div>
           <div className="nav-menu">
             <button className="menu-item active" onClick={() => navigate("/")}>급식확인</button>
@@ -421,6 +422,8 @@ export default function Home() {
           </div>
         </section>
       </main>
+
+      <Footer />
 
       {showReportModal && <ReportModal target={reportTarget} onClose={() => setShowReportModal(false)} />}
       <NoticeModal notice={activeNotice} onClose={handleCloseNotice} />

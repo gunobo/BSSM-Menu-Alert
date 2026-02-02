@@ -79,7 +79,6 @@
 /* 2. 메인 컨텐츠 영역 */
 .admin-main-content {
   display: grid;
-  grid-template-columns: 1fr 2fr;
   gap: 30px;
 }
 
@@ -428,3 +427,155 @@
 }
 .sidebar-nav button.active { background: #2d3748; color: white; font-weight: bold; }
 .admin-main { flex: 1; overflow-y: auto; background: #f7fafc; padding: 30px; }
+
+/* admin.css 추가분 */
+
+/* 상세보기 내의 그룹 디자인 */
+.detail-group {
+  padding: 15px;
+  background-color: #fcfcfc;
+  border-radius: 10px;
+  border: 1px solid #f0f0f0;
+}
+
+.detail-group strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--text-main);
+  margin-bottom: 5px;
+}
+
+/* 테이블 행 선택 효과 */
+.admin-table tbody tr:hover {
+  background-color: #f4f7fe;
+  cursor: default;
+}
+
+/* 스크롤바 커스텀 (사이드바/메인용) */
+.admin-main::-webkit-scrollbar {
+  width: 8px;
+}
+.admin-main::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+/* 상세보기 패널 애니메이션 */
+.user-detail-panel {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 1. 기간 선택 및 입력창 스타일 (Select/Input) */
+.admin-input, .admin-select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #ffffff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 15px;
+}
+
+.admin-input:focus, .admin-select:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1);
+}
+
+/* 2. 상태 배지 확장 (Success/Warning) */
+.badge.success {
+    background-color: #e6fffa;
+    color: #38b2ac;
+}
+
+.badge.warning {
+    background-color: #fffaf0;
+    color: #ed8936;
+}
+
+/* 3. 새로고침 버튼 디자인 */
+.btn-refresh {
+    background: white;
+    border: 1px solid #e0e0e0;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+}
+
+.btn-refresh:hover {
+    background: #f8f9fa;
+    border-color: #ccc;
+}
+
+/* 4. 상세보기 패널 내 정보 그룹화 */
+.info-group {
+    margin-bottom: 15px;
+}
+
+.info-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.info-group p {
+    margin: 0;
+    font-size: 15px;
+    color: var(--text-main);
+    word-break: break-all;
+}
+
+.info-group.ban-info {
+    background-color: #fff5f5;
+    padding: 10px;
+    border-radius: 8px;
+    border-left: 4px solid var(--danger-red);
+}
+
+/* 5. 로딩 스피너 애니메이션 */
+.admin-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    font-weight: 600;
+    color: var(--primary-blue);
+}
+
+.admin-loading::after {
+    content: "";
+    width: 20px;
+    height: 20px;
+    margin-left: 10px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid var(--primary-blue);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 6. 테이블 행 선택 상태 */
+.admin-table tbody tr.active {
+    background-color: #ebf1ff !important;
+}
+
+.admin-table tbody tr.active td {
+    border-bottom: 1px solid var(--primary-blue);
+}

@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
-import AdminDashboard from "./admin/AdminDashboard"; // 기존 코드를 대시보드로 분리
-import AnnouncementEditor from "./admin/AnnouncementEditor"; // 새로 추가할 공지 작성 컴포넌트
+import { useState } from "react";
+import AdminDashboard from "./admin/AdminDashboard";
+import AnnouncementEditor from "./admin/AnnouncementEditor";
+import UserManagement from "./admin/UserManagement";
 import "../styles/admin.css";
 
 export default function AdminPage() {
@@ -9,7 +9,7 @@ export default function AdminPage() {
 
   return (
     <div className="admin-layout">
-      {/* ⬅️ 왼쪽 사이드바 추가 */}
+      {/* 사이드바 영역 */}
       <aside className="admin-sidebar">
         <div className="sidebar-logo">
           <h2>BSSM Admin</h2>
@@ -23,6 +23,12 @@ export default function AdminPage() {
             📊 대시보드 (통계/신고)
           </button>
           <button 
+            className={activeMenu === "users" ? "active" : ""} 
+            onClick={() => setActiveMenu("users")}
+          >
+            👥 사용자 관리
+          </button>
+          <button 
             className={activeMenu === "announcement" ? "active" : ""} 
             onClick={() => setActiveMenu("announcement")}
           >
@@ -31,13 +37,23 @@ export default function AdminPage() {
         </nav>
       </aside>
 
-      {/* ➡️ 오른쪽 메인 영역 */}
+      {/* 메인 영역 */}
       <main className="admin-main">
-        {activeMenu === "dashboard" ? (
-          <AdminDashboard /> 
-        ) : (
-          <AnnouncementEditor />
-        )}
+        <div className="admin-container">
+          <header className="admin-header">
+            <h1>{
+              activeMenu === "dashboard" ? "통계 및 관리" : 
+              activeMenu === "users" ? "사용자 관리" : "공지사항 등록"
+            }</h1>
+            <p>BSSM 급식알리미 서비스의 통합 관리 도구입니다.</p>
+          </header>
+
+          <div className="admin-main-content">
+            {activeMenu === "dashboard" && <AdminDashboard />}
+            {activeMenu === "users" && <UserManagement />}
+            {activeMenu === "announcement" && <AnnouncementEditor />}
+          </div>
+        </div>
       </main>
     </div>
   );

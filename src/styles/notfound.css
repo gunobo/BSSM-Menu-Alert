@@ -1,0 +1,70 @@
+.not-found-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* 푸터를 바닥에 고정하기 위해 전체 높이 확보 */
+}
+
+.not-found-content {
+  flex: 1; /* 푸터를 제외한 나머지 공간을 차지하여 푸터를 아래로 밀어냄 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.error-code {
+  font-size: 120px;
+  font-weight: 900;
+  color: #3b82f6; /* 포인트 컬러 */
+  margin: 0;
+  line-height: 1;
+}
+
+.error-message {
+  font-size: 32px;
+  color: #333;
+  margin: 20px 0 10px;
+}
+
+.error-description {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.not-found-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.go-home-btn {
+  padding: 12px 24px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.go-home-btn:hover {
+  background-color: #2563eb;
+}
+
+.go-back-btn {
+  padding: 12px 24px;
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.go-back-btn:hover {
+  background-color: #e5e7eb;
+}

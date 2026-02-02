@@ -1,0 +1,63 @@
+.footer {
+  background-color: #f9f9f9; /* 배경을 살짝 회색으로 해서 본문과 분리 */
+  padding: 50px 0;
+  border-top: 1px solid #e1e1e1;
+  color: #666;
+  font-size: 13px;
+  margin-top: 80px; /* 본문과의 간격 */
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.footer-logo {
+  font-size: 22px;
+  font-weight: 800;
+  color: #444;
+  margin-bottom: 20px;
+  letter-spacing: -1px;
+}
+
+.footer-info p {
+  margin: 6px 0;
+  line-height: 1.5;
+}
+
+.footer-langs {
+  margin-bottom: 12px;
+  color: #999;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  justify-content: flex-end;
+}
+
+.social-icon {
+  font-size: 20px;
+  cursor: pointer;
+  filter: grayscale(1); /* 소셜 아이콘을 회색조로 */
+}
+
+.family-service {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  width: 160px;
+  cursor: pointer;
+}
+
+.logo-img {
+    height: 24px;
+    display: flex;
+    align-items: center;
+    filter: grayscale(1)
+}

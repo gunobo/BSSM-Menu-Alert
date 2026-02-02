@@ -8,6 +8,7 @@ import AdminRoute from "./Routes/AdminRoute.jsx"
 import AdminPage from "./pages/AdminPage.jsx";
 import Announcements from "./pages/Announcements.jsx";
 import AnnouncementDetail from "./pages/AnnouncementDetail.jsx";
+import NotFound from "./pages/NOTFOUND.jsx";
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
           </AdminRoute>
         } 
       />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

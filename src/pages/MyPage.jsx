@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getUser, updateUserInfo, logout } from "../api/auth";
 import "../styles/mypage.css";
 import bssmLogo from "../assets/bssmlogo.png";
+import Footer from "./footer";
 
 export default function MyPage() {
   const navigate = useNavigate();
@@ -148,6 +149,7 @@ export default function MyPage() {
           </div>
         </main>
       </div>
+      <Footer />
     </>
   );
 }
