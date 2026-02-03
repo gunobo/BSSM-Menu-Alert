@@ -4,6 +4,7 @@ import axios from "axios";
 import ReactMarkdown from "react-markdown"; // ✅ 마크다운 렌더러 추가
 import "../styles/announcements.css"; 
 import bssmLogo from "../assets/bssmlogo.png";
+import Footer from "./footer";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -93,6 +94,8 @@ export default function AnnouncementDetail() {
           ) : null}
         </div>
       </main>
+      
+      <Footer/>
     </div>
   );
 }

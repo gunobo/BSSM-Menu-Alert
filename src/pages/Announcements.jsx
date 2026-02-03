@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/announcements.css";
 import bssmLogo from "../assets/bssmlogo.png";
+import Footer from "./footer";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -10,11 +11,13 @@ export default function Announcements() {
   const navigate = useNavigate();
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
     const fetchNotices = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/notifications/all`); // 전체 공지 호출 API
+        const res = await axios.get(`${API_BASE_URL}/notifications/all`);
         setNotices(res.data);
       } catch (err) {
         console.error("공지사항 로드 실패:", err);
@@ -25,24 +28,24 @@ export default function Announcements() {
     fetchNotices();
   }, []);
 
-  const handleLogoClick = () => navigate("/");
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = notices.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(notices.length / itemsPerPage);
 
   return (
     <div className="notice-page">
-      {/* Home과 동일한 네비바 구조 */}
       <nav className="navbar">
         <div className="nav-left">
-          <div className="nav-logo" onClick={handleLogoClick} style={{ cursor: "pointer" }}>
+          <div className="nav-logo" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
             <img src={bssmLogo} alt="BSSM Logo" />
             <h2>BSSM 급식알리미</h2>
           </div>
         </div>
-
         <div className="nav-menu">
           <button className="menu-item" onClick={() => navigate("/")}>급식확인</button>
           <button className="menu-item active" onClick={() => navigate("/announcements")}>공지게시판</button>
         </div>
-
         <div className="nav-right">
           <button className="nav-btn" onClick={() => navigate(-1)}>뒤로가기</button>
         </div>
@@ -57,27 +60,74 @@ export default function Announcements() {
 
       <main className="container">
         <div className="notice-list-card">
+          {/* ✅ 셀렉트 박스를 카드 안쪽 상단으로 이동 */}
+          <div className="list-top-bar">
+            <div className="total-count">
+              전체 공지 <strong>{notices.length}</strong>건
+            </div>
+            <select 
+              value={itemsPerPage} 
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="per-page-select"
+            >
+              <option value={10}>10개씩 보기</option>
+              <option value={30}>30개씩 보기</option>
+              <option value={50}>50개씩 보기</option>
+            </select>
+          </div>
+
           {loading ? (
             <p className="loading-msg">공지사항을 불러오는 중입니다...</p>
-          ) : notices.length > 0 ? (
-            <div className="notice-table">
-              <div className="table-header">
-                <span className="col-id">번호</span>
-                <span className="col-title">제목</span>
-                <span className="col-date">작성일</span>
-              </div>
-              {notices.map((notice, index) => (
-                <div 
-                  key={notice.id} 
-                  className="table-row"
-                  onClick={() => navigate(`/announcements/${notice.id}`)}
-                >
-                  <span className="col-id">{notices.length - index}</span>
-                  <span className="col-title">{notice.title}</span>
-                  <span className="col-date">{notice.createdAt?.slice(0, 10)}</span>
+          ) : currentItems.length > 0 ? (
+            <>
+              <div className="notice-table">
+                <div className="table-header">
+                  <span className="col-id">번호</span>
+                  <span className="col-title">제목</span>
+                  <span className="col-date">작성일</span>
                 </div>
-              ))}
-            </div>
+                {currentItems.map((notice, index) => (
+                  <div 
+                    key={notice.id} 
+                    className="table-row"
+                    onClick={() => navigate(`/announcements/${notice.id}`)}
+                  >
+                    <span className="col-id">{notices.length - (indexOfFirstItem + index)}</span>
+                    <span className="col-title">{notice.title}</span>
+                    <span className="col-date">{notice.createdAt?.slice(0, 10)}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pagination">
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="page-btn"
+                >
+                  &lt;
+                </button>
+                {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i + 1}
+                    onClick={() => setCurrentPage(i + 1)}
+                    className={`page-number ${currentPage === i + 1 ? "active" : ""}`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+                <button 
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="page-btn"
+                >
+                  &gt;
+                </button>
+              </div>
+            </>
           ) : (
             <div className="empty-notice">
               <p>등록된 공지사항이 없습니다.</p>
@@ -85,6 +135,7 @@ export default function Announcements() {
           )}
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

@@ -24,8 +24,6 @@ export default function NotFound() {
           </button>
         </div>
       </div>
-      
-      {/* 📍 컴포넌트로 만들었기에 여기서도 쉽게 사용 가능합니다! */}
       <Footer />
     </div>
   );

@@ -1,14 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import MdEditor from "react-markdown-editor-lite";
 import MarkdownIt from "markdown-it";
-// 에디터 기본 스타일은 필수입니다
 import "react-markdown-editor-lite/lib/index.css";
+import "../../styles/Editor.css";
 
-// 마크다운 파서 초기화
 const mdParser = new MarkdownIt();
 
-export default function AnnouncementEditor() {
+export default function AnnouncementEditor({ editData, onComplete }) {
   const [data, setData] = useState({ title: "", content: "" });
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -17,12 +16,28 @@ export default function AnnouncementEditor() {
   const API_BASE_URL = import.meta.env.VITE_API_URL;
   const token = localStorage.getItem("accessToken");
 
-  // 에디터 내용 변경 핸들러 (MdEditor 전용)
+  // ✅ 수정 모드일 경우 전달받은 데이터로 초기값 설정
+  useEffect(() => {
+    if (editData) {
+      setData({
+        title: editData.title || "",
+        content: editData.content || "",
+      });
+      // 기존 이미지가 있다면 미리보기에 표시 (서버에서 주는 이미지 URL 구조에 따라 수정 필요)
+      if (editData.imageUrl) {
+        setPreviewUrl(editData.imageUrl);
+      }
+    } else {
+      // 신규 작성이면 초기화
+      setData({ title: "", content: "" });
+      setPreviewUrl(null);
+    }
+  }, [editData]);
+
   const handleEditorChange = ({ text }) => {
     setData((prev) => ({ ...prev, content: text }));
   };
 
-  // 이미지 선택 및 미리보기
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
@@ -43,23 +58,36 @@ export default function AnnouncementEditor() {
     if (file) formData.append("file", file);
 
     try {
-      // ✅ 게시판 등록용 (NoticeController) - sendAlert는 false로 처리됨
-      await axios.post(`${API_BASE_URL}/notifications`, formData, {
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data" 
-        }
-      });
+      if (editData) {
+        // 💡 수정 모드 (PUT)
+        await axios.put(`${API_BASE_URL}/notifications/${editData.id}`, formData, {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data" 
+          }
+        });
+        alert("✅ 공지사항이 수정되었습니다.");
+      } else {
+        // 💡 등록 모드 (POST)
+        await axios.post(`${API_BASE_URL}/notifications`, formData, {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data" 
+          }
+        });
+        alert("✅ 공지사항이 등록되었습니다.");
+      }
+
+      // 완료 후 리스트로 이동 (AdminPage에서 넘겨준 함수)
+      if (onComplete) onComplete();
       
-      alert("✅ 마크다운 공지사항이 성공적으로 등록되었습니다.");
-      
-      // 입력 폼 초기화
+      // 초기화
       setData({ title: "", content: "" });
       setFile(null);
       setPreviewUrl(null);
     } catch (err) {
       console.error(err);
-      alert("등록 실패: " + (err.response?.data?.message || err.message));
+      alert("처리 실패: " + (err.response?.data?.message || err.message));
     } finally {
       setIsSubmitting(false);
     }
@@ -67,13 +95,11 @@ export default function AnnouncementEditor() {
 
   return (
     <div className="admin-container">
-      {/* 원래 UI 헤더 그대로 유지 */}
       <header className="admin-header">
-        <h1>📝 공지게시판 글쓰기 (Markdown)</h1>
-        <p>마크다운 문법을 사용하여 공지를 자유롭게 꾸며보세요.</p>
+        <h1>{editData ? "📝 공지사항 수정" : "📝 공지게시판 글쓰기 (Markdown)"}</h1>
+        <p>{editData ? "내용을 수정하고 저장 버튼을 누르세요." : "마크다운 문법을 사용하여 공지를 자유롭게 꾸며보세요."}</p>
       </header>
       
-      {/* 원래 UI 섹션 및 폼 클래스 그대로 유지 */}
       <section className="admin-section full-width">
         <form onSubmit={handleSubmit} className="admin-form">
           <div className="input-group">
@@ -87,7 +113,7 @@ export default function AnnouncementEditor() {
           </div>
           
           <div className="input-group">
-            <label>대표 이미지 첨부 (선택)</label>
+            <label>대표 이미지 {editData ? "변경" : "첨부"} (선택)</label>
             <input type="file" accept="image/*" onChange={handleFileChange} />
             {previewUrl && (
               <div className="image-preview" style={{ marginTop: "10px" }}>
@@ -98,21 +124,19 @@ export default function AnnouncementEditor() {
 
           <div className="input-group">
             <label>공지 상세 내용 (Markdown)</label>
-            {/* 텍스트에어리어 대신 마크다운 에디터 배치 */}
             <div style={{ marginTop: "10px" }}>
               <MdEditor 
                 style={{ height: "500px" }} 
                 renderHTML={(text) => mdParser.render(text)} 
                 onChange={handleEditorChange} 
                 value={data.content}
-                placeholder="내용을 작성하세요... (# 제목, **굵게** 등 사용 가능)"
+                placeholder="내용을 작성하세요..."
               />
             </div>
           </div>
 
-          {/* 원래 UI 버튼 스타일 그대로 유지 */}
           <button type="submit" className="btn-send" disabled={isSubmitting} style={{ marginTop: "20px" }}>
-            {isSubmitting ? "등록 중..." : "게시판에 등록하기"}
+            {isSubmitting ? "처리 중..." : editData ? "수정 완료하기" : "게시판에 등록하기"}
           </button>
         </form>
       </section>
