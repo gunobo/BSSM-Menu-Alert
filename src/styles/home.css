@@ -231,3 +231,48 @@ button {
   color: #fff;
   font-weight: 600; 
 }
+
+/* 댓글 아이콘 버튼 스타일 수정 */
+.comment-icon-btn {
+  background: none;
+  border: none;
+  font-size: 22px; /* 👈 크기를 기존보다 키웠습니다 */
+  cursor: pointer;
+  margin-right: 12px; /* 좋아요 버튼과의 간격 확보 */
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  border-radius: 50%; /* 호버 시 원형 배경을 위해 추가 */
+}
+
+/* 마우스를 올렸을 때 효과 */
+.comment-icon-btn:hover {
+  transform: scale(1.25); /* 👈 살짝 더 크게 부풀어 오름 */
+  background-color: rgba(0, 0, 0, 0.05); /* 연한 배경색 추가 */
+}
+
+/* 클릭했을 때 톡 터지는 느낌 */
+.comment-icon-btn:active {
+  transform: scale(0.9);
+}
+
+/* 카드 헤더 내부 배치 정렬 */
+.card-header-right {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.comment-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background-color: #ff4757;
+  color: white;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 10px;
+  font-weight: bold;
+}

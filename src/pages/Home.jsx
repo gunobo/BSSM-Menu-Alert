@@ -8,6 +8,7 @@ import { getMonthMeals, extractAllergyFromDish, allergyMap } from "../api/NeisAp
 import { getUser, isLoggedIn, logout } from "../api/auth";
 import ReportModal from "../modal/ReportModal";
 import NoticeModal from "../modal/NoticeModal";
+import CommentModal from "../modal/CommentModal";
 import Footer from "./footer";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -18,7 +19,6 @@ export default function Home() {
   const [isAuth, setIsAuth] = useState(isLoggedIn());
   const sseRef = useRef(null);
 
-  // 한국 시간 기준 오늘 날짜 생성
   const todayStr = useMemo(() => {
     const now = new Date();
     const offset = now.getTimezoneOffset() * 60000;
@@ -41,6 +41,9 @@ export default function Home() {
   const [activeNotice, setActiveNotice] = useState(null);
   const [showNoticeModal, setShowNoticeModal] = useState(false);
 
+  const [showCommentModal, setShowCommentModal] = useState(false);
+  const [commentTarget, setCommentTarget] = useState(null);
+
   const handleLogoClick = () => {
     window.open("https://school.busanedu.net/bssm-h", "_blank");
   };
@@ -51,7 +54,6 @@ export default function Home() {
     return `${parseInt(cleanDate.substring(4, 6))}월 ${parseInt(cleanDate.substring(6, 8))}일`;
   };
 
-  // --- 1. 실시간 알림(SSE) ---
   const subscribeToNotifications = useCallback((userId) => {
     if (!userId || userId === "undefined") return;
     try {
@@ -77,7 +79,6 @@ export default function Home() {
     }
   }, []);
 
-  // --- 2. 좋아요 목록 로드 ---
   const fetchMyLikes = useCallback(async (userId) => {
     try {
       const token = localStorage.getItem("accessToken");
@@ -91,7 +92,6 @@ export default function Home() {
     }
   }, []);
 
-  // --- 3. 로그인 상태 및 유저 정보 ---
   useEffect(() => {
     const checkStatus = async () => {
       const token = localStorage.getItem("accessToken");
@@ -119,7 +119,6 @@ export default function Home() {
     return () => window.removeEventListener("authChange", checkStatus);
   }, [subscribeToNotifications, fetchMyLikes]);
 
-  // --- 4. 공지사항 로직 ---
   const fetchLatestNotice = useCallback(async () => {
     try {
       const res = await axios.get(`${API_BASE_URL}/notifications/latest`);
@@ -204,6 +203,16 @@ export default function Home() {
     }
   };
 
+  const handleOpenComment = (e, meal) => {
+    e.stopPropagation(); 
+    const mealKey = meal.DDISH_NM.split("(")[0].trim();
+    const mealType = meal.MMEAL_SC_NM;
+    const formattedDate = selectedDate.replace(/-/g, "");
+
+    setCommentTarget({ mealKey, mealType, mealDate: formattedDate });
+    setShowCommentModal(true);
+  };
+
   useEffect(() => {
     const [year, month] = selectedDate.split("-").map(Number);
     async function fetchMonthData(y, m) {
@@ -277,7 +286,7 @@ export default function Home() {
             className="nav-date-input"
           />
           <div className="nav-buttons">
-            <button className="nav-report-btn" onClick={handleNavReport}>🚨 신고</button>
+            <button className="nav-report-btn" onClick={handleNavReport}>🚨 건의</button>
             {isAuth ? (
               <button className="nav-btn" onClick={() => navigate("/mypage")}>마이페이지</button>
             ) : (
@@ -346,6 +355,14 @@ export default function Home() {
                           <div className="card-header">
                             <span className="meal-type">{mealType}</span>
                             <div className="card-header-right">
+                              {/* ✅ 댓글 버튼 스타일 반영 */}
+                              <button 
+                                className="comment-icon-btn" 
+                                onClick={(e) => handleOpenComment(e, meal)}
+                                title="댓글 쓰기"
+                              >
+                                💬
+                              </button>
                               <button
                                 className={`like-btn ${isLiked ? "active" : ""}`}
                                 onClick={(e) => handleLike(e, mealKey, mealType)}
@@ -364,7 +381,6 @@ export default function Home() {
                               );
                             })}
                           </div>
-                          {/* 📍 [추가] 성분 확인 안내 문구 */}
                           <p className="click-info-text">💡 클릭하여 성분을 확인하세요</p>
                           {danger && <div className="danger-badge">⚠️ 알레르기 주의</div>}
                         </div>
@@ -427,6 +443,13 @@ export default function Home() {
 
       {showReportModal && <ReportModal target={reportTarget} onClose={() => setShowReportModal(false)} />}
       <NoticeModal notice={activeNotice} onClose={handleCloseNotice} />
+      
+      {showCommentModal && (
+        <CommentModal 
+          {...commentTarget} 
+          onClose={() => setShowCommentModal(false)} 
+        />
+      )}
     </>
   );
 }

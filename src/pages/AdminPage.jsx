@@ -3,27 +3,24 @@ import AdminDashboard from "./admin/AdminDashboard";
 import AnnouncementEditor from "./admin/AnnouncementEditor"; 
 import AnnouncementList from "./admin/AnnouncementList";     
 import UserManagement from "./admin/UserManagement";
+import AdminCommentManager from "./admin/AdminCommentManager"; 
 import "../styles/admin.css";
 
 export default function AdminPage() {
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
-  
-  // 💡 수정을 위해 선택된 공지사항 데이터 상태
   const [selectedNotice, setSelectedNotice] = useState(null);
-
-  console.log("Admin Page Updated!");
 
   // 메뉴 클릭 핸들러
   const handleMenuClick = (menu) => {
     setActiveMenu(menu);
-    setSelectedNotice(null); // 다른 메뉴로 이동 시 수정 데이터 초기화
+    setSelectedNotice(null); 
   };
 
-  // 💡 리스트에서 수정 버튼을 눌렀을 때 실행될 함수
+  // 공지 수정 핸들러
   const handleEditNotice = (notice) => {
-    setSelectedNotice(notice);      // 수정할 데이터 저장
-    setActiveMenu("announcement-write"); // 에디터(공지 게시) 메뉴로 이동
+    setSelectedNotice(notice);      
+    setActiveMenu("announcement-write"); 
   };
 
   return (
@@ -49,7 +46,13 @@ export default function AdminPage() {
             👥 사용자 관리
           </button>
 
-          {/* 공지사항 그룹 메뉴 */}
+          <button 
+            className={activeMenu === "comments" ? "active" : ""} 
+            onClick={() => handleMenuClick("comments")}
+          >
+            💬 댓글 관리
+          </button>
+
           <div className={`menu-group ${isNoticeOpen ? "open" : ""}`}>
             <button 
               className={`group-title ${activeMenu.includes("announcement") ? "active" : ""}`}
@@ -85,16 +88,20 @@ export default function AdminPage() {
             <h1>{
               activeMenu === "dashboard" ? "통계 및 관리" : 
               activeMenu === "users" ? "사용자 관리" : 
+              activeMenu === "comments" ? "전체 댓글 관리" : 
               activeMenu === "announcement-write" ? (selectedNotice ? "공지사항 수정" : "공지사항 등록") : "공지사항 관리"
             }</h1>
             <p>BSSM 급식알리미 서비스의 통합 관리 도구입니다.</p>
           </header>
 
           <div className="admin-main-content">
+            {/* 통계 데이터는 Dashboard 내부에서 Fetching 하도록 구성 */}
             {activeMenu === "dashboard" && <AdminDashboard />}
+            
             {activeMenu === "users" && <UserManagement />}
             
-            {/* ✅ 에디터 컴포넌트에 selectedNotice(수정데이터) 전달 */}
+            {activeMenu === "comments" && <AdminCommentManager />}
+            
             {activeMenu === "announcement-write" && (
               <AnnouncementEditor 
                 editData={selectedNotice} 
@@ -102,7 +109,6 @@ export default function AdminPage() {
               />
             )}
             
-            {/* ✅ 리스트 컴포넌트에 handleEditNotice(수정핸들러) 전달 */}
             {activeMenu === "announcement-manage" && (
               <AnnouncementList onEdit={handleEditNotice} />
             )}

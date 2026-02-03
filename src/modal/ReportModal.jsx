@@ -33,12 +33,12 @@ export default function ReportModal({ target, onClose }) {
       });
 
       if (res.status === 200 || res.status === 201) {
-        alert("🚨 신고가 정상 접수되었습니다. 신고 결과는 이메일로 발송됩니다.");
+        alert("🚨 건의가 정상 접수되었습니다. 건의 결과는 이메일로 발송됩니다.");
         onClose();
       }
     } catch (err) {
-      console.error("신고 에러 상세:", err.response?.data || err.message);
-      alert(`신고 제출 실패: ${err.response?.data?.message || "서버 오류"}`);
+      console.error("건의 에러 상세:", err.response?.data || err.message);
+      alert(`건의 제출 실패: ${err.response?.data?.message || "서버 오류"}`);
     }
   };
 
@@ -46,15 +46,16 @@ export default function ReportModal({ target, onClose }) {
     <div className="modal-overlay" onClick={onClose}>
       {/* ✅ CSS 클래스명을 report-modal로 일치시킴 */}
       <div className="report-modal" onClick={(e) => e.stopPropagation()}>
-        <h2>🚨 신고하기</h2>
+        <h2>🚨 건의하기</h2>
         <p className="target-info">대상: {target.name}</p>
         
         <div className="form-group">
-          <label>신고 사유</label>
+          <label>건의 사유</label>
           <select value={reason} onChange={(e) => setReason(e.target.value)}>
             <option value="부적절한 정보">부적절한 정보</option>
             <option value="오타 및 오류">오타 및 오류</option>
             <option value="기능 오류">기능 오류</option>
+            <option value="급식 건의">급식 건의</option>
             <option value="기타">기타</option>
           </select>
         </div>
