@@ -53,7 +53,7 @@ export default function NoticeModal({ notice: propsNotice, onClose }) {
     <div className="modal-overlay" onClick={() => onClose(dontShowToday)}>
       <div className="notice-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>📢 전체 공지사항</h2>
+          <h2>📢 공지사항 알림</h2>
           <button className="close-btn" onClick={() => onClose(false)}>&times;</button>
         </div>
         

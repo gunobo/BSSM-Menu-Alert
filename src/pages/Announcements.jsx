@@ -85,7 +85,6 @@ export default function Announcements() {
             <>
               <div className="notice-table">
                 <div className="table-header">
-                  <span className="col-id">번호</span>
                   <span className="col-title">제목</span>
                   <span className="col-date">작성일</span>
                 </div>
@@ -95,7 +94,6 @@ export default function Announcements() {
                     className="table-row"
                     onClick={() => navigate(`/announcements/${notice.id}`)}
                   >
-                    <span className="col-id">{notices.length - (indexOfFirstItem + index)}</span>
                     <span className="col-title">{notice.title}</span>
                     <span className="col-date">{notice.createdAt?.slice(0, 10)}</span>
                   </div>

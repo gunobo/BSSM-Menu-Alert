@@ -202,23 +202,204 @@
   cursor: not-allowed;
 }
 
-/* 반응형 */
-@media (max-width: 768px) {
-  .notice-header {
-    padding: 40px 0 60px;
+@media screen and (max-width: 768px) {
+  .notice-page {
+    padding-top: 64px;
+    min-height: 100vh;
+    background-color: #f4f6fa;
   }
-  
+
+  .notice-header {
+    background: linear-gradient(135deg, #5b7cff, #7f9cff);
+    color: white;
+    padding: 60px 0 80px;
+    text-align: center;
+  }
+
+  .notice-header h1 {
+    font-size: 25px;
+    font-weight: 800;
+    margin-bottom: 10px;
+  }
+
+  /* ✅ 카드 공통 스타일 (extend 대신 쉼표로 그룹화) */
   .notice-list-card,
   .notice-detail-card {
-    padding: 20px;
-    width: 95%;
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    margin: -40px auto 50px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    position: relative;
+    z-index: 10;
+    max-width: 1000px;
+    width: 90%;
   }
 
-  .col-date {
-    display: none;
+  /* 상세 페이지 전용 디테일 */
+  .notice-detail-card {
+    line-height: 1.8; /* 가독성을 위해 줄 간격 확보 */
+    padding: 40px;
   }
 
-  .col-title {
-    width: 85%;
+  /* 상단 컨트롤러 바 */
+  .list-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .total-count {
+    font-size: 10px;
+    color: #64748b;
+  }
+
+  .total-count strong {
+    color: #5b7cff;
+  }
+
+  .per-page-select {
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background-color: #f8faff;
+    font-size: 10px;
+    color: #334155;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .per-page-select:focus {
+    border-color: #5b7cff;
+  }
+
+  /* 테이블 및 목록 스타일 */
+  .notice-table {
+    width: 100%;
+  }
+
+  .table-header {
+    display: flex;
+    padding: 6px 5px;
+    font-weight: 700;
+    color: #94a3b8;
+    font-size: 14px;
+    text-transform: uppercase;
+    font-size: 8px;
+  }
+
+  .table-row {
+    display: flex;
+    padding: 9px 5px;
+    gap: E;
+    border-radius: 12px; /* 행 라운드 추가 */
+    margin-bottom: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    align-items: center;
+    font-size: 8px;
+  }
+
+  .table-row:hover {
+    background-color: #f8faff;
+    transform: translateX(5px);
+  }
+
+  .table-row:hover .col-title {
+    color: #5b7cff;
+  }
+
+  .col-title { 
+    width: 60%; 
+    font-weight: 600; 
+    color: #1e293b; 
+  }
+
+  .col-date { 
+    width: 30%; 
+    text-align: right; 
+    color: #94a3b8; 
+  }
+
+  /* 상세 페이지 컨텐츠 */
+  .notice-detail-content {
+    padding: 20px 0;
+    color: #334155;
+    font-size: 16px;
+    border-top: 1px solid #f1f5f9;
+    min-height: 300px;
+    word-break: break-word;
+  }
+
+  /* 목록으로 돌아가기 버튼 */
+  .list-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    margin-top: 30px;
+    background-color: #ffffff;
+    color: #64748b;
+    font-weight: 600;
+    font-size: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  }
+
+  .list-back-btn:hover {
+    background-color: #5b7cff;
+    color: white;
+    border-color: #5b7cff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(91, 124, 255, 0.25);
+  }
+
+  .list-back-btn:active {
+    transform: translateY(0);
+  }
+
+  /* 페이지네이션 */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 30px;
+  }
+
+  .page-btn, .page-number {
+    min-width: 19px;
+    height: 19px;
+    border: 1px solid #e2e8f0;
+    background-color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    color: #64748b;
+    transition: all 0.2s;
+    font-size: 10px;
+    line-height: 19px;
+  }
+
+  .page-number.active {
+    background-color: #5b7cff;
+    color: white;
+    border-color: #5b7cff;
+    box-shadow: 0 4px 10px rgba(91, 124, 255, 0.3);
+  }
+
+  .page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }

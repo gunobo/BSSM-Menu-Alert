@@ -115,3 +115,119 @@ footer {
   margin-top: 15px !important;
   color: #aaa;
 }
+
+@media screen and (max-width: 768px) {
+  footer {
+    background-color: #f9f9f9; /* 배경을 살짝 회색으로 해서 본문과 분리 */
+    padding: 30px 0;
+    border-top: 1px solid #e1e1e1;
+    color: #666;
+    font-size: 5px;
+    margin-top: 40px; /* 본문과의 간격 */
+  }
+
+  .footer-content {
+    display: flex;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 10px !important;
+  }
+
+  .footer-logo {
+    font-size: 12px !important;
+    margin-bottom: 10px;
+  }
+
+  .footer-info p {
+    margin:3px 0;
+    line-height: 1.5;
+  }
+
+  /* 🆕 아이콘 및 버튼 그룹 정렬을 위한 스타일 추가 */
+  .footer-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* 오른쪽 끝으로 정렬 */
+    gap: 8px;
+  }
+
+  .footer-icons {
+    display: flex;
+    align-items: center; /* 깃허브 로고와 버튼들의 높이를 일직선으로 */
+    gap: 6px;
+  }
+
+  /* 🚀 깃허브 아이콘 크기 고정 (이게 핵심) */
+  .footer-icon-img {
+    width: 12px;   /* 너비 고정 */
+    height: 12px;  /* 높이 고정 */
+    filter: grayscale(1); /* 다른 요소들과 톤 맞춤 */
+    transition: all 0.2s;
+  }
+
+  .footer-icon-img:hover {
+    filter: grayscale(0); /* 마우스 올리면 원래 색상 */
+    transform: scale(1.1);
+  }
+
+  /* 위키, 관리자 버튼 스타일 */
+  .icon-btn {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 3px 5px;
+    font-size: 6px !important;
+    color: #666;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.2s;
+  }
+
+  .icon-btn:hover {
+    background-color: #f0f0f0;
+  }
+
+  .family-service {
+    padding: 4px 3px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    width: 60px;
+    height: 20px;
+    font-size: 8px;
+  }
+
+  /* 기존 유지 코드 */
+  .footer-langs {
+    margin-bottom: 12px;
+    color: #999;
+  }
+
+  .footer-socials {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    justify-content: flex-end;
+  }
+
+  .social-icon {
+    font-size: 20px;
+    cursor: pointer;
+    filter: grayscale(1);
+  }
+
+  .logo-img {
+    height: 24px;
+    display: flex;
+    align-items: center;
+    filter: grayscale(1);
+  }
+
+  .copyright {
+    margin-top: 15px !important;
+    color: #aaa;
+  }
+}
