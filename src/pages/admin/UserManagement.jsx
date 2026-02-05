@@ -85,12 +85,12 @@ export default function UserManagement() {
           <button onClick={fetchUsers} className="btn-refresh">🔄 새로고침</button>
         </div>
 
-        <div className="table-scroll-container" style={{ flex: 1 }}>
+        <div className="table-scroll-container user-mgmt-page" style={{ flex: 1 }}>
           <table className="admin-table">
             <thead>
               <tr>
                 <th>사용자 정보</th>
-                <th style={{ textAlign: 'center' }}>알레르기</th>
+                <th style={{ textAlign: 'center'}}>알레르기</th>
                 <th style={{ textAlign: 'center' }}>선호 메뉴</th>
                 <th style={{ textAlign: 'center' }}>상태</th>
                 <th style={{ textAlign: 'center' }}>작업</th>
@@ -110,9 +110,9 @@ export default function UserManagement() {
                       ) : (
                         <div style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: '#eee', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#aaa' }}>No Img</div>
                       )}
-                      <div>
-                        <div style={{ fontWeight: '700' }}>{getUserDisplayName(u)}</div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{u.email}</div>
+                      <div className="nmandem">
+                        <div style={{ fontWeight: '700', textAlign: 'left' }}>{getUserDisplayName(u)}</div>
+                        <div style={{ fontSize: '9px', color: 'var(--text-muted)' }}>{u.email}</div>
                       </div>
                     </div>
                   </td>

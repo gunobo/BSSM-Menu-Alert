@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import "../../styles/adminComment.css"; // CSS 파일 경로 확인하세요
 
 export default function AdminCommentManager() {
   const [comments, setComments] = useState([]);
@@ -7,19 +8,15 @@ export default function AdminCommentManager() {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // 필터 상태 관리
   const [searchType, setSearchType] = useState("username");
   const [keyword, setKeyword] = useState("");
-  const [filterDate, setFilterDate] = useState(""); // "yyyy-MM-dd" 형식 유지용
+  const [filterDate, setFilterDate] = useState("");
   const [filterType, setFilterType] = useState("");
 
-  // 1. 댓글 목록 불러오기
   const fetchComments = async (pageNum = 0) => {
     setLoading(true);
     try {
       const token = localStorage.getItem("accessToken");
-
-      // ✅ 핵심: 서버가 원하는 형식(20260203)으로 변환, 날짜가 없으면 빈 문자열
       const formattedDate = filterDate ? filterDate.replace(/-/g, "") : "";
 
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/comments/admin/all`, {
@@ -49,7 +46,6 @@ export default function AdminCommentManager() {
     fetchComments();
   }, []);
 
-  // 2. 댓글 삭제 처리
   const handleDelete = async (id) => {
     if (!window.confirm("이 댓글을 삭제하시겠습니까? 복구할 수 없습니다.")) return;
     try {
@@ -58,58 +54,44 @@ export default function AdminCommentManager() {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("삭제되었습니다.");
-      fetchComments(page); // 현재 페이지 유지하며 갱신
+      fetchComments(page);
     } catch (err) {
       alert("삭제 실패");
     }
   };
 
   return (
-    <div className="admin-section" style={{ padding: "20px" }}>
+    <div className="comment-manager-container">
       {/* 🔍 검색 및 필터 영역 */}
-      <div
-        className="filter-bar"
-        style={{
-          display: "flex",
-          gap: "10px",
-          marginBottom: "20px",
-          flexWrap: "wrap",
-          background: "#f8f9fa",
-          padding: "15px",
-          borderRadius: "8px",
-          alignItems: "center",
-        }}
-      >
-        {/* 이름/이메일 검색 */}
+      <div className="comment-filter-bar">
         <select
+          className="filter-select"
           value={searchType}
           onChange={(e) => setSearchType(e.target.value)}
-          style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ddd" }}
         >
           <option value="username">이름</option>
           <option value="email">이메일</option>
         </select>
         <input
+          className="filter-input"
           type="text"
           placeholder="검색어 입력..."
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
-          style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ddd", width: "180px" }}
         />
 
-        <div style={{ borderLeft: "1px solid #ccc", height: "24px", margin: "0 5px" }}></div>
+        <div className="filter-divider"></div>
 
-        {/* 날짜/식사구분 필터 */}
         <input
+          className="filter-date"
           type="date"
-          value={filterDate} // "yyyy-MM-dd" 형식을 유지해야 에러가 안 남
+          value={filterDate}
           onChange={(e) => setFilterDate(e.target.value)}
-          style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ddd" }}
         />
         <select
+          className="filter-select"
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
-          style={{ padding: "8px", borderRadius: "4px", border: "1px solid #ddd" }}
         >
           <option value="">식사 전체</option>
           <option value="조식">조식</option>
@@ -117,63 +99,53 @@ export default function AdminCommentManager() {
           <option value="석식">석식</option>
         </select>
 
+        <button className="btn-search" onClick={() => fetchComments(0)}>검색</button>
         <button
-          onClick={() => fetchComments(0)}
-          style={{ background: "#4e73df", color: "white", border: "none", padding: "8px 15px", borderRadius: "4px", cursor: "pointer" }}
-        >
-          검색
-        </button>
-        <button
+          className="btn-reset"
           onClick={() => {
             setKeyword("");
             setFilterDate("");
             setFilterType("");
             fetchComments(0);
           }}
-          style={{ background: "#666", color: "white", border: "none", padding: "8px 15px", borderRadius: "4px", cursor: "pointer" }}
         >
           초기화
         </button>
       </div>
 
       {/* 📋 테이블 영역 */}
-      <div style={{ background: "white", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.05)", overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
-          <thead style={{ background: "#f1f3f5", borderBottom: "2px solid #dee2e6" }}>
+      <div className="comment-table-wrapper">
+        <table className="comment-table">
+          <thead>
             <tr>
-              <th style={{ padding: "12px", width: "15%" }}>급식 정보</th>
-              <th style={{ padding: "12px", width: "15%" }}>작성자</th>
-              <th style={{ padding: "12px", width: "55%" }}>댓글 내용</th>
-              <th style={{ padding: "12px", width: "15%", textAlign: "center" }}>관리</th>
+              <th className="col-info">급식 정보</th>
+              <th className="col-author">작성자</th>
+              <th className="col-content">댓글 내용</th>
+              <th className="col-action">관리</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="4" style={{ padding: "40px", textAlign: "center" }}>데이터 로딩 중...</td></tr>
+              <tr><td colSpan="4" className="msg-cell">데이터 로딩 중...</td></tr>
             ) : comments.length > 0 ? (
               comments.map((c) => (
-                <tr key={c.id} style={{ borderBottom: "1px solid #f1f1f1" }}>
-                  <td style={{ padding: "12px", fontSize: "0.85rem" }}>
+                <tr key={c.id}>
+                  <td className="info-cell">
                     {c.mealDate} <br />
-                    <span style={{ color: "#4e73df", fontWeight: "bold" }}>{c.mealType}</span>
+                    <span className="meal-type-tag">{c.mealType}</span>
                   </td>
-                  <td style={{ padding: "12px" }}>
-                    <div style={{ fontWeight: "600" }}>{c.username}</div>
-                    <div style={{ fontSize: "0.75rem", color: "#999" }}>{c.email}</div>
+                  <td className="author-cell">
+                    <div className="author-name">{c.username}</div>
+                    <div className="author-email">{c.email}</div>
                   </td>
-                  <td style={{ padding: "12px", lineHeight: "1.5", whiteSpace: "pre-wrap" }}>{c.content}</td>
-                  <td style={{ padding: "12px", textAlign: "center" }}>
-                    <button
-                      onClick={() => handleDelete(c.id)}
-                      style={{ background: "#ff4d4f", color: "white", border: "none", padding: "6px 12px", borderRadius: "4px", cursor: "pointer" }}
-                    >
-                      삭제
-                    </button>
+                  <td className="content-cell">{c.content}</td>
+                  <td className="action-cell">
+                    <button className="btn-delete" onClick={() => handleDelete(c.id)}>삭제</button>
                   </td>
                 </tr>
               ))
             ) : (
-              <tr><td colSpan="4" style={{ padding: "40px", textAlign: "center", color: "#999" }}>조회된 댓글이 없습니다.</td></tr>
+              <tr><td colSpan="4" className="msg-cell empty">조회된 댓글이 없습니다.</td></tr>
             )}
           </tbody>
         </table>
@@ -181,19 +153,12 @@ export default function AdminCommentManager() {
 
       {/* 🔢 페이지네이션 */}
       {totalPages > 0 && (
-        <div style={{ marginTop: "20px", display: "flex", justifyContent: "center", gap: "5px" }}>
+        <div className="pagination-container">
           {Array.from({ length: totalPages }, (_, i) => (
             <button
               key={i}
+              className={`page-btn ${page === i ? "active" : ""}`}
               onClick={() => fetchComments(i)}
-              style={{
-                padding: "6px 12px",
-                borderRadius: "4px",
-                border: "1px solid #ddd",
-                background: page === i ? "#4e73df" : "white",
-                color: page === i ? "white" : "#333",
-                cursor: "pointer",
-              }}
             >
               {i + 1}
             </button>

@@ -1,0 +1,208 @@
+/* ==========================================================================
+   1. PC 버전 레이아웃 (기본 설정)
+   ========================================================================== */
+
+.admin-container {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  padding: 30px;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 상단 검색 섹션 */
+.search-header-section {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+.search-input-group {
+  display: flex;
+  gap: 12px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.admin-input-premium {
+  flex: 1;
+  padding: 15px 20px;
+  border: 2px solid #edf2f7;
+  border-radius: 12px;
+  font-size: 16px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.admin-input-premium:focus {
+  border-color: #4c6ef5;
+  background-color: #fff;
+  box-shadow: 0 0 0 4px rgba(76, 110, 245, 0.1);
+}
+
+/* 메인 그리드 (목록 7 : 상세 3) */
+.dashboard-middle-row {
+  display: flex;
+  gap: 25px;
+  align-items: flex-start;
+}
+
+/* 검색 결과 목록 */
+.admin-table-wrapper {
+  flex: 7;
+  background: white;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  min-width: 0;
+}
+
+/* 우측 상세 정보 패널 */
+.user-detail-panel {
+  flex: 3;
+  min-width: 350px;
+  background: white;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  position: sticky;
+  top: 25px;
+}
+
+/* 테이블 디자인 */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th {
+  padding: 15px 10px;
+  border-bottom: 2px solid #f8fafc;
+  color: #a0aec0;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.admin-table td {
+  padding: 18px 10px;
+  border-bottom: 1px solid #f8fafc;
+  text-align: center;
+}
+
+.admin-table tr:hover {
+  background-color: #fcfdfe;
+}
+
+/* 프로필 정보 */
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+  background: #f8fafc;
+  border-radius: 15px;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.badge.success { background: #e6fcf5; color: #0ca678; }
+.badge.danger { background: #fff5f5; color: #fa5252; }
+.btn-view-small {
+  background-color: rgb(78, 115, 223);
+  color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 2px;
+  font-weight: 550;
+}
+/* ==========================================================================
+   2. 모바일 버전 (보내주신 스타일 기반)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  /* 전체 레이아웃 세로 전환 */
+  .admin-container {
+    padding: 15px !important;
+    gap: 15px !important;
+  }
+
+  .search-header-section {
+    padding: 20px !important;
+  }
+
+  .search-input-group {
+    flex-direction: column;
+  }
+
+  .dashboard-middle-row {
+    flex-direction: column !important;
+    gap: 15px !important;
+  }
+
+  /* 각 섹션 너비 100% */
+  .admin-table-wrapper, 
+  .user-detail-panel {
+    width: 100% !important;
+    flex: none !important;
+    position: static !important;
+    padding: 15px !important;
+  }
+
+  /* 테이블 줄바꿈 및 압축 */
+  .admin-table {
+    table-layout: fixed !important;
+  }
+
+  .admin-table th, 
+  .admin-table td {
+    font-size: 11px !important;
+    padding: 10px 5px !important;
+    white-space: normal !important;
+    word-break: break-all !important;
+  }
+
+  /* 모바일 컬럼 너비 재배정 */
+  .admin-table th:nth-child(1), .admin-table td:nth-child(1) { width: 60% !important; } /* 사용자 정보 */
+  .admin-table th:nth-child(2), .admin-table td:nth-child(2) { width: 20% !important; } /* 상태 */
+  .admin-table th:nth-child(3), .admin-table td:nth-child(3) { width: 20% !important; } /* 버튼 */
+
+  /* 이미지 축소 */
+  .admin-table td img {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  /* 상세 패널 중앙 정렬 */
+  .user-detail-panel {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
+  .info-group div {
+    justify-content: center !important;
+  }
+
+  /* 버튼 최적화 */
+  .btn-push-submit {
+    width: 100% !important;
+    height: 50px !important;
+    font-size: 16px !important;
+    border-radius: 12px !important;
+  }
+  
+  .table-user { 
+    height: 89px !important;
+    width: 77px !important;
+  }
+}

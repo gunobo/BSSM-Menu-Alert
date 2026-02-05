@@ -4,7 +4,6 @@ footer {
   border-top: 1px solid #e1e1e1;
   color: #666;
   font-size: 13px;
-  margin-top: 80px; /* 본문과의 간격 */
 }
 
 .footer-content {
@@ -123,7 +122,6 @@ footer {
     border-top: 1px solid #e1e1e1;
     color: #666;
     font-size: 5px;
-    margin-top: 40px; /* 본문과의 간격 */
   }
 
   .footer-content {

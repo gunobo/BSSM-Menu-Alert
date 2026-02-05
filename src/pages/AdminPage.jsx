@@ -3,12 +3,14 @@ import AdminDashboard from "./admin/AdminDashboard";
 import AnnouncementEditor from "./admin/AnnouncementEditor"; 
 import AnnouncementList from "./admin/AnnouncementList";     
 import UserManagement from "./admin/UserManagement";
+import UserSearch from "./admin/UserSearchPage"; // 유저 검색 컴포넌트 추가
 import AdminCommentManager from "./admin/AdminCommentManager"; 
 import "../styles/admin.css";
 
 export default function AdminPage() {
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false); // 유저 메뉴 열림 상태
   const [selectedNotice, setSelectedNotice] = useState(null);
 
   // 메뉴 클릭 핸들러
@@ -39,12 +41,32 @@ export default function AdminPage() {
             📊 대시보드
           </button>
           
-          <button 
-            className={activeMenu === "users" ? "active" : ""} 
-            onClick={() => handleMenuClick("users")}
-          >
-            👥 사용자 관리
-          </button>
+          {/* 유저 관리 그룹 */}
+          <div className={`menu-group ${isUserMenuOpen ? "open" : ""}`}>
+            <button 
+              className={`group-title ${activeMenu.includes("user") ? "active" : ""}`}
+              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+            >
+              👥 유저 관리 <span className="arrow">{isUserMenuOpen ? "▲" : "▼"}</span>
+            </button>
+            
+            {isUserMenuOpen && (
+              <div className="sub-menu-list">
+                <button 
+                  className={activeMenu === "users" ? "active" : ""} 
+                  onClick={() => handleMenuClick("users")}
+                >
+                  └ 유저 관리
+                </button>
+                <button 
+                  className={activeMenu === "user-search" ? "active" : ""} 
+                  onClick={() => handleMenuClick("user-search")}
+                >
+                  └ 유저 검색
+                </button>
+              </div>
+            )}
+          </div>
 
           <button 
             className={activeMenu === "comments" ? "active" : ""} 
@@ -53,6 +75,7 @@ export default function AdminPage() {
             💬 댓글 관리
           </button>
 
+          {/* 공지 관리 그룹 */}
           <div className={`menu-group ${isNoticeOpen ? "open" : ""}`}>
             <button 
               className={`group-title ${activeMenu.includes("announcement") ? "active" : ""}`}
@@ -88,6 +111,7 @@ export default function AdminPage() {
             <h1>{
               activeMenu === "dashboard" ? "통계 및 관리" : 
               activeMenu === "users" ? "사용자 관리" : 
+              activeMenu === "user-search" ? "사용자 검색" : 
               activeMenu === "comments" ? "전체 댓글 관리" : 
               activeMenu === "announcement-write" ? (selectedNotice ? "공지사항 수정" : "공지사항 등록") : "공지사항 관리"
             }</h1>
@@ -95,10 +119,11 @@ export default function AdminPage() {
           </header>
 
           <div className="admin-main-content">
-            {/* 통계 데이터는 Dashboard 내부에서 Fetching 하도록 구성 */}
             {activeMenu === "dashboard" && <AdminDashboard />}
             
             {activeMenu === "users" && <UserManagement />}
+
+            {activeMenu === "user-search" && <UserSearch />}
             
             {activeMenu === "comments" && <AdminCommentManager />}
             

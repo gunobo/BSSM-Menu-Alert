@@ -97,7 +97,7 @@ export default function MyPage() {
           <div className="main-card">
             <h2 style={{ marginBottom: "20px" }}>마이페이지</h2>
             
-            <div className="profile-section" style={{ background: "#f8f9fa", padding: "20px", borderRadius: "12px", marginBottom: "30px" }}>
+            <div className="profile-section">
               <p><strong>이름:</strong> {user?.name}</p>
               <p><strong>이메일:</strong> {user?.email}</p>
             </div>
@@ -109,9 +109,9 @@ export default function MyPage() {
               <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "15px" }}>
                 체크된 성분이 포함된 급식은 빨간색으로 강조됩니다.
               </p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(110px, 1fr))", gap: "10px" }}>
+              <div className="allergy-option">
                 {allergyOptions.map((item) => (
-                  <label key={item} className="allergy-label" style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", padding: "5px" }}>
+                  <label key={item} className="allergy-label">
                     <input
                       type="checkbox"
                       checked={allergies.includes(item)}
@@ -130,13 +130,15 @@ export default function MyPage() {
               <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "10px" }}>
                 쉼표(,)로 구분해서 입력해 주세요.
               </p>
-              <input
-                type="text"
-                value={favoriteMenus}
-                onChange={(e) => setFavoriteMenus(e.target.value)}
-                placeholder="예: 돈까스, 고기, 치킨"
-                style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ddd", fontSize: "1rem" }}
-              />
+              <div className="favorite-input-wrapper">
+                <input
+                  type="text"
+                  value={favoriteMenus}
+                  onChange={(e) => setFavoriteMenus(e.target.value)}
+                  placeholder="예: 돈까스, 고기, 치킨"
+                  className="favorite-input"
+                />
+              </div>
             </section>
 
             <button 

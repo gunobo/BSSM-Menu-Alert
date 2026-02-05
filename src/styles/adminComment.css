@@ -1,0 +1,257 @@
+/* 컨테이너 */
+.comment-manager-container {
+  padding: 20px;
+}
+
+/* 필터 바 */
+.comment-filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  align-items: center;
+}
+
+.filter-select, 
+.filter-input, 
+.filter-date {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  outline: none;
+}
+
+.filter-input {
+  width: 180px;
+}
+
+.filter-divider {
+  border-left: 1px solid #ccc;
+  height: 24px;
+  margin: 0 5px;
+}
+
+/* 버튼 공통 */
+.comment-filter-bar button {
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.comment-filter-bar button:hover {
+  opacity: 0.8;
+}
+
+.btn-search {
+  background: #4e73df;
+  color: white;
+}
+
+.btn-reset {
+  background: #666;
+  color: white;
+}
+
+/* 테이블 레이아웃 */
+.comment-table-wrapper {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+
+.comment-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  table-layout: fixed; /* 테이블 꼬임 방지 */
+}
+
+.comment-table thead {
+  background: #f1f3f5;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.comment-table th {
+  padding: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.comment-table td {
+  padding: 12px;
+  border-bottom: 1px solid #f1f1f1;
+  vertical-align: middle;
+}
+
+/* 컬럼 너비 지정 */
+.col-info { width: 15%; }
+.col-author { width: 20%; }
+.col-content { width: 50%; }
+.col-action { width: 15%; text-align: center; }
+
+/* 셀 상세 스타일 */
+.info-cell {
+  font-size: 0.85rem;
+}
+
+.meal-type-tag {
+  color: #4e73df;
+  font-weight: bold;
+}
+
+.author-name {
+  font-weight: 600;
+}
+
+.author-email {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.content-cell {
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.msg-cell {
+  padding: 40px;
+  text-align: center;
+}
+
+.msg-cell.empty {
+  color: #999;
+}
+
+.action-cell {
+  text-align: center;
+}
+
+.btn-delete {
+  background: #ff4d4f;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* 페이지네이션 */
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.page-btn {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background: white;
+  color: #333;
+  cursor: pointer;
+}
+
+.page-btn.active {
+  background: #4e73df;
+  color: white;
+  border-color: #4e73df;
+}
+
+/* 모바일 대응 (768px 이하) */
+@media (max-width: 768px) {
+  /* 1. 필터 바 조정: 요소들을 꽉 차게 배치 */
+  .comment-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .filter-input, .filter-date, .filter-select {
+    width: 100% !important; /* 모든 입력창 너비 100% */
+  }
+
+  .filter-divider {
+    display: none; /* 모바일에서는 구분선 제거 */
+  }
+
+  /* 2. 테이블을 카드 형태로 변환 */
+  .comment-table, 
+  .comment-table thead, 
+  .comment-table tbody, 
+  .comment-table th, 
+  .comment-table td, 
+  .comment-table tr {
+    display: block; /* 테이블 구조 해제 */
+  }
+
+  .comment-table thead {
+    display: none; /* 헤더(제목 행) 숨김 */
+  }
+
+  .comment-table tr {
+    border-bottom: 8px solid #f1f3f5; /* 댓글 간의 간격을 두꺼운 선으로 구분 */
+    padding: 15px;
+    position: relative;
+  }
+
+  /* 3. 각 셀(td) 배치 조정 */
+  .comment-table td {
+    border: none;
+    padding: 4px 0;
+    width: 100% !important; /* 지정했던 컬럼 너비(15%, 55% 등) 무시 */
+    text-align: left !important;
+  }
+
+  /* 급식 정보 (날짜, 식사타입) */
+  .info-cell {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 5px;
+  }
+
+  /* 작성자 정보 */
+  .author-cell {
+    border-bottom: 1px dashed #eee;
+    padding-bottom: 8px !important;
+    margin-bottom: 8px;
+  }
+
+  /* 댓글 내용: 텍스트가 잘 보일 수 있도록 폰트 크기 조정 */
+  .content-cell {
+    font-size: 0.95rem;
+    padding: 10px 0 !important;
+    color: #333;
+  }
+
+  /* 관리(삭제) 버튼: 우측 상단이나 하단에 적절히 배치 */
+  .action-cell {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+
+  .btn-delete {
+    width: 100%; /* 모바일에서는 누르기 쉽게 버튼을 크게 */
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+
+  /* 4. 페이지네이션 크기 키우기 (터치 편의성) */
+  .pagination-container {
+    flex-wrap: wrap;
+  }
+
+  .page-btn {
+    padding: 8px 14px;
+    font-size: 0.9rem;
+  }
+}

@@ -37,7 +37,7 @@ export default function AnnouncementList({ onEdit }) { // ✅ AdminPage에서 �
   return (
     <div className="admin-notice-list">
       <div className="admin-table-wrapper">
-        <table className="admin-table">
+        <table className="admin-table2">
           <thead>
             <tr>
               <th>번호</th>
