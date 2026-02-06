@@ -13,6 +13,7 @@ export default function MyPage() {
   const [user, setUser] = useState(null);
   const [allergies, setAllergies] = useState([]);
   const [favoriteMenus, setFavoriteMenus] = useState("");
+  const [allowNotifications, setAllowNotifications] = useState(false); // 알림 상태 추가
 
   const allergyOptions = [
     "난류", "우유", "메밀", "땅콩", "대두", "밀", "고등어", "게", "새우", 
@@ -27,6 +28,7 @@ export default function MyPage() {
           setUser(userData);
           setAllergies(userData.allergies || []);
           setFavoriteMenus(userData.favoriteMenus?.join(", ") || "");
+          setAllowNotifications(userData.allowNotifications || false); // 서버에서 알림 설정값 로드
         } else {
           alert("로그인 세션이 만료되었습니다.");
           navigate("/login");
@@ -47,37 +49,45 @@ export default function MyPage() {
   };
 
   const handleSave = async () => {
-    // 1. 선호 메뉴 가공 (배열 변환)
+    // 알림을 켰을 때 브라우저 권한 요청
+    if (allowNotifications && Notification.permission !== "granted") {
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        alert("알림 권한이 거부되었습니다. 메뉴 알림을 받으려면 브라우저 설정에서 알림을 허용해주세요.");
+        return;
+      }
+    }
+
     const favoriteArray = favoriteMenus
       .split(",")
       .map((item) => item.trim())
       .filter((item) => item !== "");
 
-    // 2. 서버 DTO 구조에 맞게 데이터 구성
     const data = {
       allergies: allergies,
-      favoriteMenus: favoriteArray
+      favoriteMenus: favoriteArray,
+      allowNotifications: allowNotifications // 알림 설정값 추가
     };
 
-    console.log("🚀 서버 전송 데이터:", data);
-
     try {
-      // 3. auth.js에서 수정된 API 호출 (PUT /api/user/update)
       await updateUserInfo(data);
       alert("성공적으로 저장되었습니다! ✅");
+      
+      // 테스트용 알림 (저장 성공 시 한 번 띄워줌)
+      if (allowNotifications) {
+        new Notification("BSSM 급식알리미", {
+          body: "이제 선호 메뉴가 나오는 날 아침에 알림을 보내드릴게요!",
+          icon: bssmLogo
+        });
+      }
       navigate("/"); 
     } catch (err) {
-      console.error("저장 실패 상세:", err);
-      // 4. 403 에러 대응
-      if (err.response?.status === 403) {
-        alert("수정 권한이 없습니다 (403). 보안 설정 혹은 로그인을 확인해 주세요.");
-      } else {
-        alert("저장에 실패했습니다. 콘솔을 확인해주세요.");
-      }
+      console.error("저장 실패:", err);
+      alert("저장에 실패했습니다.");
     }
   };
 
-  if (loading) return <div className="container" style={{padding: "100px"}}>데이터를 불러오는 중입니다...</div>;
+  if (loading) return <div className="mypage-wrapper">데이터를 불러오는 중입니다...</div>;
 
   return (
     <>
@@ -92,63 +102,79 @@ export default function MyPage() {
         </div>
       </nav>
 
-      <div className="mypage-wrapper" style={{ paddingTop: "80px" }}>
-        <main className="container">
-          <div className="main-card">
-            <h2 style={{ marginBottom: "20px" }}>마이페이지</h2>
-            
-            <div className="profile-section">
-              <p><strong>이름:</strong> {user?.name}</p>
-              <p><strong>이메일:</strong> {user?.email}</p>
-            </div>
-
-            <hr style={{ margin: "20px 0", opacity: 0.1 }} />
-
-            <section className="settings-section">
-              <h3>알레르기 설정</h3>
-              <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "15px" }}>
-                체크된 성분이 포함된 급식은 빨간색으로 강조됩니다.
-              </p>
-              <div className="allergy-option">
-                {allergyOptions.map((item) => (
-                  <label key={item} className="allergy-label">
-                    <input
-                      type="checkbox"
-                      checked={allergies.includes(item)}
-                      onChange={() => handleAllergyChange(item)}
-                    />
-                    {item}
-                  </label>
-                ))}
-              </div>
-            </section>
-
-            <hr style={{ margin: "30px 0", opacity: 0.1 }} />
-
-            <section className="settings-section">
-              <h3>선호 메뉴 설정 (⭐)</h3>
-              <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "10px" }}>
-                쉼표(,)로 구분해서 입력해 주세요.
-              </p>
-              <div className="favorite-input-wrapper">
-                <input
-                  type="text"
-                  value={favoriteMenus}
-                  onChange={(e) => setFavoriteMenus(e.target.value)}
-                  placeholder="예: 돈까스, 고기, 치킨"
-                  className="favorite-input"
-                />
-              </div>
-            </section>
-
-            <button 
-              onClick={handleSave} 
-              className="save-btn" 
-              style={{ width: "100%", marginTop: "40px", padding: "15px", fontSize: "1.1rem", background: "#007bff", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer" }}
-            >
-              설정 저장하기
-            </button>
+      <div className="mypage-wrapper">
+        <main className="main-card">
+          <h2>마이페이지</h2>
+          
+          <div className="profile-section">
+            <p><strong>이름:</strong> {user?.name}</p>
+            <p><strong>이메일:</strong> {user?.email}</p>
           </div>
+
+          <hr style={{ margin: "20px 0", opacity: 0.1 }} />
+
+          {/* 추가된 알림 설정 섹션 */}
+          <section className="settings-section">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3>선호 메뉴 알림 (Push)</h3>
+                <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "4px" }}>
+                  선호 메뉴가 포함된 급식이 나오는 날 아침에 알림을 보냅니다.
+                </p>
+              </div>
+              <label className="switch">
+                <input 
+                  type="checkbox" 
+                  checked={allowNotifications} 
+                  onChange={(e) => setAllowNotifications(e.target.checked)} 
+                />
+                <span className="slider round"></span>
+              </label>
+            </div>
+          </section>
+
+          <hr style={{ margin: "25px 0", opacity: 0.1 }} />
+
+          <section className="settings-section">
+            <h3>알레르기 설정</h3>
+            <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "15px" }}>
+              체크된 성분이 포함된 급식은 빨간색으로 강조됩니다.
+            </p>
+            <div className="allergy-option">
+              {allergyOptions.map((item) => (
+                <label key={item} className="allergy-label">
+                  <input
+                    type="checkbox"
+                    checked={allergies.includes(item)}
+                    onChange={() => handleAllergyChange(item)}
+                  />
+                  {item}
+                </label>
+              ))}
+            </div>
+          </section>
+
+          <hr style={{ margin: "30px 0", opacity: 0.1 }} />
+
+          <section className="settings-section">
+            <h3>선호 메뉴 설정 (⭐)</h3>
+            <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "10px" }}>
+              쉼표(,)로 구분해서 입력해 주세요.
+            </p>
+            <div className="favorite-input-wrapper">
+              <input
+                type="text"
+                value={favoriteMenus}
+                onChange={(e) => setFavoriteMenus(e.target.value)}
+                placeholder="예: 돈까스, 고기, 치킨"
+                className="favorite-input"
+              />
+            </div>
+          </section>
+
+          <button onClick={handleSave} className="save-btn">
+            설정 저장하기
+          </button>
         </main>
       </div>
       <Footer />

@@ -76,7 +76,7 @@
    마이페이지 카드 (Main Card)
 ===================== */
 .main-card {
-  max-width: 650px;
+  max-width: 85%;
   margin: 0 auto;
   background: #ffffff;
   border-radius: 24px;
@@ -234,6 +234,49 @@
   background: #fff
 }
 
+/* 토글 스위치 (Switch) 스타일 */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 34px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #5b7cff;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
 /* =====================
    모바일 대응 (768px 이하)
 ===================== */
@@ -266,14 +309,14 @@
   .main-card {
     display: flex;
     flex-direction: column;
-    align-items: center !important;
+    align-items: center;
     padding: 30px 24px;   /* 내부 패딩도 조금 더 여유있게 */
     border-radius: 24px;  /* 라운드값 유지 */
     height: auto !important;
     
     /* 카드 너비 수정: 350px에서 420px로 확장 */
-    width: 95% !important;      /* 모바일 화면 양옆에 최소한의 간격만 유지 */
-    max-width: 600px !important; /* 최대 크기를 420px까지 허용 */
+    width: 100% !important;      /* 모바일 화면 양옆에 최소한의 간격만 유지 */
+    max-width: 100% !important;
     
     margin: 0 auto !important;   /* 중앙 정렬 */
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
@@ -283,8 +326,8 @@
   .main-card h2 {
     font-size: 22px;
     margin-bottom: 20px;
-    width: 100%;           /* 텍스트 중앙 정렬 유지 */
-    text-align: center;
+    width: 100%;
+    text-align: center; /* 텍스트 중앙 정렬 유지 */
   }
   .main-card hr{
     margin: 0 !important;
@@ -382,5 +425,18 @@
     width: 100%;
     padding: 12px;
     font-size: 16px;
+  }
+
+  .switch {
+    width: 40px;
+    height: 20px;
+  }
+  .slider:before {
+    height: 14px;
+    width: 14px;
+    bottom: 3px;
+  }
+  input:checked + .slider:before {
+    transform: translateX(20px);
   }
 }

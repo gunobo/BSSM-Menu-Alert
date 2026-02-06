@@ -22,20 +22,17 @@ button {
   max-width: 95%;
   margin-top: 0;
   margin-bottom: 0;
-  margin-left: auto;
-  margin-right: auto;
   padding-left: 40px;
   padding-right: 40px;
 }
 
 .container {
-  max-width: 85% !important;
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-  padding-left: 20px !important;
-  padding-right: 20px !important;
+  width: 100%;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  align-items: center;
+  flex-direction: column;
 }
 
 /* [3] NAVBAR */
@@ -222,7 +219,8 @@ button {
 /* [5] MAIN CARD */
 .main-card {
   width: 95%;
-  max-width: 1200px;
+  max-width: 500px;
+  height: auto;
   background-color: #ffffff;
   border-radius: 24px;
   padding-top: 60px;
@@ -230,13 +228,14 @@ button {
   padding-left: 40px;
   padding-right: 40px;
   margin-top: -80px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-left: 100px !important;
+  margin-right: 100px !important;
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
   position: relative;
   z-index: 9999 !important;
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .selected-day-info {
@@ -556,7 +555,6 @@ button {
   /* 4. 식단 그리드: 무조건 1열 */
   .meal-grid {
     /* 3열(repeat(3, 1fr))을 1열로 강제 변경 */
-
     grid-template-columns: 1fr !important; 
     gap: 15px;
     width: 100%;
@@ -597,8 +595,14 @@ button {
 
   /* 5. 랭킹 섹션 */
   .ranking-section {
-    margin-top: 40px !important;
-    padding: 30px 0 !important;
+    margin-top: 24px !important; /* 식단 카드와의 간격 */
+    padding: 24px 16px !important;
+    background-color: #ffffff; /* 또는 배경색에 맞춰 조절 */
+    border-radius: 20px;
+    width: calc(100% - 32px);
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
   }
   .ranking-section h3 {
     font-size: 18px !important;

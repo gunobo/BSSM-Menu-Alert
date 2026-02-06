@@ -3,23 +3,22 @@ import AdminDashboard from "./admin/AdminDashboard";
 import AnnouncementEditor from "./admin/AnnouncementEditor"; 
 import AnnouncementList from "./admin/AnnouncementList";     
 import UserManagement from "./admin/UserManagement";
-import UserSearch from "./admin/UserSearchPage"; // 유저 검색 컴포넌트 추가
+import UserSearch from "./admin/UserSearchPage";
 import AdminCommentManager from "./admin/AdminCommentManager"; 
+import PushNotificationManager from "./admin/PushNotificationManager"; // 신규 컴포넌트 추가
 import "../styles/admin.css";
 
 export default function AdminPage() {
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false); // 유저 메뉴 열림 상태
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState(null);
 
-  // 메뉴 클릭 핸들러
   const handleMenuClick = (menu) => {
     setActiveMenu(menu);
     setSelectedNotice(null); 
   };
 
-  // 공지 수정 핸들러
   const handleEditNotice = (notice) => {
     setSelectedNotice(notice);      
     setActiveMenu("announcement-write"); 
@@ -27,7 +26,6 @@ export default function AdminPage() {
 
   return (
     <div className="admin-layout">
-      {/* 사이드바 영역 */}
       <aside className="admin-sidebar">
         <div className="sidebar-logo">
           <h2>BSSM Admin</h2>
@@ -41,7 +39,6 @@ export default function AdminPage() {
             📊 대시보드
           </button>
           
-          {/* 유저 관리 그룹 */}
           <div className={`menu-group ${isUserMenuOpen ? "open" : ""}`}>
             <button 
               className={`group-title ${activeMenu.includes("user") ? "active" : ""}`}
@@ -75,7 +72,14 @@ export default function AdminPage() {
             💬 댓글 관리
           </button>
 
-          {/* 공지 관리 그룹 */}
+          {/* 🔔 푸시 알림 메뉴 추가 */}
+          <button 
+            className={activeMenu === "push-notis" ? "active" : ""} 
+            onClick={() => handleMenuClick("push-notis")}
+          >
+            🔔 푸시 알림 전송
+          </button>
+
           <div className={`menu-group ${isNoticeOpen ? "open" : ""}`}>
             <button 
               className={`group-title ${activeMenu.includes("announcement") ? "active" : ""}`}
@@ -104,7 +108,6 @@ export default function AdminPage() {
         </nav>
       </aside>
 
-      {/* 메인 영역 */}
       <main className="admin-main">
         <div className="admin-container">
           <header className="admin-header">
@@ -113,6 +116,7 @@ export default function AdminPage() {
               activeMenu === "users" ? "사용자 관리" : 
               activeMenu === "user-search" ? "사용자 검색" : 
               activeMenu === "comments" ? "전체 댓글 관리" : 
+              activeMenu === "push-notis" ? "푸시 알림 관리" : // 헤더 타이틀 추가
               activeMenu === "announcement-write" ? (selectedNotice ? "공지사항 수정" : "공지사항 등록") : "공지사항 관리"
             }</h1>
             <p>BSSM 급식알리미 서비스의 통합 관리 도구입니다.</p>
@@ -120,12 +124,12 @@ export default function AdminPage() {
 
           <div className="admin-main-content">
             {activeMenu === "dashboard" && <AdminDashboard />}
-            
             {activeMenu === "users" && <UserManagement />}
-
             {activeMenu === "user-search" && <UserSearch />}
-            
             {activeMenu === "comments" && <AdminCommentManager />}
+            
+            {/* 🔔 푸시 알림 컴포넌트 연결 */}
+            {activeMenu === "push-notis" && <PushNotificationManager />}
             
             {activeMenu === "announcement-write" && (
               <AnnouncementEditor 

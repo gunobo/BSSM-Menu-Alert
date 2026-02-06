@@ -1,0 +1,287 @@
+/* 컨테이너 및 카드 기본 스타일 */
+.push-manager-container {
+  padding: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+.push-card-premium {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 650px;
+  padding: 35px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid #eeeeee;
+}
+
+.push-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: 25px;
+  color: #2d3436;
+  text-align: center;
+}
+
+.push-label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #4b4b4b;
+  font-size: 0.9rem;
+}
+
+/* 수신 대상 토글 버튼 */
+.push-toggle-group {
+  display: flex;
+  background-color: #f1f3f5;
+  padding: 6px;
+  border-radius: 10px;
+  margin-bottom: 25px;
+}
+
+.push-toggle-group button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: transparent;
+  color: #868e96;
+  font-weight: 600;
+}
+
+.push-toggle-group button.active {
+  background-color: #ffffff;
+  color: #4e73df;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* 특정 유저 검색 박스 */
+.push-user-selector {
+  background-color: #f8faff;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #e9ecef;
+}
+
+.push-search-box {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.push-filter-select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #dddddd;
+  outline: none;
+  background-color: #ffffff;
+}
+
+.push-input-field {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #dddddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.push-btn-search {
+  background-color: #4e73df;
+  color: #ffffff;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* 유저 선택 리스트 */
+.push-user-list {
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: #ffffff;
+  border: 1px solid #eeeeee;
+  border-radius: 8px;
+}
+
+.push-user-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #f8f9fa;
+  transition: background-color 0.2s;
+}
+
+.push-user-item:hover {
+  background-color: #f1f3f5;
+}
+
+.push-user-item.selected {
+  background-color: #eef2ff;
+  border-left: 4px solid #4e73df;
+}
+
+.u-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.u-info img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.u-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #333333;
+}
+
+.u-email {
+  font-size: 0.75rem;
+  color: #888888;
+}
+
+.u-check {
+  color: #4e73df;
+  font-weight: bold;
+}
+
+.push-target-indicator {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: #4e73df;
+  text-align: right;
+}
+
+.push-info-text {
+  padding: 20px;
+  text-align: center;
+  color: #adb5bd;
+  font-size: 0.9rem;
+}
+
+.push-divider {
+  border: 0;
+  border-top: 1px solid #eeeeee;
+  margin: 25px 0;
+}
+
+/* 하단 입력 폼 세부사항 */
+.push-field-group {
+  margin-bottom: 18px;
+}
+
+.push-field-group input, 
+.push-field-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background-color: #fcfcfc;
+}
+
+.push-field-group input:focus, 
+.push-field-group textarea:focus {
+  outline: none;
+  border-color: #4e73df;
+  background-color: #ffffff;
+}
+
+.push-grid-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+/* 하단 전송 버튼 */
+.push-submit-btn {
+  width: 100%;
+  padding: 15px;
+  background-color: #2d3436;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.push-submit-btn:hover:not(:disabled) {
+  background-color: #4e73df;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(78, 115, 223, 0.3);
+}
+
+.push-submit-btn:disabled {
+  background-color: #adb5bd;
+  cursor: not-allowed;
+}
+
+/* 애니메이션 효과 */
+.animate-fade {
+  animation: fadeIn 0.4s ease-out;
+}
+/* 선택된 인원 표시 및 초기화 버튼 */
+.push-target-indicator {
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: #4e73df;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-clear-selection {
+  background: none;
+  border: none;
+  color: #ff4d4d;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* 체크박스 스타일 */
+.u-checkbox {
+  font-size: 1.1rem;
+  margin-right: 10px;
+  width: 24px;
+  text-align: center;
+}
+
+/* 유저 아이템 선택 시 배경색 살짝 더 진하게 */
+.push-user-item.selected {
+  background-color: #ebf0ff;
+  border-left: 5px solid #4e73df;
+}
+
+.push-user-item {
+  padding: 12px 15px;
+  border-bottom: 1px solid #f1f3f5;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

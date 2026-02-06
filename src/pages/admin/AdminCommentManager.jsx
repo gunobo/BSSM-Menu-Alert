@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "../../styles/adminComment.css"; // CSS 파일 경로 확인하세요
+import "../../styles/adminComment.css";
 
 export default function AdminCommentManager() {
   const [comments, setComments] = useState([]);
