@@ -5,6 +5,185 @@
     <link rel="icon" type="image/svg+xml" href="./src/assets/bssmlogo_rmbg.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BSSM급식알리미</title>
+
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="BSSM급식">
+    
+    <link rel="apple-touch-icon" href="/app-logo192.png">
+    
+    <script>
+      console.log("🔵🔵🔵 [index.html HEAD] 네이티브 브릿지 함수 등록 시작 🔵🔵🔵");
+      
+      // ============================================
+      // ✅ 1. FCM 토큰 수신 함수
+      // ============================================
+      window.onReceiveFcmToken = async function(token) {
+        console.log("📱📱📱 ========== 앱에서 FCM 토큰 수신 ========== 📱📱📱");
+        console.log("📱 토큰:", token);
+        console.log("📱 토큰 길이:", token ? token.length : 0);
+        
+        if (!token) {
+          console.error("❌ 토큰이 비어있습니다!");
+          return "ERROR";
+        }
+        
+        try {
+          // 1. localStorage에 저장
+          localStorage.setItem("fcmToken", token);
+          console.log("✅ localStorage에 토큰 저장 완료");
+          
+          // 2. accessToken 확인
+          const accessToken = localStorage.getItem("accessToken");
+          console.log("🔑 accessToken 존재 여부:", !!accessToken);
+          
+          if (!accessToken) {
+            console.warn("⚠️ accessToken이 없어서 서버 전송 건너뜀 (로그인 후 자동 전송됨)");
+            return "SUCCESS";
+          }
+          
+          console.log("📤 서버로 토큰 전송 시작...");
+          
+          // 3. 서버로 전송
+          const response = await fetch('/api/user/fcm/token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({
+              token: token,
+              deviceType: 'MOBILE'
+            })
+          });
+          
+          const responseText = await response.text();
+          console.log("📥 서버 응답 상태:", response.status);
+          console.log("📥 서버 응답 내용:", responseText);
+          
+          if (response.ok) {
+            console.log("✅✅✅ 토큰 서버 저장 성공! ✅✅✅");
+            return "SUCCESS";
+          } else {
+            console.error("❌ 서버 응답 실패:", response.status, responseText);
+            return "ERROR";
+          }
+          
+        } catch (err) {
+          console.error("❌❌❌ 토큰 처리 실패:", err);
+          console.error("❌ 에러 메시지:", err.message);
+          console.error("❌ 에러 스택:", err.stack);
+          return "ERROR";
+        }
+      };
+      
+      // ============================================
+      // ✅ 2. 네이티브 로그아웃 핸들러
+      // ============================================
+      window.onNativeLogout = async function(token) {
+        console.log("🚪🚪🚪 ========== 네이티브 로그아웃 이벤트 수신 ========== 🚪🚪🚪");
+        console.log("🚪 삭제할 토큰:", token ? token.substring(0, 20) + "..." : "없음");
+        
+        try {
+          const accessToken = localStorage.getItem("accessToken");
+          
+          if (!accessToken) {
+            console.warn("⚠️ accessToken이 없음 - 서버 요청 건너뜀");
+            return "SUCCESS";
+          }
+          
+          if (!token) {
+            console.warn("⚠️ 토큰이 없음 - 서버 요청 건너뜀");
+            return "SUCCESS";
+          }
+          
+          console.log("📤 서버로 토큰 삭제 요청 전송...");
+          
+          // 서버로 토큰 삭제 요청
+          const response = await fetch('/api/user/fcm/token', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({
+              token: token
+            })
+          });
+          
+          console.log("📥 서버 응답 상태:", response.status);
+          
+          if (response.ok) {
+            console.log("✅✅✅ 서버에서 토큰 삭제 성공! ✅✅✅");
+            return "SUCCESS";
+          } else {
+            const errorText = await response.text();
+            console.error("❌ 서버 토큰 삭제 실패:", response.status, errorText);
+            return "ERROR";
+          }
+          
+        } catch (err) {
+          console.error("❌❌❌ 토큰 삭제 요청 실패:", err);
+          console.error("❌ 에러 메시지:", err.message);
+          return "ERROR";
+        } finally {
+          // 서버 요청 성공/실패 여부와 관계없이 로컬 데이터는 정리
+          console.log("🧹 로컬 데이터 정리 시작...");
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("fcmToken");
+          localStorage.removeItem("token");
+          console.log("✅ 로컬 데이터 정리 완료");
+        }
+      };
+      
+      // ============================================
+      // ✅ 3. 딥링크 핸들러 (MainActivity에서 호출)
+      // ============================================
+      window.onDeepLink = function(date, action) {
+        console.log("🔗🔗🔗 ========== 딥링크 수신 ========== 🔗🔗🔗");
+        console.log("🔗 date:", date);
+        console.log("🔗 action:", action);
+        
+        // 이 함수는 React 앱에서 재정의될 수 있음
+        // React가 로드되기 전까지는 데이터를 저장
+        if (!window._deepLinkHandled) {
+          window._deepLinkData = { date, action };
+          console.log("💾 딥링크 데이터 임시 저장 (React 로드 대기)");
+        }
+      };
+      
+      console.log("✅✅✅ [index.html HEAD] 모든 네이티브 브릿지 함수 등록 완료! ✅✅✅");
+      console.log("✅ onReceiveFcmToken 타입:", typeof window.onReceiveFcmToken);
+      console.log("✅ onNativeLogout 타입:", typeof window.onNativeLogout);
+      console.log("✅ onDeepLink 타입:", typeof window.onDeepLink);
+      
+      // ============================================
+      // 디버깅용: 함수 존재 확인
+      // ============================================
+      setTimeout(function() {
+        console.log("🔍 [1초 후] 함수 상태 확인:");
+        console.log("  - onReceiveFcmToken:", typeof window.onReceiveFcmToken);
+        console.log("  - onNativeLogout:", typeof window.onNativeLogout);
+        console.log("  - onDeepLink:", typeof window.onDeepLink);
+        
+        if (typeof window.onReceiveFcmToken === 'function' &&
+            typeof window.onNativeLogout === 'function' &&
+            typeof window.onDeepLink === 'function') {
+          console.log("✅ 모든 함수가 정상적으로 등록되어 있습니다!");
+        } else {
+          console.error("❌ 일부 함수가 사라졌습니다! React가 덮어썼을 가능성 있음");
+        }
+      }, 1000);
+      
+      // 3초 후 한 번 더 확인
+      setTimeout(function() {
+        console.log("🔍 [3초 후] 함수 상태 재확인:");
+        console.log("  - onReceiveFcmToken:", typeof window.onReceiveFcmToken);
+        console.log("  - onNativeLogout:", typeof window.onNativeLogout);
+        console.log("  - onDeepLink:", typeof window.onDeepLink);
+      }, 3000);
+    </script>
   </head>
   <body>
     <div id="root"></div>

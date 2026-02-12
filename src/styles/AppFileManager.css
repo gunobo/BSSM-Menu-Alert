@@ -1,0 +1,215 @@
+/* AppFileManager 전용 스타일 */
+
+.section-title-area {
+  margin-bottom: 20px;
+}
+
+.section-title-area h3 {
+  font-size: 20px;
+  color: #2d3748;
+  margin-bottom: 5px;
+}
+
+.section-title-area p {
+  font-size: 14px;
+  color: #718096;
+}
+
+/* 업로드 폼 레이아웃 조정 */
+.app-upload-form {
+  align-items: center;
+}
+
+.select-type {
+  max-width: 180px;
+  background-color: #f8fafc;
+  cursor: pointer;
+}
+
+.file-input-wrapper {
+  flex: 2;
+}
+
+/* 버튼 스타일 보정 */
+.btn-push-submit {
+  padding: 0 30px;
+  height: 52px;
+  background: #4c6ef5;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-push-submit:hover {
+  background: #3b5bdb;
+  transform: translateY(-1px);
+}
+
+.btn-push-submit:disabled {
+  background: #a5b4fc;
+  cursor: not-allowed;
+}
+
+.admin-table {
+    width: 100%;
+}
+
+.admin-table th:nth-child(1),
+.admin-table td:nth-child(1) {
+    width: 25%;
+    text-align: center;
+}
+
+.admin-table th:nth-child(2),
+.admin-table td:nth-child(2) {
+    width: 20%;
+    text-align: center;
+}
+
+.admin-table th:nth-child(3),
+.admin-table td:nth-child(3) {
+    width: 35%;
+    text-align: center;
+}
+
+.admin-table th:nth-child(4),
+.admin-table td:nth-child(4) {
+    width: 20%;
+    text-align: center;
+}
+
+/* 테이블 폰트 강조 */
+.admin-table td strong {
+  color: #4a5568;
+}
+/* ==========================================================================
+   AppFileManager 전용 스타일 (Premium Admin Theme)
+   ========================================================================== */
+
+/* 상단 타이틀 영역 */
+.app-management-page .section-title-area {
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.app-management-page .section-title-area h3 {
+  font-size: 22px;
+  color: #2d3748;
+  margin: 0 0 8px 0;
+  font-weight: 700;
+}
+
+.app-management-page .section-title-area p {
+  font-size: 14px;
+  color: #718096;
+  margin: 0;
+}
+
+/* 업로드 폼 레이아웃 (검색바 스타일 계승) */
+.app-upload-form {
+  display: flex;
+  gap: 15px;
+  align-items: stretch; /* 높이 통일 */
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 15px;
+  border: 1px dashed #cbd5e0;
+}
+
+/* 플랫폼 선택 셀렉트 박스 */
+.select-type.admin-input-premium {
+  flex: 0 0 180px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23a0aec0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 18px;
+  appearance: none;
+  cursor: pointer;
+}
+
+/* 파일 선택 인풋 박스 */
+.file-input-wrapper {
+  flex: 1;
+  position: relative;
+}
+
+.file-input-wrapper .admin-input-premium {
+  width: 100%;
+  padding-top: 12px; /* 파일 선택 글자 위치 조정 */
+  cursor: pointer;
+}
+
+/* 전송 버튼 (기존 .nav-btn 및 .btn-push-submit 확장) */
+.app-management-page .btn-push-submit {
+  min-width: 140px;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 15px;
+  background: linear-gradient(135deg, #4c6ef5 0%, #3b5bdb 100%);
+  box-shadow: 0 4px 12px rgba(76, 110, 245, 0.25);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.app-management-page .btn-push-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(76, 110, 245, 0.35);
+}
+
+.app-management-page .btn-push-submit.loading {
+  opacity: 0.8;
+  cursor: wait;
+}
+
+/* 하단 가이드 패널 보완 */
+.user-detail-panel .profile-card p {
+  text-align: left;
+  word-break: keep-all;
+}
+
+/* ==========================================================================
+   모바일 최적화 (Responsive)
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .app-upload-form {
+    flex-direction: column;
+    padding: 15px;
+    gap: 10px;
+  }
+
+  .select-type.admin-input-premium {
+    flex: none;
+    width: 100%;
+  }
+
+  .file-input-wrapper {
+    width: 100%;
+  }
+
+  .app-management-page .btn-push-submit {
+    width: 100%;
+    height: 50px;
+    margin-top: 5px;
+  }
+
+  .app-upload-form {
+    gap: 10px;
+  }
+  
+  .select-type {
+    max-width: 100%;
+  }
+
+  .btn-push-submit {
+    margin-top: 10px;
+  }
+}

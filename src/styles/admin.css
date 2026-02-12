@@ -291,7 +291,6 @@ body {
   display: flex;
   flex-direction: column;
 }
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -734,6 +733,67 @@ button {
   border-top: calc(4px * var(--scale)) solid var(--primary-blue);
   border-radius: 50%;
   animation: spin 1s linear infinite;
+}
+
+/* 사용자 상세 패널 내 버튼 레이아웃 */
+.user-detail-panel .info-actions {
+    margin-top: auto;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ⚠️ 강제 로그아웃 버튼 스타일 */
+.btn-force-logout {
+    width: 100%;
+    padding: 12px;
+    background-color: #636e72; /* 차분한 회색 */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-force-logout:hover {
+    background-color: #2d3436; /* 더 어두운 회색 */
+    transform: translateY(-1px);
+}
+
+.btn-force-logout:active {
+    transform: translateY(0);
+}
+
+/* 차단/해제 버튼 공통 스타일 보완 */
+.btn-reject, .btn-resolve {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+/* 모달 내 취소 버튼 스타일 고정 */
+.btn-modal-cancel {
+    color: #636e72;
+    background-color: #f1f2f6;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-modal-cancel:hover {
+    background-color: #dfe4ea;
 }
 
 @keyframes spin {
@@ -1338,7 +1398,6 @@ button {
 @media (max-width: 768px) {
   
   /* 1. 전체 컨테이너 및 레이아웃 구조 수정 */
-  .admin-container,
   .admin-layout {
     display: flex !important;
     flex-direction: column !important; /* 가로에서 세로로 변경 */
@@ -1348,6 +1407,14 @@ button {
     gap: 20px !important;
     overflow-y: auto !important;
   }
+
+  .admin-container {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start; /* 핵심: 요소들을 상단 정렬 */
+    padding: 0 !important;
+    height: calc(100vh - 100px); /* 화면 높이에 맞춤 (헤더 높이에 따라 조절) */
+}
 
   /* 2. 사이드바 및 메인 영역 조정 */
   .admin-sidebar {
@@ -1365,6 +1432,16 @@ button {
     box-sizing: border-box;
   }
 
+  .admin-section {
+    background-color: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin: 0;               /* 중요: 개별 마진 제거 */
+    height: 100%;            /* 두 섹션의 높이를 동일하게 유지 */
+    box-sizing: border-box;
+  }
+
   /* 3. 헤더 및 섹션 타이틀 중앙 정렬 */
   .admin-header, 
   .admin-section h3 {
@@ -1372,7 +1449,8 @@ button {
     text-align: center !important;
     margin-bottom: 0;
     padding-bottom: 0;
-
+    font-size: 1.25rem;
+    font-weight: 700;
   }
 
   .admin-header p {
@@ -1480,6 +1558,7 @@ button {
   .admin-table th:nth-child(2),
   .admin-table td:nth-child(2) {
     width: 14% !important;
+    font-size: 10px !important;
   }
   /* 선호메뉴 (너무 좁으면 숨김 추천) */
   .admin-table th:nth-child(3),

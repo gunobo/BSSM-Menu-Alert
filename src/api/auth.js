@@ -22,11 +22,17 @@ export const getToken = () => {
   return localStorage.getItem("accessToken");
 };
 
-export const logout = () => {
+export const logout = async (token) => {
   localStorage.removeItem("accessToken");
   window.dispatchEvent(new Event("authChange"));
-  // 💡 로그아웃 후 즉시 이동하면 커스텀 이벤트가 제대로 전달 안 될 수 있으므로 확인
-  window.location.href = "/login"; 
+  const response = await axios.post('/user/logout-device', { token });
+  window.location.href = "/";
+  return response.data;
+};
+
+export const logoutDevice = async (userId) => {
+  const response = await axios.post(`/admin/users/${userId}/logout`);
+  return response.data;
 };
 
 export const isLoggedIn = () => {
@@ -87,6 +93,29 @@ export const updateUserInfo = async (data) => {
     if (error.response?.status === 403) {
       console.error("❌ 403 Forbidden: 접근 권한이 없습니다. 토큰 만료 여부나 백엔드 설정을 확인하세요.");
     }
+    throw error;
+  }
+};
+
+// ✅ FCM 토큰 저장 함수
+export const saveFcmToken = async (token, deviceType = "MOBILE") => {
+  console.log("📤 saveFcmToken 호출");
+  console.log("📤 토큰:", token ? token.substring(0, 30) + "..." : "없음");
+  console.log("📤 디바이스 타입:", deviceType);
+  
+  try {
+    const response = await axios.post('/user/fcm/token', {
+      token,
+      deviceType
+    });
+    
+    console.log("📥 saveFcmToken 응답:", response.data);
+    return response.data;
+    
+  } catch (error) {
+    console.error("❌ saveFcmToken 에러:", error);
+    console.error("❌ 에러 상세:", error.response?.data);
+    console.error("❌ 에러 상태:", error.response?.status);
     throw error;
   }
 };

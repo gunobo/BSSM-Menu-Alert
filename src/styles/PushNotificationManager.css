@@ -275,6 +275,16 @@
   transition: all 0.2s ease;
 }
 
+.device-selector button {
+  flex: 1;
+  font-size: 0.9rem;
+  padding: 12px;
+}
+
+.device-mobile.active { background-color: #4dabf7 !important; color: white; border-color: #4dabf7; }
+.device-web.active { background-color: #ff922b !important; color: white; border-color: #ff922b; }
+.device-all.active { background-color: #51cf66 !important; color: white; border-color: #51cf66; }
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -283,5 +293,81 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  /* 1. 컨테이너: 가로 정렬 해제 및 수직 배치 */
+  .push-manager-container {
+    padding: 15px; /* 여백 축소 */
+    display: flex;
+    flex-direction: column; /* 무조건 수직 쌓임 */
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* 2. 카드: 모바일 너비에 맞게 조정 */
+  .push-card-premium {
+    width: 100%; /* 옆으로 안 퍼지게 100% 고정 */
+    max-width: 100%; 
+    padding: 20px; /* 내부 여백 최적화 */
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  }
+
+  /* 3. 제목 및 라벨 크기 조정 */
+  .push-title {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+  }
+
+  /* 4. 그리드 행(Input 두 개 나란히 있는 곳)을 수직으로 */
+  .push-grid-row {
+    grid-template-columns: 1fr; /* 1fr 1fr -> 1fr (한 줄에 하나씩) */
+    gap: 10px;
+  }
+
+  /* 5. 검색 박스: 입력창과 버튼 조절 */
+  .push-search-box {
+    flex-direction: column; /* 검색창과 버튼도 세로로 */
+    gap: 10px;
+  }
+
+  .push-filter-select {
+    width: 100%; /* 셀렉트 박스 전체 너비 */
+  }
+
+  .push-btn-search {
+    width: 100%; /* 검색 버튼 전체 너비 */
+    padding: 12px; /* 터치하기 편하게 높이 상향 */
+  }
+
+  /* 6. 유저 리스트 아이템 가독성 */
+  .push-user-item {
+    padding: 15px 10px;
+  }
+
+  .u-info img {
+    width: 40px; /* 프로필 이미지 약간 키움 */
+    height: 40px;
+  }
+
+  .u-name {
+    font-size: 1rem;
+  }
+
+  /* 7. 입력 필드 및 전송 버튼 */
+  .push-field-group input, 
+  .push-field-group textarea {
+    padding: 14px; /* 모바일 타이핑 편의를 위해 패딩 증가 */
+    font-size: 16px; /* 아이폰 등에서 focus 시 자동 줌 방지를 위해 16px 권장 */
+  }
+
+  .push-submit-btn {
+    padding: 18px; /* 전송 버튼은 더 크게 */
+    font-size: 1.1rem;
+    position: sticky; /* 하단에 고정하고 싶을 경우 대비 */
+    bottom: 10px;
   }
 }

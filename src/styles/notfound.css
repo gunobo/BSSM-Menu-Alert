@@ -68,3 +68,25 @@
 .go-back-btn:hover {
   background-color: #e5e7eb;
 }
+
+@media (max-width: 768px) {
+  .error-code {
+    font-size: 60px !important;
+  }
+
+  .error-message {
+    font-size: 30px;
+  }
+
+  .error-description {
+    font-size: 14px;
+  }
+
+  .go-back-btn,
+  .go-home-btn {
+    padding: 6px 12px;
+    width: 100px;
+    height: 40px;
+    font-size: 11px;
+  }
+}

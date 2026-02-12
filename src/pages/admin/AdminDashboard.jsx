@@ -30,6 +30,9 @@ export default function AdminDashboard() {
     reportedReviews: [], popularMenus: [], topCommentedMenus: [], dailyStats: []
   });
 
+  // ✅ 앱 다운로드 통계 상태 추가
+  const [appStats, setAppStats] = useState([]);
+  
   const [selectedReport, setSelectedReport] = useState(null);
   const [processMessage, setProcessMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -44,11 +47,20 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     if (!token) return;
     try {
+      // 1. 기존 대시보드 통계 로드
       const res = await axios.get(`${API_BASE_URL}/admin/stats`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setStats(res.data);
-    } catch (err) { console.error("데이터 로드 실패:", err); }
+
+      // 2. ✅ 앱 다운로드 통계 로드
+      const appRes = await axios.get(`${API_BASE_URL}/admin/app/stats`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setAppStats(appRes.data);
+    } catch (err) { 
+      console.error("데이터 로드 실패:", err); 
+    }
   };
 
   useEffect(() => { fetchStats(); }, [token]);
@@ -74,9 +86,9 @@ export default function AdminDashboard() {
 
   const chartOptions = {
     responsive: true,
-    maintainAspectRatio: false, // ⭐ 부모 div 높이에 맞춤
+    maintainAspectRatio: false,
     plugins: {
-      legend: { display: false }, // 커스텀 레전드 사용을 위해 숨김
+      legend: { display: false },
       tooltip: { backgroundColor: '#1e293b' }
     },
     scales: {
@@ -85,7 +97,7 @@ export default function AdminDashboard() {
     }
   };
 
-  // --- 기존 핸들러 함수들 (신고 처리, 모달 등) ---
+  // --- 기존 핸들러 함수들 ---
   const handleProcessReport = async (status) => {
     if (!processMessage.trim()) return alert("사유를 입력하세요.");
     try {
@@ -100,6 +112,7 @@ export default function AdminDashboard() {
 
   const openModal = (report) => { setSelectedReport(report); setShowModal(true); };
   const closeModal = () => { setSelectedReport(null); setProcessMessage(""); setShowModal(false); };
+  
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) { setImageFile(file); setPreviewUrl(URL.createObjectURL(file)); }
@@ -110,7 +123,9 @@ export default function AdminDashboard() {
     if (!notice.title || !notice.content) return alert("내용 입력 필수");
     setIsSending(true);
     const formData = new FormData();
-    formData.append("title", notice.title); formData.append("content", notice.content); formData.append("type", "ALARM");
+    formData.append("title", notice.title); 
+    formData.append("content", notice.content); 
+    formData.append("type", "ALARM");
     if (imageFile) formData.append("file", imageFile);
     try {
       await axios.post(`${API_BASE_URL}/admin/notifications`, formData, {
@@ -120,17 +135,29 @@ export default function AdminDashboard() {
     } catch (err) { alert("발송 실패"); } finally { setIsSending(false); }
   };
 
+  // ✅ 누적 다운로드 합계 계산
+  const totalDownloads = appStats.reduce((acc, curr) => acc + curr.downloadCount, 0);
+
   return (
     <div className="admin-container">
       <header className="admin-header">
         <h1>🛠️ 관리자 컨트롤 타워</h1>
-        <p>서비스 현황을 실시간으로 확인합니다.</p>
+        <p>서비스 현황 및 앱 배포 상태를 실시간으로 확인합니다.</p>
       </header>
 
+      {/* 💳 통계 카드 섹션 */}
       <div className="stats-grid">
         <div className="stat-card blue"><div className="stat-info"><h3>전체 사용자</h3><p className="count">{(stats.totalUsers || 0).toLocaleString()} 명</p></div></div>
         <div className="stat-card pink"><div className="stat-info"><h3>오늘의 좋아요</h3><p className="count">{(stats.todayLikes || 0).toLocaleString()} 개</p></div></div>
-        <div className="stat-card purple"><div className="stat-info"><h3>누적 댓글</h3><p className="count">{(stats.totalComments || 0).toLocaleString()} 개</p></div></div>
+        
+        {/* ✅ 누적 앱 다운로드 카드 추가 */}
+        <div className="stat-card green">
+            <div className="stat-info">
+                <h3>누적 앱 다운로드</h3>
+                <p className="count">{totalDownloads.toLocaleString()} 회</p>
+            </div>
+        </div>
+
         <div className="stat-card yellow"><div className="stat-info"><h3>미처리 신고</h3><p className="count">{stats.reportedReviews?.length || 0} 건</p></div></div>
       </div>
 
@@ -149,6 +176,7 @@ export default function AdminDashboard() {
       </section>
 
       <div className="dashboard-middle-row">
+        {/* 📢 알림 전송 섹션 */}
         <section className="admin-section">
           <h3>📢 전체 알림 전송</h3>
           <form onSubmit={handleSendNotice} className="admin-form">
@@ -156,24 +184,51 @@ export default function AdminDashboard() {
             <div className="file-input-wrapper">
                 <input type="file" onChange={handleFileChange} />
             </div>
+            {previewUrl && <img src={previewUrl} alt="미리보기" style={{width: '100%', borderRadius: '8px', marginBottom: '10px'}} />}
             <textarea placeholder="내용" value={notice.content} onChange={(e) => setNotice({ ...notice, content: e.target.value })} />
             <button type="submit" disabled={isSending}>{isSending ? "전송 중..." : "발송하기"}</button>
           </form>
         </section>
 
+        {/* ✅ 앱 상세 다운로드 통계 섹션 추가 */}
         <section className="admin-section">
-          <h3>🔥 인기 메뉴 TOP 5</h3>
-          <ul className="rank-list">
-            {stats.popularMenus?.map((menu, i) => (
-              <li key={i} className="rank-item">
-                <span className={`rank-badge rank-${i+1}`}>{i+1}</span>
-                {menu.date} {menu.type} (❤️ {menu.votes})
-              </li>
-            ))}
-          </ul>
+          <h3>📱 앱 플랫폼별 통계</h3>
+          <div className="app-stats-list">
+            {appStats.length > 0 ? appStats.map((app, i) => (
+              <div key={i} className="app-stat-item" style={{
+                  display: 'flex', justifyContent: 'space-between', padding: '15px', 
+                  backgroundColor: '#f8fafc', borderRadius: '10px', marginBottom: '10px'
+              }}>
+                <div>
+                  <strong style={{fontSize: '1.1rem', color: app.appType === 'APK' ? '#3b82f6' : '#ef4444'}}>
+                      {app.appType}
+                  </strong>
+                  <p style={{fontSize: '0.85rem', color: '#64748b', marginTop: '4px'}}>
+                      최근 다운로드: {app.lastDownloadedAt ? new Date(app.lastDownloadedAt).toLocaleString() : '기록 없음'}
+                  </p>
+                </div>
+                <div style={{textAlign: 'right'}}>
+                  <span style={{fontSize: '1.2rem', fontWeight: 'bold'}}>{app.downloadCount.toLocaleString()}회</span>
+                </div>
+              </div>
+            )) : <p>다운로드 기록이 없습니다.</p>}
+          </div>
+          
+          <div style={{marginTop: '20px'}}>
+              <h3 style={{fontSize: '1rem', marginBottom: '10px'}}>🔥 인기 메뉴 TOP 5</h3>
+              <ul className="rank-list">
+                {stats.popularMenus?.map((menu, i) => (
+                  <li key={i} className="rank-item">
+                    <span className={`rank-badge rank-${i+1}`}>{i+1}</span>
+                    {menu.date} {menu.type} (❤️ {menu.votes})
+                  </li>
+                ))}
+              </ul>
+          </div>
         </section>
       </div>
 
+      {/* 🚨 신고 내역 테이블 */}
       <section className="admin-section">
         <h3>🚨 최근 신고 내역</h3>
         <table className="admin-table">
@@ -186,6 +241,7 @@ export default function AdminDashboard() {
         </table>
       </section>
 
+      {/* 신고 처리 모달 */}
       {showModal && (
         <div className="admin-modal-overlay">
           <div className="admin-modal">

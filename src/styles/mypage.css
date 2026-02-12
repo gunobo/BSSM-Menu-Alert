@@ -270,6 +270,29 @@
   border-radius: 50%;
 }
 
+.save-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  background-color: #5b7cff;
+  color: white;
+  font-weight: 800;
+  border-radius: 8px;
+}
+
+.profile-section {
+  padding: 16px;
+  width: 100%;           /* 카드가 좁아져도 꽉 차게 */
+  box-sizing: border-box;
+  font-size: 16px !important;
+}
+
+.settings-section {
+    padding: 10px;
+    width: 100% !important; /* 화면에 꽉 차게 변경 */
+    box-sizing: border-box;
+  }
+
 input:checked + .slider {
   background-color: #5b7cff;
 }
@@ -318,7 +341,7 @@ input:checked + .slider:before {
     width: 100% !important;      /* 모바일 화면 양옆에 최소한의 간격만 유지 */
     max-width: 100% !important;
     
-    margin: 0 auto !important;   /* 중앙 정렬 */
+    margin: 0 10px !important;   /* 중앙 정렬 */
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
     box-sizing: border-box;
   }
@@ -421,10 +444,19 @@ input:checked + .slider:before {
     gap: 8px;
   }
 
-  .btn-save, .btn-logout-outline {
+  .btn-logout-outline {
     width: 100%;
     padding: 12px;
     font-size: 16px;
+  }
+  .save-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    background-color: #5b7cff;
+    color: #ddd;
+    font-weight: 800;
+    border-radius: 8px;
   }
 
   .switch {

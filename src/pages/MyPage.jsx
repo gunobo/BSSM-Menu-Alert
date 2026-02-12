@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUser, updateUserInfo, logout } from "../api/auth";
+import { getUser, updateUserInfo, logout, saveFcmToken } from "../api/auth";
 import "../styles/mypage.css";
 import bssmLogo from "../assets/bssmlogo.png";
 import Footer from "./footer";
@@ -9,16 +9,23 @@ export default function MyPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   
-  // 상태 관리
   const [user, setUser] = useState(null);
   const [allergies, setAllergies] = useState([]);
   const [favoriteMenus, setFavoriteMenus] = useState("");
-  const [allowNotifications, setAllowNotifications] = useState(false); // 알림 상태 추가
+
+  const [allowNotifications, setAllowNotifications] = useState(false);
+  const [allowAllergyNotifications, setAllowAllergyNotifications] = useState(false);
+  const [allowFavoriteNotifications, setAllowFavoriteNotifications] = useState(false);
 
   const allergyOptions = [
     "난류", "우유", "메밀", "땅콩", "대두", "밀", "고등어", "게", "새우", 
     "돼지고기", "복숭아", "토마토", "아황산류", "호두", "닭고기", "쇠고기", "오징어", "조개류"
   ];
+
+  // ❌ App.jsx에서 이미 등록했으므로 이 useEffect는 삭제
+  // useEffect(() => {
+  //   window.onReceiveFcmToken = ...
+  // }, []);
 
   useEffect(() => {
     async function loadData() {
@@ -28,7 +35,16 @@ export default function MyPage() {
           setUser(userData);
           setAllergies(userData.allergies || []);
           setFavoriteMenus(userData.favoriteMenus?.join(", ") || "");
-          setAllowNotifications(userData.allowNotifications || false); // 서버에서 알림 설정값 로드
+          
+          setAllowNotifications(
+            userData.allowNotifications ?? userData.allow_notifications ?? false
+          );
+          setAllowAllergyNotifications(
+            userData.allowAllergyNotifications ?? userData.allow_allergy_notifications ?? false
+          );
+          setAllowFavoriteNotifications(
+            userData.allowFavoriteNotifications ?? userData.allow_favorite_notifications ?? false
+          );
         } else {
           alert("로그인 세션이 만료되었습니다.");
           navigate("/login");
@@ -42,6 +58,41 @@ export default function MyPage() {
     loadData();
   }, [navigate]);
 
+  const requestNotificationPermission = async () => {
+    // 1. 앱 환경이면 즉시 통과
+    if (window.Android) return true;
+
+    // 2. 브라우저 환경에서 Notification 존재 여부 체크
+    if (typeof window === "undefined" || !("Notification" in window)) {
+      console.warn("이 브라우저는 알림 기능을 지원하지 않습니다.");
+      return false;
+    }
+
+    try {
+      if (window.Notification.permission !== "granted") {
+        const permission = await window.Notification.requestPermission();
+        return permission === "granted";
+      }
+      return true;
+    } catch (e) {
+      console.error("권한 요청 에러:", e);
+      return false;
+    }
+  };
+
+  const handleToggle = async (type, isChecked) => {
+    if (isChecked) {
+      const hasPermission = await requestNotificationPermission();
+      if (!hasPermission && !window.Android) { 
+        alert("알림 권한이 필요합니다. 설정에서 알림을 허용해주세요.");
+        return;
+      }
+    }
+    if (type === "meal") setAllowNotifications(isChecked);
+    if (type === "allergy") setAllowAllergyNotifications(isChecked);
+    if (type === "favorite") setAllowFavoriteNotifications(isChecked);
+  };
+
   const handleAllergyChange = (allergy) => {
     setAllergies((prev) =>
       prev.includes(allergy) ? prev.filter((a) => a !== allergy) : [...prev, allergy]
@@ -49,15 +100,6 @@ export default function MyPage() {
   };
 
   const handleSave = async () => {
-    // 알림을 켰을 때 브라우저 권한 요청
-    if (allowNotifications && Notification.permission !== "granted") {
-      const permission = await Notification.requestPermission();
-      if (permission !== "granted") {
-        alert("알림 권한이 거부되었습니다. 메뉴 알림을 받으려면 브라우저 설정에서 알림을 허용해주세요.");
-        return;
-      }
-    }
-
     const favoriteArray = favoriteMenus
       .split(",")
       .map((item) => item.trim())
@@ -66,24 +108,99 @@ export default function MyPage() {
     const data = {
       allergies: allergies,
       favoriteMenus: favoriteArray,
-      allowNotifications: allowNotifications // 알림 설정값 추가
+      allow_notifications: allowNotifications,
+      allow_allergy_notifications: allowAllergyNotifications,
+      allow_favorite_notifications: allowFavoriteNotifications
     };
+
+    let isSuccess = false;
 
     try {
       await updateUserInfo(data);
-      alert("성공적으로 저장되었습니다! ✅");
-      
-      // 테스트용 알림 (저장 성공 시 한 번 띄워줌)
-      if (allowNotifications) {
-        new Notification("BSSM 급식알리미", {
-          body: "이제 선호 메뉴가 나오는 날 아침에 알림을 보내드릴게요!",
-          icon: bssmLogo
+      isSuccess = true;
+
+      // ✅ 안드로이드 앱인 경우
+      if (window.Android && typeof window.Android.requestFcmToken === "function") {
+        console.log("🔔 안드로이드에 FCM 토큰 요청");
+        window.Android.requestFcmToken();
+        
+        // ✅ 토큰이 도착할 때까지 대기 (App.jsx의 onReceiveFcmToken이 처리함)
+        await new Promise((resolve) => {
+          let attempts = 0;
+          const checkToken = setInterval(() => {
+            attempts++;
+            const token = localStorage.getItem("fcmToken");
+            
+            if (token) {
+              clearInterval(checkToken);
+              console.log("💾 localStorage에서 토큰 확인:", token.substring(0, 30) + "...");
+              console.log("✅ 토큰이 App.jsx에서 자동으로 서버에 저장됩니다");
+              resolve();
+            } else if (attempts >= 10) {
+              clearInterval(checkToken);
+              console.warn("⚠️ 토큰을 찾을 수 없음 (10초 대기)");
+              resolve();
+            } else {
+              console.log(`⏳ 토큰 대기 중... ${attempts}/10초`);
+            }
+          }, 1000);
         });
+      } 
+      // PC 브라우저 환경
+      else if (typeof window !== "undefined" && "Notification" in window && window.Notification.permission === "granted") {
+        const shouldNotify = allowNotifications || allowAllergyNotifications || allowFavoriteNotifications;
+        if (shouldNotify) {
+          new window.Notification("BSSM 급식알리미", {
+            body: "설정이 저장되었습니다! 🍱",
+            icon: bssmLogo
+          });
+        }
       }
-      navigate("/"); 
+
     } catch (err) {
-      console.error("저장 실패:", err);
-      alert("저장에 실패했습니다.");
+      console.error("저장 에러:", err);
+      alert("저장에 실패했습니다. ❌");
+      return;
+    }
+
+    if (isSuccess) {
+      setTimeout(() => {
+        alert("성공적으로 저장되었습니다! ✅");
+        if (window.Android) {
+          window.location.href = "/";
+        } else {
+          navigate("/");
+        }
+      }, 100);
+    }
+  };
+
+  const handleLogout = async () => {
+    if (!window.confirm("로그아웃 하시겠습니까?")) return;
+
+    if (window.Android) {
+      Android.logout();
+    }
+    
+    const fcmToken = localStorage.getItem("fcmToken");
+    
+    // 비동기로 서버에 알리지만, 실패해도 무시
+    logout(fcmToken).catch(err => {
+      console.error("서버 로그아웃 실패 (무시):", err);
+    });
+    
+    // 로컬 스토리지 즉시 정리
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("fcmToken");
+    window.dispatchEvent(new Event("authChange"));
+    
+    // 즉시 리다이렉트
+    alert("로그아웃 되었습니다.");
+    
+    if (window.Android) {
+      window.location.href = "/";
+    } else {
+      navigate("/");
     }
   };
 
@@ -98,14 +215,15 @@ export default function MyPage() {
         </div>
         <div className="nav-right">
           <button className="nav-btn" onClick={() => navigate("/")}>홈으로</button>
-          <button className="nav-btn" style={{background: '#ff4d4f', color: 'white'}} onClick={logout}>로그아웃</button>
+          <button className="nav-btn" style={{background: '#ff4d4f', color: 'white'}} onClick={handleLogout}>
+            로그아웃
+          </button>
         </div>
       </nav>
 
       <div className="mypage-wrapper">
         <main className="main-card">
           <h2>마이페이지</h2>
-          
           <div className="profile-section">
             <p><strong>이름:</strong> {user?.name}</p>
             <p><strong>이메일:</strong> {user?.email}</p>
@@ -113,21 +231,46 @@ export default function MyPage() {
 
           <hr style={{ margin: "20px 0", opacity: 0.1 }} />
 
-          {/* 추가된 알림 설정 섹션 */}
           <section className="settings-section">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h3>선호 메뉴 알림 (Push)</h3>
-                <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "4px" }}>
-                  선호 메뉴가 포함된 급식이 나오는 날 아침에 알림을 보냅니다.
+                <h3>기본 급식 알림 (Push)</h3>
+                <p style={{ fontSize: "0.85rem", color: allowNotifications ? "#2ecc71" : "#666", marginTop: "4px" }}>
+                  {allowNotifications ? "✨ 매일 정해진 시간에 급식 메뉴를 알려드려요." : "알림을 켜면 메뉴 정보를 보내드려요."}
                 </p>
               </div>
               <label className="switch">
-                <input 
-                  type="checkbox" 
-                  checked={allowNotifications} 
-                  onChange={(e) => setAllowNotifications(e.target.checked)} 
-                />
+                <input type="checkbox" checked={allowNotifications} onChange={(e) => handleToggle("meal", e.target.checked)} />
+                <span className="slider round"></span>
+              </label>
+            </div>
+          </section>
+
+          <section className="settings-section">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3>알레르기 주의 알림</h3>
+                <p style={{ fontSize: "0.85rem", color: allowAllergyNotifications ? "#e67e22" : "#666", marginTop: "4px" }}>
+                  {allowAllergyNotifications ? "⚠️ 설정한 알레르기 메뉴 포함 시 알려드려요." : "내 알레르기가 포함된 식단을 체크해드려요."}
+                </p>
+              </div>
+              <label className="switch">
+                <input type="checkbox" checked={allowAllergyNotifications} onChange={(e) => handleToggle("allergy", e.target.checked)} />
+                <span className="slider round"></span>
+              </label>
+            </div>
+          </section>
+
+          <section className="settings-section">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3>선호 메뉴 등장 알림</h3>
+                <p style={{ fontSize: "0.85rem", color: allowFavoriteNotifications ? "#f1c40f" : "#666", marginTop: "4px" }}>
+                  {allowFavoriteNotifications ? "⭐ 좋아하는 메뉴가 나오는 날 알려드려요!" : "선호 메뉴가 나오는 날에 맞춰 알려드려요."}
+                </p>
+              </div>
+              <label className="switch">
+                <input type="checkbox" checked={allowFavoriteNotifications} onChange={(e) => handleToggle("favorite", e.target.checked)} />
                 <span className="slider round"></span>
               </label>
             </div>
@@ -137,17 +280,10 @@ export default function MyPage() {
 
           <section className="settings-section">
             <h3>알레르기 설정</h3>
-            <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "15px" }}>
-              체크된 성분이 포함된 급식은 빨간색으로 강조됩니다.
-            </p>
             <div className="allergy-option">
               {allergyOptions.map((item) => (
                 <label key={item} className="allergy-label">
-                  <input
-                    type="checkbox"
-                    checked={allergies.includes(item)}
-                    onChange={() => handleAllergyChange(item)}
-                  />
+                  <input type="checkbox" checked={allergies.includes(item)} onChange={() => handleAllergyChange(item)} />
                   {item}
                 </label>
               ))}
@@ -158,9 +294,6 @@ export default function MyPage() {
 
           <section className="settings-section">
             <h3>선호 메뉴 설정 (⭐)</h3>
-            <p style={{ fontSize: "0.9rem", color: "#666", marginBottom: "10px" }}>
-              쉼표(,)로 구분해서 입력해 주세요.
-            </p>
             <div className="favorite-input-wrapper">
               <input
                 type="text"

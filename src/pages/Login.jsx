@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
-import { saveToken } from "../api/auth";
+import { saveToken, saveFcmToken } from "../api/auth";
 import axios from "axios";
 import { messaging } from "../firebase-config";
 import { getToken } from "firebase/messaging";
@@ -10,64 +10,123 @@ import "../styles/auth.css";
 export default function Login() {
   const navigate = useNavigate();
 
-  // 1. 환경변수 로드 (예: https://api.imjemin.co.kr/api)
   const BaseUrl = import.meta.env.VITE_API_URL;
+  const ServerUrl = import.meta.env.VITE_BASE_URL;
   const FcmVapidKey = import.meta.env.VITE_FCM_VAPID_KEY;
 
-  // 2. BaseUrl에서 /api를 제거하여 구글 로그인용 URL 생성
-  // replace를 사용하면 '/api' 부분만 쏙 빠집니다.
-  const GoogleUrl = BaseUrl?.replace("/api", "");
+  // ✅ 안드로이드에서 보낸 로그인 성공 신호 받기
+  useEffect(() => {
+    window.onNativeLoginSuccess = (idToken) => {
+      console.log("✅ 안드로이드 네이티브 토큰 수신 완료");
+      handleLoginSuccess({ credential: idToken });
+    };
 
-  // Login.jsx 내부 registerFcm 함수
+    return () => {
+      delete window.onNativeLoginSuccess;
+    };
+  }, []);
+
+  // ✅ FCM 토큰 등록 로직
   const registerFcm = async (accessToken) => {
-  console.log("1️⃣ registerFcm 실행됨 (accessToken 유무):", !!accessToken);
-  
-  try {
-    // 1. 권한 요청 확인
-    const permission = await Notification.requestPermission();
-    console.log("2️⃣ 알림 권한 상태:", permission);
-    
-    if (permission !== "granted") {
-      console.warn("⚠️ 알림 권한이 거부되었습니다.");
-      return;
-    }
+    try {
+      console.log("🔔 FCM 등록 시작...");
+      
+      // 1. 환경 판단
+      const isAndroid = !!(window.Android && window.Android.googleLogin);
+      const deviceType = isAndroid ? "MOBILE" : "WEB";
+      
+      console.log("📱 디바이스 타입:", deviceType);
 
-    // 2. getToken 호출 전 로그
-    console.log("3️⃣ FCM 토큰 추출 시도 중... (VAPID KEY 확인):", FcmVapidKey);
+      let fcmToken = null;
 
-    const fcmToken = await getToken(messaging, { 
-      vapidKey: FcmVapidKey?.trim() 
-    });
+      if (isAndroid) {
+        // ✅ 앱 환경: 안드로이드가 토큰을 전달할 때까지 대기
+        console.log("📱 앱 환경 - 안드로이드 토큰 대기 중...");
+        
+        // 안드로이드에 토큰 요청
+        if (window.Android.requestFcmToken) {
+          window.Android.requestFcmToken();
+        }
+        
+        // 최대 10초 대기
+        for (let i = 0; i < 10; i++) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          fcmToken = localStorage.getItem("fcmToken");
+          
+          if (fcmToken) {
+            console.log("✅ localStorage에서 토큰 발견:", fcmToken.substring(0, 30) + "...");
+            break;
+          }
+          console.log(`⏳ 토큰 대기 중... ${i + 1}/10초`);
+        }
+        
+        if (!fcmToken) {
+          console.warn("⚠️ 안드로이드 토큰을 받지 못했습니다 (10초 타임아웃)");
+          return;
+        }
+      } else {
+        // ✅ 웹 환경: Firebase로 토큰 생성
+        console.log("💻 웹 환경 - Firebase 토큰 생성 중...");
+        
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") {
+          console.warn("🔔 알림 권한이 거부되었습니다.");
+          return;
+        }
+        
+        fcmToken = await getToken(messaging, { 
+          vapidKey: FcmVapidKey?.trim() 
+        });
+        
+        if (fcmToken) {
+          console.log("✅ Firebase 토큰 생성 완료:", fcmToken.substring(0, 30) + "...");
+          localStorage.setItem("fcmToken", fcmToken);
+        }
+      }
 
-    if (fcmToken) {
-      console.log("4️⃣ ⭐ FCM 토큰 추출 성공!:", fcmToken);
-
-      const response = await axios.post(`${BaseUrl}/fcm/subscribe`, 
-        { token: fcmToken },
-        {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
-            'Content-Type': 'application/json'
+      if (fcmToken) {
+        // ✅ 서버로 토큰 전송 (auth.js의 saveFcmToken 사용)
+        console.log("📤 서버로 토큰 전송 중...");
+        
+        try {
+          await saveFcmToken(fcmToken, deviceType);
+          console.log(`✅ FCM 등록 성공 (${deviceType})`);
+        } catch (error) {
+          console.error("❌ 서버 토큰 저장 실패:", error);
+          
+          // ✅ fallback: 기존 방식으로 재시도
+          try {
+            await axios.post(`${BaseUrl}/fcm/subscribe`, 
+              { 
+                token: fcmToken,
+                deviceType: deviceType
+              },
+              {
+                headers: {
+                  'Authorization': `Bearer ${accessToken}`,
+                  'Content-Type': 'application/json'
+                }
+              }
+            );
+            console.log("✅ FCM 등록 성공 (fallback)");
+          } catch (fallbackError) {
+            console.error("❌ fallback도 실패:", fallbackError);
           }
         }
-      );
-      console.log("5️⃣ 서버 등록 결과:", response.data);
-    } else {
-      console.warn("⚠️ fcmToken이 생성되지 않았습니다 (null).");
+      }
+    } catch (error) {
+      console.error("❌ FCM 등록 에러:", error);
     }
-  } catch (error) {
-    console.error("❌ FCM 단계 중 에러 발생:", error);
-    // 에러 상세 내용 출력
-    if (error.code) console.error("에러 코드:", error.code);
-    if (error.message) console.error("에러 메시지:", error.message);
-  }
-};
+  };
 
+  // ✅ 공통 로그인 처리 함수
   const handleLoginSuccess = async (credentialResponse) => {
     if (!credentialResponse.credential) return;
 
     try {
-      const res = await fetch(`${GoogleUrl}/auth/google`, {
+      console.log("🔐 로그인 처리 시작...");
+      
+      const res = await fetch(`${ServerUrl}/auth/google`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: credentialResponse.credential }),
@@ -75,27 +134,31 @@ export default function Login() {
 
       if (res.ok) {
         const data = await res.json();
-        
         if (data.token) {
-          // 1. 토큰 저장
-          saveToken(data.token); 
+          console.log("✅ 로그인 성공");
           
-          // 2. FCM 등록 (비동기로 실행하되 끝날 때까지 기다림)
-          console.log("🚀 FCM 등록 시작...");
+          saveToken(data.token); 
           axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
+          
+          // ✅ 로그인 성공 후 FCM 등록 실행
           await registerFcm(data.token);
-          console.log("✅ FCM 등록 프로세스 종료");
-
-          // 3. [핵심] navigate 대신 강제 페이지 이동
-          // 이렇게 하면 모든 컴포넌트가 초기화되면서 localStorage의 토큰을 정상적으로 읽습니다.
+          
           alert(`환영합니다, ${data.name}님!`);
-          navigate("/");
+          window.location.href = "/";
         }
       } else {
         alert("로그인 처리 중 오류가 발생했습니다.");
       }
     } catch (error) {
-      console.error("로그인 프로세스 에러:", error);
+      console.error("❌ 로그인 에러:", error);
+    }
+  };
+
+  // ✅ 앱 전용 클릭 핸들러
+  const handleNativeLoginRequest = () => {
+    if (window.Android && window.Android.googleLogin) {
+      console.log("🚀 앱 인터페이스 호출: window.Android.googleLogin()");
+      window.Android.googleLogin();
     }
   };
 
@@ -103,7 +166,26 @@ export default function Login() {
     <div className="auth-bg">
       <div className="auth-box">
         <h2>BSSM 급식 알리미</h2>
-        <div className="google-login-container">
+        <div 
+          className="google-login-container" 
+          style={{ position: 'relative', display: 'inline-block' }}
+        >
+          {window.Android && (
+            <div 
+              onClick={handleNativeLoginRequest}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 9999,
+                cursor: 'pointer',
+                backgroundColor: 'transparent'
+              }}
+            />
+          )}
+
           <GoogleLogin
             onSuccess={handleLoginSuccess}
             onError={() => alert("구글 로그인 실패")}

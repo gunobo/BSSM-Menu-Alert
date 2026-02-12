@@ -275,15 +275,17 @@ export default function Home() {
           <div className="nav-menu">
             <button className="menu-item active" onClick={() => navigate("/")}>급식확인</button>
             <button className="menu-item" onClick={() => navigate("/announcements")}>공지게시판</button>
+            <button className="menu-item" onClick={() => navigate("/appdownload")}>어플 다운로드</button>
           </div>
         </div>
 
         <div className="nav-right">
+          {/* ✅ 데스크톱 전용 날짜 선택 */}
           <input
             type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
-            className="nav-date-input"
+            className="nav-date-input desktop-only"
           />
           <div className="nav-buttons">
             <button className="nav-report-btn" onClick={handleNavReport}>🚨 건의</button>
@@ -296,9 +298,20 @@ export default function Home() {
         </div>
       </nav>
 
+      {/* ✅ 모바일 전용 날짜 선택 (검색창 위) */}
+      
+
       <section className="hero">
         <div className="container">
           <h1>BSSM 급식알리미</h1>
+          <div className="mobile-date-selector mobile-only">
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="mobile-date-input"
+              />
+            </div>
           <div className="search-bar">
             <input
               type="text"
@@ -355,7 +368,6 @@ export default function Home() {
                           <div className="card-header">
                             <span className="meal-type">{mealType}</span>
                             <div className="card-header-right">
-                              {/* ✅ 댓글 버튼 스타일 반영 */}
                               <button 
                                 className="comment-icon-btn" 
                                 onClick={(e) => handleOpenComment(e, meal)}

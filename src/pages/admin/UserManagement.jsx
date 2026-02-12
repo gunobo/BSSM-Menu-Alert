@@ -39,6 +39,23 @@ export default function UserManagement() {
     fetchUsers();
   }, []);
 
+  // ✅ 추가: 강제 로그아웃 핸들러
+  const handleForceLogout = async () => {
+    if (!selectedUser) return;
+    if (!window.confirm(`${getUserDisplayName(selectedUser)} 님을 강제 로그아웃 시키겠습니까?\n(FCM 토큰이 삭제되어 즉시 접속이 차단됩니다.)`)) return;
+
+    try {
+      await axios.post(`${API_URL}/admin/users/${selectedUser.email}/logout`, null, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      alert("강제 로그아웃 처리가 완료되었습니다.");
+      await fetchUsers();
+    } catch (err) {
+      console.error("강제 로그아웃 실패:", err);
+      alert("로그아웃 처리 중 오류가 발생했습니다.");
+    }
+  };
+
   const handleBanSubmit = async () => {
     const isBanning = !selectedUser.banned; 
     if (isBanning && !banReason.trim()) return alert("차단 사유를 입력해주세요.");
@@ -138,7 +155,7 @@ export default function UserManagement() {
       </section>
 
       {/* 2. 우측 상세 정보 패널 */}
-      <section className="admin-section" style={{ width: '400px', display: 'flex', flexDirection: 'column' }}>
+      <section className="admin-section">
         <h3>상세 정보</h3>
         {selectedUser ? (
           <div className="user-detail-panel" style={{ flex: 1, overflowY: 'auto' }}>
@@ -178,7 +195,16 @@ export default function UserManagement() {
               </div>
             )}
             
-            <div style={{ marginTop: 'auto', paddingTop: '20px' }}>
+            <div style={{ marginTop: 'auto', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {/* ✅ 강제 로그아웃 버튼: 기존 스타일 테마에 맞춰 추가 */}
+              <button 
+                className="btn-refresh" 
+                style={{ width: '100%', backgroundColor: '#636e72', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}
+                onClick={handleForceLogout}
+              >
+                ⚠️ 세션 강제 종료 (로그아웃)
+              </button>
+
               <button 
                 className={selectedUser.banned ? "btn-resolve" : "btn-reject"}
                 style={{ width: '100%' }}
@@ -232,7 +258,6 @@ export default function UserManagement() {
             )}
 
             <div className="modal-actions">
-              {/* ✅ 취소 버튼: 스타일 충돌 방지를 위해 인라인으로 색상을 명시적으로 고정 */}
               <button 
                 className="btn-close" 
                 onClick={() => setIsModalOpen(false)}

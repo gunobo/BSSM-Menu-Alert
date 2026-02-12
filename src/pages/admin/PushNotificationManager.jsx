@@ -10,6 +10,8 @@ export default function PushNotificationManager() {
     scheduledTime: "",
     targetType: "ALL", 
     targetEmails: [], 
+    // ✅ 추가: 발송 대상 기기 설정 (ALL, MOBILE, WEB)
+    deviceTarget: "ALL", 
   });
 
   const [users, setUsers] = useState([]); 
@@ -19,38 +21,25 @@ export default function PushNotificationManager() {
   const [loading, setLoading] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
 
-  const API_BASE_URL = import.meta.env.VITE_API_URL; // VITE_ 접두사 확인 필요
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-  // ✅ 토큰 및 인증 헤더 가져오기
   const getAuthHeader = () => {
     const savedToken = localStorage.getItem("accessToken"); 
     if (!savedToken) return null;
     return { Authorization: `Bearer ${savedToken}` };
   };
 
-  // ✅ [수정됨] 토큰에서 관리자 정보 추출 (Base64Url 디코딩 에러 해결)
   const decodeAdminToken = () => {
     const token = localStorage.getItem("accessToken");
     if (!token) return;
-
     try {
-      // 1. JWT 페이로드 추출
       const base64Url = token.split('.')[1];
       if (!base64Url) return;
-
-      // 2. Base64Url -> 표준 Base64 치환
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-
-      // 3. 패딩 처리 및 atob 디코딩 (한글 깨짐 방지 포함)
       const jsonPayload = decodeURIComponent(
-        atob(base64)
-          .split('')
-          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
+        atob(base64).split('').map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
       );
-
       const payload = JSON.parse(jsonPayload);
-
       setAdminInfo({
         email: payload.sub || payload.email || "알 수 없음",
         name: payload.name || "관리자"
@@ -61,11 +50,9 @@ export default function PushNotificationManager() {
     }
   };
 
-  // 유저 검색 로직
   const handleUserSearch = async () => {
     const headers = getAuthHeader();
     if (!headers) return;
-
     setSearchLoading(true);
     try {
       const response = await axios.get(`${API_BASE_URL}/admin/users`, {
@@ -93,7 +80,6 @@ export default function PushNotificationManager() {
       const newEmails = isSelected
         ? prev.targetEmails.filter((e) => e !== email)
         : [...prev.targetEmails, email];
-
       return { ...prev, targetEmails: newEmails };
     });
   };
@@ -101,25 +87,24 @@ export default function PushNotificationManager() {
   const handleSendPush = async () => {
     const headers = getAuthHeader();
     if (!headers) return alert("로그인 세션이 만료되었습니다.");
-    
     if (!pushData.title || !pushData.body) return alert("제목과 내용을 입력해주세요.");
     
     if (pushData.targetType === "SPECIFIC" && pushData.targetEmails.length === 0) {
       return alert("알림을 받을 유저를 최소 한 명 선택해주세요.");
     }
 
-    const confirmMsg = pushData.targetType === "ALL" 
-      ? "모든 사용자에게 푸시 알림을 발송하시겠습니까?" 
-      : `${pushData.targetEmails.length}명의 선택된 사용자에게 발송하시겠습니까?`;
+    const deviceText = pushData.deviceTarget === "ALL" ? "모든 기기" : pushData.deviceTarget === "MOBILE" ? "모바일 앱" : "PC 웹";
+    const confirmMsg = `[${deviceText}] 대상으로 발송하시겠습니까?`;
 
     if (!window.confirm(confirmMsg)) return;
 
     setLoading(true);
     try {
-      await axios.post(`${API_BASE_URL}/admin/notifications/send`, pushData, {
+      // ✅ 서버로 pushData 전송 (이제 deviceTarget 포함됨)
+      await axios.post(`${API_BASE_URL}/admin/notification/send`, pushData, {
         headers: headers
       });
-      alert(`🚀 성공적으로 전송되었습니다! (발송자: ${adminInfo.email})`);
+      alert(`🚀 성공적으로 전송되었습니다!`);
       setPushData({ ...pushData, title: "", body: "", targetEmails: [], targetDate: "", scheduledTime: "" });
     } catch (error) {
       console.error("전송 에러:", error);
@@ -134,13 +119,14 @@ export default function PushNotificationManager() {
       <div className="push-card-premium">
         <div className="admin-status-bar">
           <span className="admin-badge">ADMIN</span>
-          <span className="admin-email"><strong>{adminInfo.name}</strong> ({adminInfo.email}) 님이 발송 대기 중</span>
+          <span className="admin-email"><strong>{adminInfo.name}</strong> ({adminInfo.email}) 님</span>
         </div>
 
         <h3 className="push-title">🔔 푸시 알림 통합 발송</h3>
         
+        {/* --- 수신 대상 (전체/특정) --- */}
         <div className="push-section">
-          <label className="push-label">수신 대상 설정</label>
+          <label className="push-label">수신 대상 범위</label>
           <div className="push-toggle-group">
             <button 
               type="button"
@@ -151,7 +137,29 @@ export default function PushNotificationManager() {
               type="button"
               className={pushData.targetType === "SPECIFIC" ? "active" : ""} 
               onClick={() => setPushData({...pushData, targetType: "SPECIFIC"})}
-            >특정 사용자(다중 선택)</button>
+            >특정 사용자</button>
+          </div>
+        </div>
+
+        {/* ✅ 신규: 발송 기기 선택 섹션 */}
+        <div className="push-section">
+          <label className="push-label">발송 기기 선택</label>
+          <div className="push-toggle-group device-selector">
+            <button 
+              type="button"
+              className={pushData.deviceTarget === "ALL" ? "active device-all" : ""} 
+              onClick={() => setPushData({...pushData, deviceTarget: "ALL"})}
+            >전체 기기</button>
+            <button 
+              type="button"
+              className={pushData.deviceTarget === "MOBILE" ? "active device-mobile" : ""} 
+              onClick={() => setPushData({...pushData, deviceTarget: "MOBILE"})}
+            >📱 모바일</button>
+            <button 
+              type="button"
+              className={pushData.deviceTarget === "WEB" ? "active device-web" : ""} 
+              onClick={() => setPushData({...pushData, deviceTarget: "WEB"})}
+            >💻 PC 웹</button>
           </div>
         </div>
 
@@ -184,9 +192,7 @@ export default function PushNotificationManager() {
                     onClick={() => toggleUserSelection(u.email)}
                   >
                     <div className="u-info">
-                      <div className="u-checkbox">
-                        {pushData.targetEmails.includes(u.email) ? "✅" : "⬜"}
-                      </div>
+                      <div className="u-checkbox">{pushData.targetEmails.includes(u.email) ? "✅" : "⬜"}</div>
                       <div className="u-text">
                         <div className="u-name">{u.name || u.userName || "이름 없음"}</div>
                         <div className="u-email">{u.email}</div>
@@ -201,6 +207,7 @@ export default function PushNotificationManager() {
 
         <hr className="push-divider" />
 
+        {/* --- 제목 및 내용 --- */}
         <div className="push-field-group">
           <label className="push-label">알림 제목</label>
           <input 
@@ -223,9 +230,10 @@ export default function PushNotificationManager() {
           ></textarea>
         </div>
 
+        {/* --- 시간 및 날짜 --- */}
         <div className="push-grid-row">
           <div className="push-field-group">
-            <label className="push-label">식단 날짜 (연동)</label>
+            <label className="push-label">식단 날짜</label>
             <input 
               type="date" 
               className="push-input-field"
