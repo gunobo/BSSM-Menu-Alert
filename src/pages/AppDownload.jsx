@@ -116,9 +116,9 @@ const AppDownload = () => {
                     </button>
                     <button 
                       className="nav-btn download-action-btn" 
-                      onClick={() => handleAppDownload("apk")}
+                      onClick={handleAppDownload}
                     >
-                      APK 다운로드
+                      apk 다운로드 받기
                     </button>
                   </div>
                 </div>

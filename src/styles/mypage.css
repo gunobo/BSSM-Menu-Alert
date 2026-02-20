@@ -77,11 +77,11 @@
 ===================== */
 .main-card {
   max-width: 85%;
-  margin: 0 auto;
-  background: #ffffff;
-  border-radius: 24px;
-  padding: 40px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* 부드러운 그림자 */
+  margin: 0 auto !important;
+  background: #ffffff !important;
+  border-radius: 24px !important;
+  padding: 40px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important; /* 부드러운 그림자 */
   z-index: 9999 !important;
 }
 
@@ -275,6 +275,17 @@
   padding: 12px;
   font-size: 16px;
   background-color: #5b7cff;
+  color: white;
+  font-weight: 800;
+  border-radius: 8px;
+}
+
+.danger-btn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  background-color: #ff5b5b;
   color: white;
   font-weight: 800;
   border-radius: 8px;

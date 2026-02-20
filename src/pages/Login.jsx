@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import { saveToken, saveFcmToken } from "../api/auth";
@@ -9,6 +9,8 @@ import "../styles/auth.css";
 
 export default function Login() {
   const navigate = useNavigate();
+  // ✅ 로딩 상태 관리 (기본값: false)
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const BaseUrl = import.meta.env.VITE_API_URL;
   const ServerUrl = import.meta.env.VITE_BASE_URL;
@@ -123,6 +125,9 @@ export default function Login() {
   const handleLoginSuccess = async (credentialResponse) => {
     if (!credentialResponse.credential) return;
 
+    // 🚀 로딩 시작
+    setIsLoggingIn(true);
+
     try {
       console.log("🔐 로그인 처리 시작...");
       
@@ -137,20 +142,25 @@ export default function Login() {
         if (data.token) {
           console.log("✅ 로그인 성공");
           
-          saveToken(data.token); 
+          saveToken(data.token);
+          localStorage.setItem("userRole", data.role);
           axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
           
-          // ✅ 로그인 성공 후 FCM 등록 실행
+          // ✅ 로그인 성공 후 FCM 등록 실행 (여기서 대기 시간이 발생함)
           await registerFcm(data.token);
           
           alert(`환영합니다, ${data.name}님!`);
+          // 페이지 이동 시 로딩은 자동으로 해제됨 (새로고침 효과)
           window.location.href = "/";
         }
       } else {
         alert("로그인 처리 중 오류가 발생했습니다.");
+        setIsLoggingIn(false); // 실패 시 로딩 해제
       }
     } catch (error) {
       console.error("❌ 로그인 에러:", error);
+      alert("서버 연결에 실패했습니다.");
+      setIsLoggingIn(false); // 에러 발생 시 로딩 해제
     }
   };
 
@@ -164,6 +174,14 @@ export default function Login() {
 
   return (
     <div className="auth-bg">
+      {/* ✅ 로딩 레이어: 로딩 중일 때만 표시됨 */}
+      {isLoggingIn && (
+        <div className="login-loading-overlay">
+          <div className="spinner"></div>
+          <p>사용자 정보를 확인하고 있습니다.<br/>잠시만 기다려 주세요...</p>
+        </div>
+      )}
+
       <div className="auth-box">
         <h2>BSSM 급식 알리미</h2>
         <div 
@@ -172,7 +190,7 @@ export default function Login() {
         >
           {window.Android && (
             <div 
-              onClick={handleNativeLoginRequest}
+              onClick={!isLoggingIn ? handleNativeLoginRequest : null}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -180,7 +198,7 @@ export default function Login() {
                 right: 0,
                 bottom: 0,
                 zIndex: 9999,
-                cursor: 'pointer',
+                cursor: isLoggingIn ? 'default' : 'pointer',
                 backgroundColor: 'transparent'
               }}
             />
@@ -190,8 +208,14 @@ export default function Login() {
             onSuccess={handleLoginSuccess}
             onError={() => alert("구글 로그인 실패")}
             ux_mode="popup" 
-            useOneTap={false} 
+            useOneTap={false}
+            disabled={isLoggingIn} // 로딩 중 버튼 비활성화
           />
+          <p onClick={() => navigate("/privacy")}>
+            로그인 시 
+            <strong> 개인정보처리방침</strong>에 
+            동의한 것으로 간주합니다.
+          </p>
         </div>
       </div>
     </div>

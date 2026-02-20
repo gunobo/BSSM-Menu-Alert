@@ -23,6 +23,8 @@ import Announcements from "./pages/Announcements.jsx";
 import AnnouncementDetail from "./pages/AnnouncementDetail.jsx";
 import NotFound from "./pages/NOTFOUND.jsx";
 import AppDownload from "./pages/AppDownload.jsx";
+import PrivacyPolicy from "./pages/Privacypolicy.jsx";
+import DeleteAccount from "./pages/DeleteAccount.jsx";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -191,6 +193,8 @@ export default function App() {
       <Route path="/announcements" element={<Announcements />} />
       <Route path="/announcements/:id" element={<AnnouncementDetail />} />
       <Route path="/appdownload" element={<AppDownload />}/>
+      <Route path="/privacy" element={<PrivacyPolicy />} /> {/* 추가 */}
+      <Route path="/delete-account" element={<DeleteAccount />} />
       <Route
         path="/adminpages"
         element={

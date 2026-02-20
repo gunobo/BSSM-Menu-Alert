@@ -1,0 +1,344 @@
+/* Delete Account Page Styles */
+
+.delete-account-container {
+  min-height: 100vh;
+  background-color: #f4f6fa;
+  padding: 100px 20px 60px;
+}
+
+.delete-account-card {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 50px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.delete-title {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #ff4d4f;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.delete-subtitle {
+  font-size: 1.1rem;
+  color: #64748b;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+/* 사용자 정보 섹션 */
+.user-info-section {
+  background-color: #f8faff;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.user-info-section h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #333333;
+  margin-bottom: 20px;
+}
+
+.user-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-label {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.info-value {
+  font-size: 1rem;
+  color: #333333;
+  font-weight: 600;
+}
+
+/* 경고 섹션 */
+.warning-section {
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+  border: 2px solid #ff6b6b;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.warning-section h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ff4d4f;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.warning-section ul {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 16px;
+}
+
+.warning-section li {
+  font-size: 1rem;
+  color: #555555;
+  margin-bottom: 8px;
+  padding-left: 24px;
+  position: relative;
+}
+
+.warning-section li::before {
+  content: "•";
+  position: absolute;
+  left: 8px;
+  color: #ff6b6b;
+  font-weight: bold;
+}
+
+.warning-text {
+  font-size: 1rem;
+  color: #ff4d4f;
+  font-weight: 700;
+  padding: 12px;
+  background-color: white;
+  border-radius: 8px;
+  text-align: center;
+  margin-top: 12px;
+}
+
+/* 법적 고지 */
+.legal-notice {
+  background-color: #f8f9fa;
+  border-left: 4px solid #5b7cff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 32px;
+}
+
+.legal-notice h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #333333;
+  margin-bottom: 12px;
+}
+
+.legal-notice p {
+  font-size: 0.95rem;
+  color: #555555;
+  margin-bottom: 12px;
+}
+
+.legal-notice ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.legal-notice li {
+  font-size: 0.9rem;
+  color: #666666;
+  margin-bottom: 6px;
+  padding-left: 20px;
+  position: relative;
+}
+
+.legal-notice li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: #5b7cff;
+}
+
+/* 버튼 */
+.action-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.cancel-btn,
+.delete-btn {
+  padding: 16px 32px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+.cancel-btn:hover {
+  background-color: #e2e8f0;
+  transform: translateY(-2px);
+}
+
+.delete-btn {
+  background-color: #ff4d4f;
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 77, 79, 0.3);
+}
+
+.delete-btn:hover {
+  background-color: #ff3333;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 77, 79, 0.4);
+}
+
+.delete-btn:active,
+.cancel-btn:active {
+  transform: translateY(0);
+}
+
+/* 모달 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ff4d4f;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.modal-content p {
+  font-size: 1rem;
+  color: #555555;
+  margin-bottom: 24px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.confirm-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #dddddd;
+  border-radius: 10px;
+  font-size: 1rem;
+  margin-bottom: 24px;
+  transition: border-color 0.3s ease;
+}
+
+.confirm-input:focus {
+  outline: none;
+  border-color: #ff4d4f;
+}
+
+.modal-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.modal-cancel-btn,
+.modal-delete-btn {
+  padding: 14px 24px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.modal-cancel-btn {
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+.modal-cancel-btn:hover {
+  background-color: #e2e8f0;
+}
+
+.modal-delete-btn {
+  background-color: #ff4d4f;
+  color: white;
+}
+
+.modal-delete-btn:hover:not(:disabled) {
+  background-color: #ff3333;
+}
+
+.modal-delete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 로딩 */
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 1.2rem;
+  color: #64748b;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .delete-account-card {
+    padding: 30px 20px;
+  }
+
+  .delete-title {
+    font-size: 1.8rem;
+  }
+
+  .delete-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .user-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-content {
+    padding: 30px 20px;
+  }
+
+  .modal-buttons {
+    grid-template-columns: 1fr;
+  }
+}

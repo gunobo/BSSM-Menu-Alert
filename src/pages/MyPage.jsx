@@ -204,6 +204,12 @@ export default function MyPage() {
     }
   };
 
+  const handleDeleteAccount = () => {
+    if (window.confirm("정말로 탈퇴하시겠습니까? 모든 데이터가 삭제됩니다.")) {
+      navigate("/delete-account");
+    }
+  }
+
   if (loading) return <div className="mypage-wrapper">데이터를 불러오는 중입니다...</div>;
 
   return (
@@ -228,6 +234,9 @@ export default function MyPage() {
             <p><strong>이름:</strong> {user?.name}</p>
             <p><strong>이메일:</strong> {user?.email}</p>
           </div>
+          <button className="nav-btn" onClick={() => navigate("/privacy")}>
+            개인정보처리방침 보기
+          </button>
 
           <hr style={{ margin: "20px 0", opacity: 0.1 }} />
 
@@ -307,6 +316,9 @@ export default function MyPage() {
 
           <button onClick={handleSave} className="save-btn">
             설정 저장하기
+          </button>
+          <button className="danger-btn" onClick={handleDeleteAccount}>
+            회원 탈퇴
           </button>
         </main>
       </div>

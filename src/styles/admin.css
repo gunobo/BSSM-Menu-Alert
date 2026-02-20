@@ -642,6 +642,7 @@ button {
   align-items: center;
   gap: 7.5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  text-align: center;
 }
 
 .btn-refresh:hover {
@@ -1393,6 +1394,93 @@ button {
 @keyframes highlight-green {
   0% { background-color: #d1fae5; } /* 초록색 불빛이 들어왔다가 */
   100% { background-color: transparent; } /* 서서히 사라짐 */
+}
+
+/* ✅ 권한 배지 스타일 */
+.role-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.role-badge.admin-only {
+  background-color: rgba(230, 119, 0, 0.1);
+  color: #e67700;
+  border: 1px solid rgba(230, 119, 0, 0.3);
+}
+
+/* ✅ 접근 불가 페이지 스타일 */
+.access-denied {
+  text-align: center;
+  padding: 60px 20px;
+  color: #868e96;
+}
+
+.access-denied-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.access-denied h2 {
+  color: #495057;
+  margin-bottom: 10px;
+  font-size: 24px;
+}
+
+.access-denied p {
+  color: #868e96;
+  font-size: 16px;
+}
+
+/* ✅ 사이드바 로고에 권한 배지 추가 시 스타일 */
+.sidebar-logo p {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* ✅ 메뉴 그룹 버튼 내 배지 위치 조정 */
+.group-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.group-title .role-badge {
+  margin-left: auto;
+  margin-right: 8px;
+}
+
+.group-title .arrow {
+  margin-left: auto;
+}
+
+/* ✅ 권한 없는 메뉴 비활성화 스타일 (선택사항) */
+.menu-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ✅ 관리자/운영자 구분 색상 */
+.badge-admin {
+  background-color: #e67700;
+  color: white;
+}
+
+.badge-moderator {
+  background-color: #4c6ef5;
+  color: white;
+}
+
+.badge-user {
+  background-color: #868e96;
+  color: white;
 }
 
 @media (max-width: 768px) {

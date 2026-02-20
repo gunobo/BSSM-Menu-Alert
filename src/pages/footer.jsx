@@ -14,6 +14,7 @@ export default function Footer() {
           <div className="footer-info">
             <p>제작 : 임제민  |  관리자 : 임제민  |  문의 : 미정</p>
             <p>주소 : 부산광역시 강서구 가락대로 1393 (부산소프트웨어마이스터고등학교)</p>
+            <p onClick={() => navigate("/privacy")} className="Privacy">개인정보처리방침</p>
             <p>데이터 제공 : NEIS 교육정보개방포털</p>
             <p>본 서비스는 학교 급식 정보를 실시간으로 제공하며, 비영리 목적으로 운영됩니다.</p>
             <p className="copyright">Copyright © BSSM Meal Alimi. All Rights Reserved.</p>

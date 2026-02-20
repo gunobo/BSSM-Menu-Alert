@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>계정 권한 변경 안내</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #4c6ef5 0%, #3b5bdb 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .role-change-box {
+            background: #f8f9fa;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 0 10px;
+        }
+        .role-old {
+            background: #e9ecef;
+            color: #495057;
+        }
+        .role-new {
+            background: #e67700;
+            color: white;
+        }
+        .arrow {
+            font-size: 24px;
+            margin: 0 10px;
+            color: #868e96;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            text-align: center;
+            color: #868e96;
+            font-size: 14px;
+        }
+        .logo {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🔐</div>
+            <h1>계정 권한 변경 안내</h1>
+        </div>
+        <div class="content">
+            <p style="font-size: 16px; color: #212529; line-height: 1.6;">
+                안녕하세요. <strong>BSSM 급식알리미</strong> 운영팀입니다.
+            </p>
+            <p style="color: #495057; line-height: 1.6;">
+                귀하의 계정 권한이 변경되었음을 알려드립니다.
+            </p>
+            
+            <div class="role-change-box">
+                <p style="margin: 0 0 20px 0; color: #495057; font-weight: 600;">권한 변경 내역</p>
+                <div style="display: flex; align-items: center; justify-content: center;">
+                    <span class="role-badge role-old">일반 사용자</span>
+                    <span class="arrow">→</span>
+                    <span class="role-badge role-new">관리자</span>
+                </div>
+                <p style="margin: 20px 0 0 0; color: #868e96; font-size: 14px;">
+                    ROLE_USER → ROLE_ADMIN
+                </p>
+            </div>
+            
+            <p style="color: #495057; line-height: 1.6; font-size: 14px;">
+                변경된 권한에 따라 이용 가능한 기능이 달라질 수 있습니다.<br>
+                권한 변경에 대해 문의사항이 있으시면 관리자에게 연락 부탁드립니다.
+            </p>
+        </div>
+        <div class="footer">
+            <p style="margin: 0;"><strong>BSSM 급식알리미</strong> 운영팀</p>
+            <p style="margin: 5px 0 0 0; font-size: 12px;">이 메일은 발신 전용입니다.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -156,3 +156,44 @@
 .btn-save {
   margin-top: 30px; /* 섹션들 사이 간격 확보 */
 }
+
+/* 로그인 로딩 화면 전체 덮기 */
+.login-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(255, 255, 255, 0.9); /* 흰색 배경에 약간의 투명도 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000; /* 구글 로그인 버튼보다 위에 위치 */
+  backdrop-filter: blur(5px); /* 배경을 살짝 흐릿하게 처리 */
+}
+
+/* 안내 문구 스타일 */
+.login-loading-overlay p {
+  margin-top: 20px;
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* 로딩 스피너 애니메이션 */
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3498db; /* 로딩 색상 */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

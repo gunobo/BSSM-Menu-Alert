@@ -222,6 +222,7 @@ button {
 /* [5] MAIN CARD */
 .main-card {
   width: 95%;
+  max-width: 1200px !important;
   height: auto;
   background-color: #ffffff;
   border-radius: 24px;
@@ -252,12 +253,12 @@ button {
 .meal-grid {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 10px !important;
 }
 
 .meal-card-wrapper {
-  height: 420px;
+  height: 420px !important;
 }
 
 .card-inner {
@@ -278,6 +279,7 @@ button {
 .card-back {
   position: absolute;
   width: 100%;
+  max-width: 400px;
   height: 100%;
   backface-visibility: hidden;
   border-radius: 15px;
@@ -610,8 +612,7 @@ button {
   /* 4. 식단 그리드: 무조건 1열 */
   .meal-grid {
     /* 3열(repeat(3, 1fr))을 1열로 강제 변경 */
-    grid-template-columns: 1fr !important; 
-    gap: 15px;
+    /* grid-template-columns: 1fr !important;  */
     width: 100%;
   }
   .status-msg {
@@ -619,7 +620,17 @@ button {
   }
   .meal-card-wrapper {
     height: auto !important; /* 높이 고정 해제 (내용에 맞게) */
-    min-height: 180px;
+    min-height: 220px;
+  }
+  .meal-card-wrapper .menu-line {
+    font-size: 12px !important;
+  }
+  .allergy-row {
+    height: 15px;
+    width: auto;
+  }
+  .allergy-detail-item {
+    font-size: 9px !important;
   }
   .comment-icon-btn {
     font-size: 11px !important;
