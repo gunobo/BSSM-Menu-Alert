@@ -6,6 +6,11 @@ export default function NoticeModal({ notice: propsNotice, onClose }) {
   const [localNotice, setLocalNotice] = useState(null);
   const API_BASE_URL = import.meta.env.VITE_API_URL;
   const todayStr = new Date().toISOString().slice(0, 10);
+  const weekLaterStr = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().slice(0, 10);
+  })();
 
   useEffect(() => {
     // 1. props로 전달받은 알림이 있으면 그걸 사용
@@ -24,8 +29,8 @@ export default function NoticeModal({ notice: propsNotice, onClose }) {
           const dontShowUntil = localStorage.getItem("dontShowNoticeUntil");
           const lastReadId = localStorage.getItem("lastReadNoticeId");
 
-          // 오늘 하루 안보기 체크 혹은 아예 새로운 ID의 공지라면 보여줌
-          if (dontShowUntil !== todayStr || (lastReadId && Number(data.id) > Number(lastReadId))) {
+          // 1주일 안보기 체크 혹은 아예 새로운 ID의 공지라면 보여줌
+          if (!dontShowUntil || dontShowUntil <= todayStr || (lastReadId && Number(data.id) > Number(lastReadId))) {
             setLocalNotice(data);
           }
         }
@@ -50,11 +55,11 @@ export default function NoticeModal({ notice: propsNotice, onClose }) {
   const imageUrl = getImageUrl();
 
   return (
-    <div className="modal-overlay" onClick={() => onClose(dontShowToday)}>
+    <div className="modal-overlay" onClick={() => onClose()}>
       <div className="notice-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>📢 공지사항 알림</h2>
-          <button className="close-btn" onClick={() => onClose(false)}>&times;</button>
+          <button className="close-btn" onClick={() => onClose()}>&times;</button>
         </div>
         
         <div className="notice-body">
@@ -73,14 +78,14 @@ export default function NoticeModal({ notice: propsNotice, onClose }) {
           <label style={{ fontSize: '14px', cursor: 'pointer' }}>
             <input type="checkbox" onChange={(e) => {
               if(e.target.checked) {
-                localStorage.setItem("dontShowNoticeUntil", todayStr);
+                localStorage.setItem("dontShowNoticeUntil", weekLaterStr);
                 localStorage.setItem("lastReadNoticeId", String(localNotice.id));
               }
-            }} /> 오늘 하루 보지 않기
+            }} /> 1주일 보지 않기
           </label>
           <button className="confirm-btn" onClick={() => {
              setLocalNotice(null);
-             onClose(false);
+             onClose();
           }}>닫기</button>
         </div>
       </div>

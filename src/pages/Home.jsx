@@ -25,6 +25,14 @@ export default function Home() {
     return new Date(now.getTime() - offset).toISOString().slice(0, 10);
   }, []);
 
+  const weekLaterStr = useMemo(() => {
+    const now = new Date();
+    const offset = now.getTimezoneOffset() * 60000;
+    const d = new Date(now.getTime() - offset);
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().slice(0, 10);
+  }, []);
+
   const [selectedDate, setSelectedDate] = useState(todayStr);
   const [monthData, setMonthData] = useState({});
   const [meals, setMeals] = useState([]);
@@ -126,7 +134,7 @@ export default function Home() {
         const lastReadId = localStorage.getItem("lastReadNoticeId");
         const dontShowUntil = localStorage.getItem("dontShowNoticeUntil");
         const isNewNotice = lastReadId ? Number(res.data.id) > Number(lastReadId) : true;
-        const isDayPassed = dontShowUntil !== todayStr;
+        const isDayPassed = !dontShowUntil || dontShowUntil <= todayStr;
         if (isDayPassed || isNewNotice) {
           setActiveNotice(res.data);
           setShowNoticeModal(true);
@@ -137,15 +145,7 @@ export default function Home() {
     }
   }, [todayStr]);
 
-  const handleCloseNotice = (isDontShowToday) => {
-    if (activeNotice) {
-      if (isDontShowToday) {
-        localStorage.setItem("lastReadNoticeId", String(activeNotice.id));
-        localStorage.setItem("dontShowNoticeUntil", todayStr);
-      } else {
-        localStorage.removeItem("dontShowNoticeUntil");
-      }
-    }
+  const handleCloseNotice = () => {
     setShowNoticeModal(false);
   };
 
