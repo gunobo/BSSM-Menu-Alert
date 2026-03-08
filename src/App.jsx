@@ -25,6 +25,7 @@ import NotFound from "./pages/NOTFOUND.jsx";
 import AppDownload from "./pages/AppDownload.jsx";
 import PrivacyPolicy from "./pages/Privacypolicy.jsx";
 import DeleteAccount from "./pages/DeleteAccount.jsx";
+import TimetablePage from "./pages/Timetable.jsx";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -195,6 +196,7 @@ export default function App() {
       <Route path="/appdownload" element={<AppDownload />}/>
       <Route path="/privacy" element={<PrivacyPolicy />} /> {/* 추가 */}
       <Route path="/delete-account" element={<DeleteAccount />} />
+      <Route path="/timetable" element={<TimetablePage />}/>
       <Route
         path="/adminpages"
         element={

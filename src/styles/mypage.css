@@ -271,6 +271,7 @@
 }
 
 .save-btn {
+  margin-top: 25px;
   width: 100%;
   padding: 12px;
   font-size: 16px;
@@ -299,10 +300,11 @@
 }
 
 .settings-section {
-    padding: 10px;
-    width: 100% !important; /* 화면에 꽉 차게 변경 */
-    box-sizing: border-box;
-  }
+  padding: 10px;
+  width: 100% !important; /* 화면에 꽉 차게 변경 */
+  box-sizing: border-box;
+  margin-bottom: 5px;
+}
 
 input:checked + .slider {
   background-color: #5b7cff;
@@ -310,6 +312,24 @@ input:checked + .slider {
 
 input:checked + .slider:before {
   transform: translateX(22px);
+}
+
+.set-class {
+  width: 20%;
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+  flex-direction: row;
+  box-sizing: border-box;
+}
+
+.set-class input {
+  width: 40px;
+  padding: 2px;
+  margin-right: 1px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #5b7cff;
 }
 /* =====================
    모바일 대응 (768px 이하)

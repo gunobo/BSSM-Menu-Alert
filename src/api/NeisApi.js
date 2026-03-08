@@ -40,7 +40,7 @@ export function parseAllergy(codeStr) {
 }
 
 /* =====================
-   ✅ 추가: 급식 메뉴 문자열에서
+   급식 메뉴 문자열에서
    알레르기 숫자 자동 추출
    (DDISH_NM 기반)
 ===================== */
@@ -49,7 +49,7 @@ export function extractAllergyFromDish(dishText) {
 
   const cleaned = dishText
     .replaceAll("<br/>", " ")
-    .replaceAll("·", "."); // 특수점 대응
+    .replaceAll("·", ".");
 
   const matches = cleaned.match(/\d+/g);
   if (!matches) return [];
@@ -59,12 +59,11 @@ export function extractAllergyFromDish(dishText) {
     .filter(Boolean);
 }
 
-
 /* =====================
    날짜 기준 급식 가져오기
 ===================== */
 export async function getMealsByDate(date) {
-  const ymd = date.replaceAll("-", ""); // YYYY-MM-DD → YYYYMMDD
+  const ymd = date.replaceAll("-", "");
   const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${API_KEY}&Type=json&ATPT_OFCDC_SC_CODE=${ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${SD_SCHUL_CODE}&MLSV_YMD=${ymd}`;
 
   try {
@@ -98,4 +97,82 @@ export async function getMonthMeals(year, month) {
   }
 
   return result;
+}
+
+/* =====================
+   주간 날짜 범위 계산 (월~금)
+===================== */
+export function getWeekRange(baseDate = new Date()) {
+  const day = baseDate.getDay(); // 0=일, 1=월, ..., 6=토
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+
+  const monday = new Date(baseDate);
+  monday.setDate(baseDate.getDate() + diffToMonday);
+
+  const days = [];
+  for (let i = 0; i < 5; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const offset = d.getTimezoneOffset() * 60000;
+    const local = new Date(d.getTime() - offset);
+    days.push(local.toISOString().slice(0, 10).replace(/-/g, ""));
+  }
+
+  return {
+    start: days[0],
+    end: days[4],
+    days,
+  };
+}
+
+/* =====================
+   주간 시간표 가져오기
+===================== */
+export async function getWeekTimetable(grade, classNum, startDate, endDate) {
+  const url =
+    `https://open.neis.go.kr/hub/hisTimetable` +
+    `?KEY=${API_KEY}` +
+    `&Type=json` +
+    `&pIndex=1` +
+    `&pSize=200` +
+    `&ATPT_OFCDC_SC_CODE=${ATPT_OFCDC_SC_CODE}` +
+    `&SD_SCHUL_CODE=${SD_SCHUL_CODE}` +
+    `&GRADE=${grade}` +
+    `&CLASS_NM=${classNum}` +
+    `&TI_FROM_YMD=${startDate}` +
+    `&TI_TO_YMD=${endDate}`;
+
+  try {
+    const res = await fetch(url);
+    const json = await res.json();
+
+    const resultCode = json?.hisTimetable?.[0]?.head?.[1]?.RESULT?.CODE;
+    if (resultCode && resultCode !== "INFO-000") {
+      console.warn("시간표 API 결과:", json?.hisTimetable?.[0]?.head?.[1]?.RESULT?.MESSAGE);
+      return {};
+    }
+
+    const rows = json?.hisTimetable?.[1]?.row || [];
+    const result = {};
+
+    rows.forEach((item) => {
+      const date = item.ALL_TI_YMD; // YYYYMMDD
+      const period = Number(item.PERIO);
+      const subject = item.ITRT_CNTNT?.trim() || "";
+
+      if (!result[date]) result[date] = [];
+      result[date][period - 1] = { period, subject };
+    });
+
+    // 빈 슬롯 제거
+    Object.keys(result).forEach((date) => {
+      result[date] = result[date].filter(Boolean);
+      console.log("빈 슬롯 제거!")
+    });
+
+    return result;
+  } catch (err) {
+    console.error("시간표 API 오류:", err);
+    return {};
+  }
 }

@@ -44,6 +44,7 @@ export default function Announcements() {
         </div>
         <div className="nav-menu">
           <button className="menu-item" onClick={() => navigate("/")}>급식확인</button>
+          <button className="menu-item" onClick={() => navigate("/timetable")}>시간표</button>
           <button className="menu-item active" onClick={() => navigate("/announcements")}>공지게시판</button>
           <button className="menu-item" onClick={() => navigate("/appdownload")}>어플 다운로드</button>
         </div>

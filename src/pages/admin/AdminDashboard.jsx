@@ -128,7 +128,7 @@ export default function AdminDashboard() {
     formData.append("type", "ALARM");
     if (imageFile) formData.append("file", imageFile);
     try {
-      await axios.post(`${API_BASE_URL}/admin/notifications`, formData, {
+      await axios.post(`${API_BASE_URL}/notifications`, formData, {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" }
       });
       alert("발송 완료"); setNotice({ title: "", content: "" }); setImageFile(null); setPreviewUrl(null);
