@@ -84,6 +84,18 @@ body {
   border-radius: 4px;
 }
 
+/* 통계 에러 배너 */
+.stats-error-banner {
+  background: #fef2f2;
+  border: 1.5px solid #fca5a5;
+  color: #b91c1c;
+  border-radius: 10px;
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
 /* 1. 헤더 및 통계 카드 섹션 */
 .admin-header {
   margin-bottom: calc(35px * var(--scale));
@@ -685,6 +697,34 @@ button {
   color: white;
 }
 
+/* 공지 유형 배지 */
+.notice-type-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.notice-type-badge.alarm {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+.notice-type-badge.notice {
+  background: #e8f4fd;
+  color: #1565c0;
+  border: 1px solid #90caf9;
+}
+.td-author {
+  color: #64748b;
+  font-size: 0.85rem;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .btn-resolve {
   background: var(--success-green);
   color: white;
@@ -1244,6 +1284,45 @@ button {
   gap: calc(20px * var(--scale));
 }
 
+/* 인기 메뉴 랭킹 리스트 */
+.rank-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rank-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.rank-badge.rank-1 { background: #fef9c3; color: #854d0e; font-size: 1.2rem; background: none; }
+.rank-badge.rank-2 { background: #f1f5f9; color: #475569; font-size: 1.2rem; background: none; }
+.rank-badge.rank-3 { background: #fff7ed; color: #9a3412; font-size: 1.2rem; background: none; }
+.rank-badge.rank-4 { background: #e2e8f0; color: #475569; }
+.rank-badge.rank-5 { background: #e2e8f0; color: #475569; }
+
 /* 모달 애니메이션 */
 .admin-modal-overlay {
   position: fixed;
@@ -1797,31 +1876,298 @@ button {
   }
   /* 번호 */
   .admin-table2 th:nth-child(1),
-  .admin-table2 td:nth-child(1) {
-    width: 10% !important;
-  }
-  .td-id,
-  .td-title,
-  .td-date,
-  .td-action {
-    text-align: center;
-  }
-  /* 제목 */
+  .admin-table2 td:nth-child(1) { width: 7% !important; }
+  /* 유형 */
   .admin-table2 th:nth-child(2),
-  .admin-table2 td:nth-child(2) {
-    width: 40% !important;
-  }
-  /* 작성일*/
+  .admin-table2 td:nth-child(2) { width: 14% !important; }
+  /* 제목 */
   .admin-table2 th:nth-child(3),
-  .admin-table2 td:nth-child(3) {
-    width: 30% !important;
-  }
-  /* 관리 */
+  .admin-table2 td:nth-child(3) { width: 30% !important; }
+  /* 작성자 */
   .admin-table2 th:nth-child(4),
-  .admin-table2 td:nth-child(4) {
-    width: 20% !important;
-  }
+  .admin-table2 td:nth-child(4) { width: 20% !important; }
+  /* 작성일 */
+  .admin-table2 th:nth-child(5),
+  .admin-table2 td:nth-child(5) { width: 13% !important; }
+  /* 관리 */
+  .admin-table2 th:nth-child(6),
+  .admin-table2 td:nth-child(6) { width: 16% !important; }
   .td-action {
     justify-items: center;
+  }
+}
+
+/* =====================================================
+   기본 시간표 관리 (TimetableManager)
+===================================================== */
+.tt-admin-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.tt-admin-selector-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tt-admin-selector-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #64748b;
+  margin-right: 4px;
+}
+
+.tt-admin-cls-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tt-admin-cls-btn:hover {
+  border-color: #6366f1;
+  color: #6366f1;
+}
+
+.tt-admin-cls-btn.active {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: #fff;
+}
+
+.tt-admin-table-wrapper {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 16px;
+}
+
+.tt-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 480px;
+}
+
+.tt-admin-table thead tr {
+  background: #f1f5f9;
+}
+
+.tt-admin-period-header,
+.tt-admin-day-header {
+  padding: 10px 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #475569;
+  text-align: center;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.tt-admin-period-header {
+  width: 68px;
+  color: #94a3b8;
+}
+
+.tt-admin-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.tt-admin-table tbody tr.even {
+  background: #fafbfc;
+}
+
+.tt-admin-period-cell {
+  padding: 8px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-align: center;
+  border-right: 1px solid #f1f5f9;
+  white-space: nowrap;
+}
+
+.tt-admin-subject-cell {
+  padding: 5px 6px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tt-admin-input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: #334155;
+  background: #fff;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+
+.tt-admin-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.tt-admin-input::placeholder {
+  color: #cbd5e1;
+  font-weight: 400;
+}
+
+.tt-admin-msg {
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-top: 12px;
+}
+
+.tt-admin-msg.success {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.tt-admin-msg.error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.tt-admin-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.tt-admin-btn-clear {
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tt-admin-btn-clear:hover:not(:disabled) {
+  border-color: #f87171;
+  color: #dc2626;
+  background: #fff5f5;
+}
+
+.tt-admin-btn-clear:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tt-admin-btn-save {
+  padding: 10px 28px;
+  font-size: 0.9rem;
+}
+
+/* 수정된 칸 입력 강조 */
+.tt-admin-input.dirty {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+/* 과목 드롭다운 */
+.tt-admin-select {
+  width: 100%;
+  padding: 6px 4px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+  background: #fff;
+  text-align: center;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%2394a3b8' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  padding-right: 20px;
+}
+
+.tt-admin-select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.tt-admin-select.dirty {
+  border-color: #f59e0b;
+  background-color: #fffbeb;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23f59e0b' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+}
+
+/* 변경 이력 테이블 */
+.tt-log-table td,
+.tt-log-table th {
+  font-size: 0.82rem;
+  padding: 8px 10px;
+  white-space: nowrap;
+}
+
+.tt-log-date {
+  color: #64748b;
+  font-size: 0.78rem !important;
+}
+
+.tt-log-before {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.tt-log-after {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.tt-log-admin {
+  font-weight: 700;
+  color: #4f46e5;
+}
+
+@media (max-width: 600px) {
+  .tt-admin-selector {
+    gap: 10px;
+  }
+
+  .tt-admin-input {
+    padding: 6px 4px;
+    font-size: 0.75rem;
+  }
+
+  .tt-admin-period-header {
+    width: 50px;
   }
 }

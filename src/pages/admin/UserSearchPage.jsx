@@ -15,7 +15,7 @@ export default function UserSearchPage() {
   const [roleLoading, setRoleLoading] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL;
-  const token = localStorage.getItem("accessToken");
+  const token = sessionStorage.getItem("accessToken");
 
   // 검색 로직
   const handleSearch = async () => {
@@ -46,7 +46,7 @@ export default function UserSearchPage() {
     setShowRoleModal(true);
   };
 
-  // Role 변경 API 호출
+  // Role 변경 API 호출 — PATCH /admin/users/{email}/role
   const handleRoleChange = async () => {
     if (!selectedUser || !selectedRole) {
       alert("역할을 선택해주세요.");
@@ -55,53 +55,62 @@ export default function UserSearchPage() {
 
     setRoleLoading(true);
     try {
-      await axios.put(
-        `${API_URL}/admin/users/${selectedUser.email}/role`,
+      await axios.patch(
+        `${API_URL}/admin/users/${encodeURIComponent(selectedUser.email)}/role`,
         { role: selectedRole },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      alert(`${selectedUser.userName}님의 권한이 ${selectedRole.replace('ROLE_', '')}(으)로 변경되었습니다.`);
-      
-      // 변경된 정보 반영
+      const roleName = selectedRole.replace("ROLE_", "");
+      alert(`${selectedUser.userName}님의 권한이 ${roleName}(으)로 변경되었습니다.`);
+
       setSelectedUser({ ...selectedUser, role: selectedRole });
-      setUsers(users.map(u => 
+      setUsers(users.map(u =>
         u.email === selectedUser.email ? { ...u, role: selectedRole } : u
       ));
-      
       setShowRoleModal(false);
     } catch (err) {
       console.error("권한 변경 실패:", err);
-      alert(err.response?.data?.message || "권한 변경에 실패했습니다.");
+      const status = err.response?.status;
+      if (status === 403) alert("권한이 없습니다.");
+      else alert(err.response?.data || "권한 변경에 실패했습니다.");
     } finally {
       setRoleLoading(false);
     }
   };
 
-  // 사용자 차단/해제
+  // 사용자 차단/해제 — PATCH /admin/users/{email}/ban?status=&reason=&min=
   const handleBanToggle = async () => {
     if (!selectedUser) return;
-    
-    const action = selectedUser.banned ? "해제" : "차단";
-    if (!confirm(`${selectedUser.userName}님을 ${action}하시겠습니까?`)) return;
+
+    const isBanning = !selectedUser.banned;
+    const action = isBanning ? "차단" : "해제";
+    if (!window.confirm(`${selectedUser.userName}님을 ${action}하시겠습니까?`)) return;
 
     try {
-      await axios.put(
-        `${API_URL}/admin/users/${selectedUser.email}/ban`,
-        { banned: !selectedUser.banned },
-        { headers: { Authorization: `Bearer ${token}` } }
+      await axios.patch(
+        `${API_URL}/admin/users/${encodeURIComponent(selectedUser.email)}/ban`,
+        null,
+        {
+          params: {
+            status: isBanning,
+            reason: isBanning ? "관리자 조치" : "",
+            min: isBanning ? 1440 : null,
+          },
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
       alert(`${selectedUser.userName}님이 ${action}되었습니다.`);
-      
-      // 변경된 정보 반영
-      setSelectedUser({ ...selectedUser, banned: !selectedUser.banned });
-      setUsers(users.map(u => 
-        u.email === selectedUser.email ? { ...u, banned: !selectedUser.banned } : u
+      setSelectedUser({ ...selectedUser, banned: isBanning });
+      setUsers(users.map(u =>
+        u.email === selectedUser.email ? { ...u, banned: isBanning } : u
       ));
     } catch (err) {
       console.error("차단 처리 실패:", err);
-      alert("차단 처리에 실패했습니다.");
+      const status = err.response?.status;
+      if (status === 403) alert("권한이 없습니다.");
+      else alert("차단 처리에 실패했습니다.");
     }
   };
 
@@ -169,8 +178,9 @@ export default function UserSearchPage() {
                   </td>
                   <td className="table-status">
                     <span className={`role-badge ${
-                      u.role === 'ROLE_ADMIN' ? 'admin' : 
-                      u.role === 'ROLE_MODERATOR' ? 'moderator' : 'user'
+                      u.role === 'ROLE_ADMIN' ? 'admin' :
+                      u.role === 'ROLE_MODERATOR' ? 'moderator' :
+                      u.role === 'ROLE_TEACHER' ? 'teacher' : 'user'
                     }`}>
                       {u.role?.replace('ROLE_', '') || 'USER'}
                     </span>
@@ -207,8 +217,9 @@ export default function UserSearchPage() {
               
               {/* 현재 권한 표시 */}
               <span className={`role-badge profile-role-badge ${
-                selectedUser.role === 'ROLE_ADMIN' ? 'admin' : 
-                selectedUser.role === 'ROLE_MODERATOR' ? 'moderator' : 'user'
+                selectedUser.role === 'ROLE_ADMIN' ? 'admin' :
+                selectedUser.role === 'ROLE_MODERATOR' ? 'moderator' :
+                selectedUser.role === 'ROLE_TEACHER' ? 'teacher' : 'user'
               }`}>
                 {selectedUser.role?.replace('ROLE_', '') || 'USER'}
               </span>
@@ -275,6 +286,7 @@ export default function UserSearchPage() {
               >
                 <option value="ROLE_USER">일반 사용자 (USER)</option>
                 <option value="ROLE_MODERATOR">운영자 (MODERATOR)</option>
+                <option value="ROLE_TEACHER">교사 (TEACHER)</option>
                 <option value="ROLE_ADMIN">관리자 (ADMIN)</option>
               </select>
             </div>

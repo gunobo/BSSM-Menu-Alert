@@ -29,7 +29,7 @@ export default function CommentModal({ mealKey, mealType, mealDate, onClose }) {
     if (!comment.trim()) return alert("내용을 입력해주세요!");
     setLoading(true);
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = sessionStorage.getItem("accessToken");
       await axios.post(
         `${API_BASE_URL}/comments`,
         { mealDate, mealType, mealKey, content: comment },

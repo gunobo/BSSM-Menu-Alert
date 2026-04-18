@@ -187,7 +187,7 @@ export default function MyPage() {
     });
     
     // 로컬 스토리지 즉시 정리
-    localStorage.removeItem("accessToken");
+    sessionStorage.removeItem("accessToken");
     localStorage.removeItem("fcmToken");
     window.dispatchEvent(new Event("authChange"));
     

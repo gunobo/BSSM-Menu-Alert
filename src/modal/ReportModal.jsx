@@ -9,7 +9,7 @@ export default function ReportModal({ target, onClose }) {
 
   const handleSubmit = async () => {
     // ✅ 이 줄을 추가해서 토큰을 가져와야 합니다!
-    const token = localStorage.getItem("token") || localStorage.getItem("accessToken");
+    const token = sessionStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
     console.log("실제 토큰 값:", token);
 
     if (!token) return alert("로그인이 필요합니다.");

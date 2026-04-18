@@ -38,8 +38,9 @@ export default function AdminRoute({ children }) {
 
   // 3. Role이 ROLE_ADMIN이 아닐 때
   // (백엔드 AuthController에서 role을 보내주고 있는지 꼭 확인하세요!)
-  if (user.role !== "ROLE_ADMIN" && user.role !== "ADMIN" && user.role !== "ROLE_MODERATOR" && user.role !== "MODERATOR") {
-    console.log(user)
+  const allowedRoles = ["ROLE_ADMIN", "ADMIN", "ROLE_MODERATOR", "MODERATOR", "ROLE_TEACHER"];
+  if (!allowedRoles.includes(user.role)) {
+    console.log(user);
     alert(`관리자 권한이 없습니다. (현재: ${user.role || '권한없음'})`);
     return <Navigate to="/" replace />;
   }

@@ -9,6 +9,7 @@ import AdminCommentManager from "./admin/AdminCommentManager";
 import PushNotificationManager from "./admin/PushNotificationManager"; 
 import NotificationStats from "./admin/NotificationStats"; 
 import AppFileManager from "./admin/AppFileManager";
+import TimetableManager from "./admin/TimetableManager";
 import "../styles/admin.css";
 
 export default function AdminPage() {
@@ -47,6 +48,7 @@ export default function AdminPage() {
     // ADMIN은 모든 메뉴 접근 가능
     if (userRole === "ROLE_ADMIN" || userRole === "ADMIN") return true;
 
+    // TIMETABLE(시간표 담당)은 MODERATOR 권한 전부 + 시간표 포함 (모더레이터 위)
     // MODERATOR(운영자) 접근 가능 메뉴
     const moderatorMenus = [
       "dashboard",           // 대시보드
@@ -55,14 +57,17 @@ export default function AdminPage() {
       "push-stats",          // 알림 통계
       "announcement-write",  // 공지 작성
       "announcement-manage", // 공지 관리
+      "timetable",           // 기본 시간표 관리
     ];
+
+    if (userRole === "ROLE_TEACHER") return moderatorMenus.includes(menu);
 
     return moderatorMenus.includes(menu);
   };
 
   // ✅ 권한별 메뉴 표시 여부 (사이드바 노출 제어)
   const isAdmin = userRole === "ROLE_ADMIN" || userRole === "ADMIN";
-  const canSeeUserMenu = isAdmin; 
+  const canSeeUserMenu = isAdmin;
   const canSeeAppMenu = isAdmin;
 
   const handleMenuClick = (menu) => {
@@ -90,6 +95,7 @@ export default function AdminPage() {
       "ADMIN": { text: "관리자", color: "#e67700" },
       "ROLE_MODERATOR": { text: "운영자", color: "#4c6ef5" },
       "MODERATOR": { text: "운영자", color: "#4c6ef5" },
+      "ROLE_TEACHER": { text: "시간표 담당교사", color: "#2f9e44" },
       "ROLE_USER": { text: "일반", color: "#868e96" }
     };
     
@@ -127,13 +133,13 @@ export default function AdminPage() {
           </div>
         </div>
         <nav className="sidebar-nav">
-          <button 
-            className={activeMenu === "dashboard" ? "active" : ""} 
+          <button
+            className={activeMenu === "dashboard" ? "active" : ""}
             onClick={() => handleMenuClick("dashboard")}
           >
             📊 대시보드
           </button>
-          
+
           {/* 유저 관리 - 관리자만 노출 */}
           {canSeeUserMenu && (
             <div className={`menu-group ${isUserMenuOpen ? "open" : ""}`}>
@@ -163,8 +169,8 @@ export default function AdminPage() {
             </div>
           )}
 
-          <button 
-            className={activeMenu === "comments" ? "active" : ""} 
+          <button
+            className={activeMenu === "comments" ? "active" : ""}
             onClick={() => handleMenuClick("comments")}
           >
             💬 댓글 관리
@@ -172,7 +178,7 @@ export default function AdminPage() {
 
           {/* 🔔 푸시 알림 */}
           <div className={`menu-group ${isPushMenuOpen ? "open" : ""}`}>
-            <button 
+            <button
               className={`group-title ${activeMenu.includes("push") || activeMenu.includes("stats") ? "active" : ""}`}
               onClick={() => setIsPushMenuOpen(!isPushMenuOpen)}
             >
@@ -180,14 +186,14 @@ export default function AdminPage() {
             </button>
             {isPushMenuOpen && (
               <div className="sub-menu-list">
-                <button 
-                  className={activeMenu === "push-notis" ? "active" : ""} 
+                <button
+                  className={activeMenu === "push-notis" ? "active" : ""}
                   onClick={() => handleMenuClick("push-notis")}
                 >
                   └ 알림 전송
                 </button>
-                <button 
-                  className={activeMenu === "push-stats" ? "active" : ""} 
+                <button
+                  className={activeMenu === "push-stats" ? "active" : ""}
                   onClick={() => handleMenuClick("push-stats")}
                 >
                   └ 알림 통계/내역
@@ -198,7 +204,7 @@ export default function AdminPage() {
 
           {/* 📢 공지 관리 */}
           <div className={`menu-group ${isNoticeOpen ? "open" : ""}`}>
-            <button 
+            <button
               className={`group-title ${activeMenu.includes("announcement") ? "active" : ""}`}
               onClick={() => setIsNoticeOpen(!isNoticeOpen)}
             >
@@ -206,14 +212,14 @@ export default function AdminPage() {
             </button>
             {isNoticeOpen && (
               <div className="sub-menu-list">
-                <button 
-                  className={activeMenu === "announcement-write" ? "active" : ""} 
+                <button
+                  className={activeMenu === "announcement-write" ? "active" : ""}
                   onClick={() => handleMenuClick("announcement-write")}
                 >
                   └ {selectedNotice ? "공지 수정" : "공지 게시"}
                 </button>
-                <button 
-                  className={activeMenu === "announcement-manage" ? "active" : ""} 
+                <button
+                  className={activeMenu === "announcement-manage" ? "active" : ""}
                   onClick={() => handleMenuClick("announcement-manage")}
                 >
                   └ 공지글 관리
@@ -221,6 +227,14 @@ export default function AdminPage() {
               </div>
             )}
           </div>
+
+          {/* 📅 시간표 관리 */}
+          <button
+            className={activeMenu === "timetable" ? "active" : ""}
+            onClick={() => handleMenuClick("timetable")}
+          >
+            📅 기본 시간표 관리
+          </button>
 
           {/* 📱 앱 관리 - 관리자만 노출 */}
           {canSeeAppMenu && (
@@ -258,6 +272,7 @@ export default function AdminPage() {
               activeMenu === "push-notis" ? "푸시 알림 전송" :
               activeMenu === "push-stats" ? "알림 통계 및 내역" : 
               activeMenu === "app-upload" ? "앱 설치 파일 관리" :
+              activeMenu === "timetable" ? "기본 시간표 관리" :
               activeMenu === "announcement-write" ? (selectedNotice ? "공지사항 수정" : "공지사항 등록") : "공지사항 관리"
             }</h1>
             <p>BSSM 급식알리미 서비스 통합 관리 시스템</p>
@@ -274,6 +289,7 @@ export default function AdminPage() {
                 {activeMenu === "push-notis" && <PushNotificationManager />}
                 {activeMenu === "push-stats" && <NotificationStats />}
                 {activeMenu === "app-upload" && <AppFileManager />}
+                {activeMenu === "timetable" && <TimetableManager />}
                 {activeMenu === "announcement-write" && (
                   <AnnouncementEditor 
                     editData={selectedNotice} 

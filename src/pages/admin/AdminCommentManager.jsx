@@ -16,7 +16,7 @@ export default function AdminCommentManager() {
   const fetchComments = async (pageNum = 0) => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = sessionStorage.getItem("accessToken");
       const formattedDate = filterDate ? filterDate.replace(/-/g, "") : "";
 
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/comments/admin/all`, {
@@ -49,7 +49,7 @@ export default function AdminCommentManager() {
   const handleDelete = async (id) => {
     if (!window.confirm("이 댓글을 삭제하시겠습니까? 복구할 수 없습니다.")) return;
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = sessionStorage.getItem("accessToken");
       await axios.delete(`${import.meta.env.VITE_API_URL}/comments/admin/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });

@@ -13,17 +13,17 @@ const API_BASE_URL = getBaseUrl();
 
 export const saveToken = (token) => {
   if (token) {
-    localStorage.setItem("accessToken", token);
+    sessionStorage.setItem("accessToken", token);
     window.dispatchEvent(new Event("authChange"));
   }
 };
 
 export const getToken = () => {
-  return localStorage.getItem("accessToken");
+  return sessionStorage.getItem("accessToken");
 };
 
 export const logout = async (token) => {
-  localStorage.removeItem("accessToken");
+  sessionStorage.removeItem("accessToken");
   window.dispatchEvent(new Event("authChange"));
   const response = await axios.post('/user/logout-device', { token });
   window.location.href = "/";

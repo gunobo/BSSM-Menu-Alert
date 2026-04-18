@@ -126,6 +126,50 @@ export function getWeekRange(baseDate = new Date()) {
 }
 
 /* =====================
+   학년 전체 과목 목록 수집
+   - localStorage에 오늘 날짜 기준으로 캐싱 (당일 재호출 시 즉시 반환)
+   - 캐시 없을 때만 NEIS 1~4반 병렬 조회
+===================== */
+export async function getGradeSubjects(grade) {
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const cacheKey = `neis_subjects_${grade}_${today}`;
+
+  // 캐시 확인
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    try {
+      return JSON.parse(cached);
+    } catch {
+      // 파싱 실패 시 무시하고 재조회
+    }
+  }
+
+  const { start, end } = getWeekRange();
+
+  // 1반만 조회 (같은 학년은 과목 동일, 4번→1번 호출로 속도 개선)
+  const data = await getWeekTimetable(grade, 1, start, end);
+
+  const subjects = new Set();
+  Object.values(data).forEach((periods) => {
+    periods.forEach((slot) => {
+      if (slot.subject?.trim()) subjects.add(slot.subject.trim());
+    });
+  });
+
+  const sorted = [...subjects].sort((a, b) => a.localeCompare(b, "ko"));
+
+  // 오늘 하루 캐싱 (어제 캐시 자동 무효화)
+  localStorage.setItem(cacheKey, JSON.stringify(sorted));
+
+  // 이전 날짜 캐시 정리
+  Object.keys(localStorage)
+    .filter((k) => k.startsWith(`neis_subjects_${grade}_`) && k !== cacheKey)
+    .forEach((k) => localStorage.removeItem(k));
+
+  return sorted;
+}
+
+/* =====================
    주간 시간표 가져오기
 ===================== */
 export async function getWeekTimetable(grade, classNum, startDate, endDate) {

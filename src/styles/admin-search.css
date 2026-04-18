@@ -227,6 +227,11 @@
   color: #1971c2;
 }
 
+.role-badge.teacher {
+  background: #ebfbee;
+  color: #2f9e44;
+}
+
 .role-badge.user {
   background: #f1f3f5;
   color: #495057;

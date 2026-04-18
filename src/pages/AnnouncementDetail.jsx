@@ -72,10 +72,14 @@ export default function AnnouncementDetail() {
               {/* ✅ 이미지 노출 로직 추가 (이미지가 있을 경우) */}
               {notice.imageUrl && (
                 <div className="detail-image" style={{ textAlign: 'center', marginBottom: '20px' }}>
-                  <img 
-                    src={`http://localhost:8080${notice.imageUrl}`} 
-                    alt="공지 이미지" 
-                    style={{ maxWidth: '100%', borderRadius: '8px' }} 
+                  <img
+                    src={
+                      notice.imageUrl.startsWith("http")
+                        ? notice.imageUrl
+                        : `${API_BASE_URL.replace(/\/api$/, "")}${notice.imageUrl}`
+                    }
+                    alt="공지 이미지"
+                    style={{ maxWidth: '100%', borderRadius: '8px' }}
                   />
                 </div>
               )}

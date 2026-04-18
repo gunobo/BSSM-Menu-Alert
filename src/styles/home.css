@@ -364,6 +364,45 @@ button {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
   margin: 0 200px;
   width: auto;
+  gap: 16px;
+}
+
+.rank-num {
+  font-size: 1.6rem;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rank-num-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  color: #475569;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.rank-info {
+  flex: 1;
+}
+
+.rank-name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.rank-count {
+  font-size: 0.95rem;
+  color: #64748b;
+  white-space: nowrap;
 }
 .ranking-list .status-msg {
   text-align: center;
@@ -849,6 +888,119 @@ button {
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
+.tt-subject-chip.changed {
+  background: #fff8c5;
+  border: 1.5px solid #f5c518;
+  color: #7a5800;
+}
+
+.tt-subject-chip.changed:hover {
+  box-shadow: 0 3px 8px rgba(245, 197, 24, 0.3);
+}
+
+/* 변경 칩 — 툴팁 컨테이너 */
+.tt-subject-chip.changed {
+  position: relative;
+}
+
+.tt-change-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: #f1f5f9;
+  border-radius: 8px;
+  padding: 6px 10px;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+  z-index: 100;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.tt-change-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #1e293b;
+}
+
+.tt-change-teacher {
+  display: block;
+  font-weight: 700;
+  color: #fde68a;
+}
+
+.tt-change-diff {
+  display: block;
+  color: #94a3b8;
+  font-size: 0.68rem;
+}
+
+.tt-subject-chip.changed:hover .tt-change-tooltip {
+  display: block;
+}
+
+/* 기본 시간표만 있는 칸 (NEIS 데이터 없음) */
+.tt-subject-chip.base-only {
+  background: #f1f5f9;
+  border: 1.5px dashed #94a3b8;
+  color: #64748b;
+}
+
+/* 변경 배지 */
+.tt-changed-badge {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: #f5c518;
+  color: #7a5800;
+  font-size: 0.62rem;
+  font-weight: 700;
+  vertical-align: middle;
+  line-height: 1.4;
+}
+
+/* 모바일 슬롯 변경 강조 */
+.tt-mobile-slot.changed {
+  background: #fffbeb;
+  border-left: 3px solid #f5c518;
+}
+
+/* 서버 연결 불가 알림 */
+.tt-server-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* 모바일 변경 교사 표시 */
+.tt-mobile-change-teacher {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #92400e;
+  margin-top: 2px;
+  opacity: 0.85;
+}
+
 .tt-empty {
   color: #ddd;
   font-size: 0.85rem;
@@ -1167,6 +1319,12 @@ button {
     font-size: 0.75rem;
     font-weight: 700;
     line-height: 1.2;
+  }
+
+  .tt-mobile-subject.changed {
+    background: #fff8c5;
+    border: 1.5px solid #f5c518;
+    color: #7a5800;
   }
 
   .tt-no-class {

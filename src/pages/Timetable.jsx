@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import bssmLogo from "../assets/bssmlogo.png";
 import { isLoggedIn, getUser } from "../api/auth";
 import { getWeekTimetable } from "../api/NeisApi";
+import { getPublicBaseTimetable } from "../api/timetableApi";
 import Footer from "./footer";
 import "../styles/home.css";
 
@@ -11,13 +12,11 @@ const MAX_CLASSES = 4;
 const DAY_NAMES = ["월", "화", "수", "목", "금"];
 const CAL_DAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
-// 날짜 → YYYYMMDD 문자열
 function toYMD(date) {
   const offset = date.getTimezoneOffset() * 60000;
   return new Date(date.getTime() - offset).toISOString().slice(0, 10).replace(/-/g, "");
 }
 
-// Date → 해당 주 월~금 배열 (YYYYMMDD)
 function getWeekDays(date) {
   const d = new Date(date);
   const day = d.getDay();
@@ -31,40 +30,35 @@ function getWeekDays(date) {
   });
 }
 
-// YYYYMMDD → Date
-function ymdToDate(ymd) {
-  return new Date(`${ymd.slice(0,4)}-${ymd.slice(4,6)}-${ymd.slice(6,8)}`);
-}
-
 export default function Timetable() {
   const navigate = useNavigate();
   const [isAuth, setIsAuth] = useState(isLoggedIn());
   const [user, setUser] = useState(null);
 
-  const [grade, setGrade] = useState(1);
-  const [classNum, setClassNum] = useState(1);
+  const [grade, setGrade] = useState(() => {
+    const saved = localStorage.getItem("tt_grade");
+    return saved ? Number(saved) : 1;
+  });
+  const [classNum, setClassNum] = useState(() => {
+    const saved = localStorage.getItem("tt_class");
+    return saved ? Number(saved) : 1;
+  });
 
   const [timetable, setTimetable] = useState({});
+  const [baseTimetable, setBaseTimetable] = useState(null); // subjects[periodIdx][dayIdx]
   const [loading, setLoading] = useState(false);
 
-  // 선택된 주의 기준 날짜 (Date 객체)
   const [selectedDate, setSelectedDate] = useState(() => new Date());
-
-  // 달력 팝업 상태
   const [showCalendar, setShowCalendar] = useState(false);
   const [calYear, setCalYear] = useState(() => new Date().getFullYear());
-  const [calMonth, setCalMonth] = useState(() => new Date().getMonth()); // 0-based
+  const [calMonth, setCalMonth] = useState(() => new Date().getMonth());
   const calRef = useRef(null);
 
-  // 오늘 (YYYYMMDD)
   const todayStr = useMemo(() => toYMD(new Date()), []);
-
-  // 선택된 주의 월~금 날짜 배열
   const weekDays = useMemo(() => getWeekDays(selectedDate), [selectedDate]);
   const weekStart = weekDays[0];
   const weekEnd = weekDays[4];
 
-  // 주간 표시 텍스트
   const weekLabel = useMemo(() => {
     const s = weekStart;
     const e = weekEnd;
@@ -82,28 +76,21 @@ export default function Timetable() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 인증 체크 + 학반 초기화 (localStorage 우선, 없으면 유저 프로필 사용)
+  // 인증 체크 + 학반 초기화
   useEffect(() => {
     const check = async () => {
-      const token = localStorage.getItem("accessToken");
+      const token = sessionStorage.getItem("accessToken");
       setIsAuth(!!token);
       if (token) {
         const u = await getUser();
         setUser(u);
         const savedGrade = localStorage.getItem("tt_grade");
         const savedClass = localStorage.getItem("tt_class");
-        if (savedGrade) {
-          setGrade(Number(savedGrade));
-        } else if (u?.class) {
-          setGrade(Number(u.class));
-        }
-        if (savedClass) {
-          setClassNum(Number(savedClass));
-        } else if (u?.classnum) {
-          setClassNum(Number(u.classnum));
-        }
+        if (savedGrade) setGrade(Number(savedGrade));
+        else if (u?.class) setGrade(Number(u.class));
+        if (savedClass) setClassNum(Number(savedClass));
+        else if (u?.classnum) setClassNum(Number(u.classnum));
       } else {
-        // 비로그인: localStorage만 복원
         const savedGrade = localStorage.getItem("tt_grade");
         const savedClass = localStorage.getItem("tt_class");
         if (savedGrade) setGrade(Number(savedGrade));
@@ -115,13 +102,19 @@ export default function Timetable() {
     return () => window.removeEventListener("authChange", check);
   }, []);
 
-  // 시간표 불러오기
+  // 기본 시간표 불러오기 (학년/반 바뀔 때)
+  useEffect(() => {
+    setBaseTimetable(null);
+    getPublicBaseTimetable(grade, classNum).then(setBaseTimetable);
+  }, [grade, classNum]);
+
+  // NEIS에서 시간표 불러오기
   const fetchTimetable = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getWeekTimetable(grade, classNum, weekStart, weekEnd);
       setTimetable(data);
-    } catch (e) {
+    } catch {
       setTimetable({});
     } finally {
       setLoading(false);
@@ -132,19 +125,22 @@ export default function Timetable() {
     fetchTimetable();
   }, [fetchTimetable]);
 
+  // 기본 시간표에서 특정 칸 과목 가져오기
+  const getBaseSubject = useCallback((periodIdx, dayIdx) => {
+    return baseTimetable?.[periodIdx]?.[dayIdx] ?? "";
+  }, [baseTimetable]);
+
   const handleGradeChange = (g) => { setGrade(g); localStorage.setItem("tt_grade", g); };
   const handleClassChange = (c) => { setClassNum(c); localStorage.setItem("tt_class", c); };
 
-  // 최대 교시 수
   const maxPeriods = useMemo(() => {
     let max = 7;
     Object.values(timetable).forEach((p) => { if (p.length > max) max = p.length; });
     return max;
   }, [timetable]);
 
-  // 달력 날짜 목록 생성
   const calDates = useMemo(() => {
-    const firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=일
+    const firstDay = new Date(calYear, calMonth, 1).getDay();
     const lastDate = new Date(calYear, calMonth + 1, 0).getDate();
     const cells = [];
     for (let i = 0; i < firstDay; i++) cells.push(null);
@@ -152,11 +148,9 @@ export default function Timetable() {
     return cells;
   }, [calYear, calMonth]);
 
-  // 날짜가 선택된 주에 속하는지 확인
   const isInSelectedWeek = (date) => {
     if (!date) return false;
-    const ymd = toYMD(date);
-    return weekDays.includes(ymd);
+    return weekDays.includes(toYMD(date));
   };
 
   const isToday = (date) => date && toYMD(date) === todayStr;
@@ -167,11 +161,9 @@ export default function Timetable() {
     setShowCalendar(false);
   };
 
-  // 학반 팝업 상태
   const [showClassPopup, setShowClassPopup] = useState(false);
   const classPopupRef = useRef(null);
 
-  // 학반 팝업 외부 클릭 닫기
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (classPopupRef.current && !classPopupRef.current.contains(e.target)) {
@@ -219,24 +211,20 @@ export default function Timetable() {
       </section>
 
       <main className="container tt-container">
-        {/* 학반 선택 팝업 */}
+        {/* 학반 선택 */}
         <div className="tt-setting">
           <div className="tt-controls" ref={classPopupRef}>
             <span className="tt-week-label">{grade}학년 {classNum}반</span>
             <button className="tt-cal-trigger" onClick={() => setShowClassPopup((v) => !v)}>
               🏫 학반 선택
             </button>
-
             {showClassPopup && (
               <div className="tt-cal-popup tt-class-popup">
                 <div className="tt-class-popup-title">학년 선택</div>
                 <div className="tt-class-grid">
                   {GRADES.map((g) => (
-                    <button
-                      key={g}
-                      className={`tt-class-cell ${grade === g ? "active" : ""}`}
-                      onClick={() => { handleGradeChange(g); }}
-                    >
+                    <button key={g} className={`tt-class-cell ${grade === g ? "active" : ""}`}
+                      onClick={() => handleGradeChange(g)}>
                       {g}학년
                     </button>
                   ))}
@@ -244,11 +232,8 @@ export default function Timetable() {
                 <div className="tt-class-popup-title" style={{ marginTop: "0.75rem" }}>반 선택</div>
                 <div className="tt-class-grid">
                   {Array.from({ length: MAX_CLASSES }, (_, i) => i + 1).map((c) => (
-                    <button
-                      key={c}
-                      className={`tt-class-cell ${classNum === c ? "active" : ""}`}
-                      onClick={() => { handleClassChange(c); setShowClassPopup(false); }}
-                    >
+                    <button key={c} className={`tt-class-cell ${classNum === c ? "active" : ""}`}
+                      onClick={() => { handleClassChange(c); setShowClassPopup(false); }}>
                       {c}반
                     </button>
                   ))}
@@ -257,7 +242,7 @@ export default function Timetable() {
             )}
           </div>
 
-          {/* 주 선택 (달력 팝업) */}
+          {/* 주 선택 */}
           <div className="tt-week-nav" ref={calRef}>
             <span className="tt-week-label">{weekLabel}</span>
             <button className="tt-cal-trigger" onClick={() => {
@@ -267,10 +252,8 @@ export default function Timetable() {
             }}>
               📅 주 선택
             </button>
-
             {showCalendar && (
               <div className="tt-cal-popup">
-                {/* 달 이동 */}
                 <div className="tt-cal-header">
                   <button className="tt-cal-nav" onClick={() => {
                     if (calMonth === 0) { setCalYear(y => y - 1); setCalMonth(11); }
@@ -282,8 +265,6 @@ export default function Timetable() {
                     else setCalMonth(m => m + 1);
                   }}>▶</button>
                 </div>
-
-                {/* 요일 헤더 */}
                 <div className="tt-cal-grid">
                   {CAL_DAYS.map((d) => (
                     <div key={d} className="tt-cal-day-name">{d}</div>
@@ -307,7 +288,6 @@ export default function Timetable() {
             )}
           </div>
         </div>
-        
 
         {/* 시간표 테이블 */}
         <div className="tt-card">
@@ -335,16 +315,33 @@ export default function Timetable() {
                   {Array.from({ length: maxPeriods }, (_, periodIdx) => (
                     <tr key={periodIdx} className={`tt-row ${(periodIdx + 1) % 2 === 0 ? "even" : ""}`}>
                       <td className="tt-period-cell">{periodIdx + 1}교시</td>
-                      {weekDays.map((day) => {
+                      {weekDays.map((day, dayIdx) => {
                         const isTodayCol = day === todayStr;
                         const periods = timetable[day] || [];
                         const slot = periods.find((p) => p.period === periodIdx + 1);
-                        const subject = slot?.subject || "";
+                        const neisSubject = slot?.subject || "";
+                        const baseSubject = getBaseSubject(periodIdx, dayIdx);
+
+                        // NEIS 데이터 없고 기본 시간표 있으면 기본 시간표로 대체
+                        const displaySubject = neisSubject || baseSubject;
+                        // NEIS 데이터가 있고 기본 시간표와 다르면 변경된 것
+                        const isChanged = neisSubject && baseSubject && neisSubject !== baseSubject;
+                        // NEIS 데이터 없이 기본 시간표만 표시 중
+                        const isBaseOnly = !neisSubject && !!baseSubject;
+
                         return (
                           <td key={day} className={`tt-subject-cell ${isTodayCol ? "today-col" : ""}`}>
-                            {subject
-                              ? <div className="tt-subject-chip">{subject}</div>
-                              : <span className="tt-empty">-</span>}
+                            {displaySubject ? (
+                              <div
+                                className={`tt-subject-chip ${isChanged ? "changed" : ""} ${isBaseOnly ? "base-only" : ""}`}
+                                title={isChanged ? `기준: ${baseSubject}` : isBaseOnly ? "기본 시간표" : ""}
+                              >
+                                {displaySubject}
+                                {isChanged && <span className="tt-changed-badge">변경</span>}
+                              </div>
+                            ) : (
+                              <span className="tt-empty">-</span>
+                            )}
                           </td>
                         );
                       })}
@@ -358,24 +355,39 @@ export default function Timetable() {
 
         {/* 모바일: 일별 카드 뷰 */}
         <div className="tt-mobile-view">
-          {weekDays.map((day, i) => {
+          {weekDays.map((day, dayIdx) => {
             const isTodayCol = day === todayStr;
-            const periods = timetable[day] || [];
+            const neisPeriods = timetable[day] || [];
+
+            // 기본 시간표로 전체 슬롯 구성 (최대 7교시)
+            const allPeriods = Array.from({ length: maxPeriods }, (_, pi) => {
+              const neisSlot = neisPeriods.find((p) => p.period === pi + 1);
+              const neisSubject = neisSlot?.subject || "";
+              const baseSubject = getBaseSubject(pi, dayIdx);
+              const displaySubject = neisSubject || baseSubject;
+              const isChanged = neisSubject && baseSubject && neisSubject !== baseSubject;
+              const isBaseOnly = !neisSubject && !!baseSubject;
+              return { period: pi + 1, displaySubject, isChanged, isBaseOnly };
+            }).filter((s) => s.displaySubject);
+
             return (
               <div key={day} className={`tt-mobile-day-card ${isTodayCol ? "today" : ""}`}>
                 <div className="tt-mobile-day-header">
-                  <span className="tt-mobile-day-name">{DAY_NAMES[i]}</span>
+                  <span className="tt-mobile-day-name">{DAY_NAMES[dayIdx]}</span>
                   <span className="tt-mobile-day-date">{parseInt(day.slice(4,6))}/{parseInt(day.slice(6,8))}</span>
                   {isTodayCol && <span className="tt-today-badge">오늘</span>}
                 </div>
                 <div className="tt-mobile-periods">
                   {loading ? (
                     <p className="status-msg" style={{ fontSize: "0.8rem" }}>로딩 중...</p>
-                  ) : periods.length > 0 ? (
-                    periods.map((slot) => (
-                      <div key={slot.period} className="tt-mobile-slot">
+                  ) : allPeriods.length > 0 ? (
+                    allPeriods.map((slot) => (
+                      <div key={slot.period} className={`tt-mobile-slot ${slot.isChanged ? "changed" : ""}`}>
                         <span className="tt-mobile-period">{slot.period}</span>
-                        <div className="tt-mobile-subject">{slot.subject}</div>
+                        <div className="tt-mobile-subject">
+                          {slot.displaySubject}
+                          {slot.isChanged && <span className="tt-changed-badge">변경</span>}
+                        </div>
                       </div>
                     ))
                   ) : (

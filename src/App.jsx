@@ -117,7 +117,7 @@ export default function App() {
         
         if (token) {
           console.log("✅ 브라우저 FCM 토큰 생성 성공:", token);
-          const jwtToken = localStorage.getItem("accessToken") || localStorage.getItem("token");
+          const jwtToken = sessionStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
 
           if (jwtToken && Base_URL) {
             await axios.post(`${Base_URL}/user/fcm-token`, 

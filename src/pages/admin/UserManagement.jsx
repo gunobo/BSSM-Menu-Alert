@@ -13,7 +13,7 @@ export default function UserManagement() {
   const [banMins, setBanMins] = useState(10);
 
   const API_URL = import.meta.env.VITE_API_URL;
-  const token = localStorage.getItem("accessToken");
+  const token = sessionStorage.getItem("accessToken");
 
   const fetchUsers = async () => {
     setLoading(true);

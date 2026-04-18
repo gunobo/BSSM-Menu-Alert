@@ -89,7 +89,7 @@ export default function Home() {
 
   const fetchMyLikes = useCallback(async (userId) => {
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = sessionStorage.getItem("accessToken");
       if (!token || !userId) return;
       const res = await axios.get(`${API_BASE_URL}/likes/user/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -102,7 +102,7 @@ export default function Home() {
 
   useEffect(() => {
     const checkStatus = async () => {
-      const token = localStorage.getItem("accessToken");
+      const token = sessionStorage.getItem("accessToken");
       const loggedIn = !!token;
       setIsAuth(loggedIn);
 
@@ -174,7 +174,7 @@ export default function Home() {
 
   const handleLike = async (e, mealKey, mealType) => {
     e.stopPropagation();
-    const token = localStorage.getItem("accessToken");
+    const token = sessionStorage.getItem("accessToken");
     const userIdentifier = user?.id || user?.email;
     if (!token || !userIdentifier) {
       alert("로그인 후 이용 가능합니다!");
@@ -438,7 +438,11 @@ export default function Home() {
             {dbRanking.length > 0 ? (
               dbRanking.slice(0, 5).map((item, idx) => (
                 <div key={idx} className="ranking-item">
-                  <div className="rank-num">{idx < 3 ? ["🥇", "🥈", "🥉"][idx] : idx + 1}</div>
+                  <div className="rank-num">
+                    {idx < 3
+                      ? ["🥇", "🥈", "🥉"][idx]
+                      : <span className="rank-num-badge">{idx + 1}</span>}
+                  </div>
                   <div className="rank-info">
                     <span className="rank-name">{formatRankingDate(item.mealDate)} - {item.mealType}</span>
                   </div>

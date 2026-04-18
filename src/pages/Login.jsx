@@ -143,7 +143,6 @@ export default function Login() {
           console.log("✅ 로그인 성공");
           
           saveToken(data.token);
-          localStorage.setItem("userRole", data.role);
           axios.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
           
           // ✅ 로그인 성공 후 FCM 등록 실행 (여기서 대기 시간이 발생함)

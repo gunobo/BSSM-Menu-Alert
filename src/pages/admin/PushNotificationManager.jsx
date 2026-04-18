@@ -24,13 +24,13 @@ export default function PushNotificationManager() {
   const API_BASE_URL = import.meta.env.VITE_API_URL;
 
   const getAuthHeader = () => {
-    const savedToken = localStorage.getItem("accessToken"); 
+    const savedToken = sessionStorage.getItem("accessToken"); 
     if (!savedToken) return null;
     return { Authorization: `Bearer ${savedToken}` };
   };
 
   const decodeAdminToken = () => {
-    const token = localStorage.getItem("accessToken");
+    const token = sessionStorage.getItem("accessToken");
     if (!token) return;
     try {
       const base64Url = token.split('.')[1];

@@ -20,7 +20,7 @@ export default function AppFileManager() {
 
     try {
       // ✅ 로컬 스토리지에서 관리자 토큰 추출
-      const token = localStorage.getItem("accessToken");
+      const token = sessionStorage.getItem("accessToken");
 
       // ✅ 헤더에 Authorization 추가 (Bearer 토큰)
       await axios.post("/api/admin/app/upload", formData, {

@@ -14,7 +14,7 @@ export default function AnnouncementEditor({ editData, onComplete }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const API_BASE_URL = import.meta.env.VITE_API_URL;
-  const token = localStorage.getItem("accessToken");
+  const token = sessionStorage.getItem("accessToken");
 
   // ✅ 수정 모드일 경우 전달받은 데이터로 초기값 설정
   useEffect(() => {
@@ -58,22 +58,19 @@ export default function AnnouncementEditor({ editData, onComplete }) {
     if (file) formData.append("file", file);
 
     try {
+      // Content-Type 직접 설정 금지 — Axios가 multipart/form-data + boundary 자동 설정
+      const authHeader = { Authorization: `Bearer ${token}` };
+
       if (editData) {
         // 💡 수정 모드 (PUT)
         await axios.put(`${API_BASE_URL}/notifications/${editData.id}`, formData, {
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data" 
-          }
+          headers: authHeader,
         });
         alert("✅ 공지사항이 수정되었습니다.");
       } else {
         // 💡 등록 모드 (POST)
         await axios.post(`${API_BASE_URL}/notifications`, formData, {
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data" 
-          }
+          headers: authHeader,
         });
         alert("✅ 공지사항이 등록되었습니다.");
       }

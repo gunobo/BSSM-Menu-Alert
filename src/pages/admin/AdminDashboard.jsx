@@ -30,8 +30,8 @@ export default function AdminDashboard() {
     reportedReviews: [], popularMenus: [], topCommentedMenus: [], dailyStats: []
   });
 
-  // ✅ 앱 다운로드 통계 상태 추가
   const [appStats, setAppStats] = useState([]);
+  const [statsError, setStatsError] = useState(null);
   
   const [selectedReport, setSelectedReport] = useState(null);
   const [processMessage, setProcessMessage] = useState("");
@@ -42,25 +42,34 @@ export default function AdminDashboard() {
   const [isSending, setIsSending] = useState(false);
 
   const API_BASE_URL = import.meta.env.VITE_API_URL;
-  const token = localStorage.getItem("accessToken");
+  const token = sessionStorage.getItem("accessToken");
 
   const fetchStats = async () => {
     if (!token) return;
-    try {
-      // 1. 기존 대시보드 통계 로드
-      const res = await axios.get(`${API_BASE_URL}/admin/stats`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setStats(res.data);
+    setStatsError(null);
+    const headers = { Authorization: `Bearer ${token}` };
 
-      // 2. ✅ 앱 다운로드 통계 로드
-      const appRes = await axios.get(`${API_BASE_URL}/admin/app/stats`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setAppStats(appRes.data);
-    } catch (err) { 
-      console.error("데이터 로드 실패:", err); 
+    // 두 요청을 독립적으로 처리 — 하나 실패해도 나머지 표시
+    const [statsResult, appResult] = await Promise.allSettled([
+      axios.get(`${API_BASE_URL}/admin/stats`,     { headers }),
+      axios.get(`${API_BASE_URL}/admin/app/stats`, { headers }),
+    ]);
+
+    if (statsResult.status === "fulfilled") {
+      setStats(statsResult.value.data);
+    } else {
+      const status = statsResult.reason?.response?.status;
+      setStatsError(
+        status === 403
+          ? "통계 권한 없음 (403) — 관리자에게 ROLE_MODERATOR 이상 권한을 요청하세요."
+          : `통계 로드 실패 (${status ?? "네트워크 오류"})`
+      );
     }
+
+    if (appResult.status === "fulfilled") {
+      setAppStats(appResult.value.data);
+    }
+    // 앱 통계 실패는 조용히 무시 (모더레이터 권한 부족 등)
   };
 
   useEffect(() => { fetchStats(); }, [token]);
@@ -123,16 +132,20 @@ export default function AdminDashboard() {
     if (!notice.title || !notice.content) return alert("내용 입력 필수");
     setIsSending(true);
     const formData = new FormData();
-    formData.append("title", notice.title); 
-    formData.append("content", notice.content); 
-    formData.append("type", "ALARM");
+    formData.append("title", notice.title);
+    formData.append("content", notice.content);
     if (imageFile) formData.append("file", imageFile);
     try {
-      await axios.post(`${API_BASE_URL}/notifications`, formData, {
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" }
+      // /api/admin/notifications → type=ALARM, SSE 실시간 팝업 발송
+      await axios.post(`${API_BASE_URL}/admin/notifications`, formData, {
+        headers: { Authorization: `Bearer ${token}` }, // Content-Type 직접 설정 금지 (Axios가 boundary 자동 설정)
       });
       alert("발송 완료"); setNotice({ title: "", content: "" }); setImageFile(null); setPreviewUrl(null);
-    } catch (err) { alert("발송 실패"); } finally { setIsSending(false); }
+    } catch (err) {
+      const status = err.response?.status;
+      if (status === 403) alert("권한이 없습니다.");
+      else alert("발송 실패: " + (err.response?.data || err.message));
+    } finally { setIsSending(false); }
   };
 
   // ✅ 누적 다운로드 합계 계산
@@ -144,6 +157,13 @@ export default function AdminDashboard() {
         <h1>🛠️ 관리자 컨트롤 타워</h1>
         <p>서비스 현황 및 앱 배포 상태를 실시간으로 확인합니다.</p>
       </header>
+
+      {/* ⚠️ 통계 로드 오류 */}
+      {statsError && (
+        <div className="stats-error-banner">
+          ⚠️ {statsError}
+        </div>
+      )}
 
       {/* 💳 통계 카드 섹션 */}
       <div className="stats-grid">
@@ -219,7 +239,9 @@ export default function AdminDashboard() {
               <ul className="rank-list">
                 {stats.popularMenus?.map((menu, i) => (
                   <li key={i} className="rank-item">
-                    <span className={`rank-badge rank-${i+1}`}>{i+1}</span>
+                    <span className={`rank-badge rank-${i+1}`}>
+                      {i < 3 ? ["🥇", "🥈", "🥉"][i] : i + 1}
+                    </span>
                     {menu.date} {menu.type} (❤️ {menu.votes})
                   </li>
                 ))}

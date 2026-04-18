@@ -26,7 +26,7 @@ export default function DeleteAccount() {
 
   const fetchUserInfo = async () => {
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = sessionStorage.getItem("accessToken");
       const res = await axios.get(`${API_BASE_URL}/user/info`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -53,7 +53,7 @@ export default function DeleteAccount() {
     setIsDeleting(true);
 
     try {
-      const token = localStorage.getItem("accessToken");
+      const token = sessionStorage.getItem("accessToken");
       await axios.delete(`${API_BASE_URL}/user/delete`, {
         headers: { Authorization: `Bearer ${token}` },
       });
