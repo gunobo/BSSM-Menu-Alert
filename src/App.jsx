@@ -24,7 +24,7 @@ import AnnouncementDetail from "./pages/AnnouncementDetail.jsx";
 import NotFound from "./pages/NOTFOUND.jsx";
 import AppDownload from "./pages/AppDownload.jsx";
 import PrivacyPolicy from "./pages/Privacypolicy.jsx";
-import DeleteAccount from "./pages/DeleteAccount.jsx";
+import DeleteAccount from "./pages/Deleteaccount.jsx";
 import TimetablePage from "./pages/Timetable.jsx";
 
 export default function App() {
