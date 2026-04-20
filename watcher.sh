@@ -30,7 +30,7 @@ docker events \
     case "$action" in
       start) send_discord "✅ **[$label]** 서버가 시작되었습니다." ;;
       stop)  send_discord "🔴 **[$label]** 서버가 중지되었습니다." ;;
-      die)   send_discord "💀 **[$label]** 서버가 예기치 않게 종료되었습니다!" ;;
-      kill)  send_discord "⚠️ **[$label]** 서버가 강제 종료되었습니다." ;;
+      die)   send_discord "<@945179735003127851> 💀 **[$label]** 서버가 예기치 않게 종료되었습니다!" ;;
+      kill)  send_discord "<@945179735003127851> ⚠️ **[$label]** 서버가 강제 종료되었습니다." ;;
     esac
   done
