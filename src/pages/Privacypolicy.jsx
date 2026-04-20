@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/privacy.css";
+import "../styles/Privacy.css";
 import bssmLogo from "../assets/bssmlogo.png";
 
 export default function PrivacyPolicy() {
