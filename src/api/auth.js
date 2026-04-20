@@ -11,23 +11,36 @@ const getBaseUrl = () => {
 
 const API_BASE_URL = getBaseUrl();
 
+// ✅ Android WebView는 앱이므로 localStorage, 웹 브라우저는 sessionStorage 사용
+const isAndroidWebView = () => !!(window.Android);
+
 export const saveToken = (token) => {
   if (token) {
-    sessionStorage.setItem("accessToken", token);
+    if (isAndroidWebView()) {
+      localStorage.setItem("accessToken", token);
+    } else {
+      sessionStorage.setItem("accessToken", token);
+    }
     window.dispatchEvent(new Event("authChange"));
   }
 };
 
 export const getToken = () => {
-  return sessionStorage.getItem("accessToken");
+  // 양쪽 모두 확인 (마이그레이션 대응)
+  return sessionStorage.getItem("accessToken") || localStorage.getItem("accessToken") || null;
 };
 
-export const logout = async (token) => {
+export const logout = async (fcmToken) => {
   sessionStorage.removeItem("accessToken");
+  localStorage.removeItem("accessToken");
   window.dispatchEvent(new Event("authChange"));
-  const response = await axios.post('/user/logout-device', { token });
-  window.location.href = "/";
-  return response.data;
+  try {
+    const response = await axios.post('/user/logout-device', { token: fcmToken });
+    window.location.href = "/";
+    return response.data;
+  } catch {
+    window.location.href = "/";
+  }
 };
 
 export const logoutDevice = async (userId) => {

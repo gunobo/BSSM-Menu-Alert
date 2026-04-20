@@ -186,8 +186,9 @@ export default function MyPage() {
       console.error("서버 로그아웃 실패 (무시):", err);
     });
     
-    // 로컬 스토리지 즉시 정리
+    // 토큰 즉시 정리 (sessionStorage + localStorage 모두)
     sessionStorage.removeItem("accessToken");
+    localStorage.removeItem("accessToken");
     localStorage.removeItem("fcmToken");
     window.dispatchEvent(new Event("authChange"));
     
