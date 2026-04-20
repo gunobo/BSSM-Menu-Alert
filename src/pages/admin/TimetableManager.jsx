@@ -13,6 +13,13 @@ const MAX_PERIODS = 7;
 const GRADES = [1, 2, 3];
 const MAX_CLASSES = 4;
 
+// 학년+반 → 과 이름 (2,3학년만 구분)
+function getDepartmentLabel(grade, classNum) {
+  if (grade === 1) return null;
+  if (classNum <= 2) return "소프트웨어개발과";
+  return "임베디드소프트웨어과";
+}
+
 function makeEmpty() {
   return Array.from({ length: MAX_PERIODS }, () => Array(5).fill(""));
 }
@@ -43,15 +50,15 @@ export default function TimetableManager() {
     getUser().then((u) => { if (u?.name) setAdminName(u.name); });
   }, []);
 
-  // 학년 변경 시 NEIS에서 과목 목록 불러오기
+  // 학년/반 변경 시 NEIS에서 과목 목록 불러오기 (소개과/임베과 구분)
   useEffect(() => {
     setOptionsLoading(true);
     setSubjectOptions([]);
-    getGradeSubjects(grade)
+    getGradeSubjects(grade, classNum)
       .then(setSubjectOptions)
       .catch(() => setSubjectOptions([]))
       .finally(() => setOptionsLoading(false));
-  }, [grade]);
+  }, [grade, classNum]);
 
   const loadChangeLog = useCallback(async () => {
     setLogLoading(true);
@@ -169,6 +176,13 @@ export default function TimetableManager() {
               </button>
             ))}
           </div>
+          {getDepartmentLabel(grade, classNum) && (
+            <div className="tt-admin-selector-group">
+              <span className="tt-admin-dept-badge">
+                🏫 {getDepartmentLabel(grade, classNum)}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* 시간표 그리드 */}

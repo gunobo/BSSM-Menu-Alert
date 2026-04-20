@@ -130,9 +130,9 @@ export function getWeekRange(baseDate = new Date()) {
    - localStorage에 오늘 날짜 기준으로 캐싱 (당일 재호출 시 즉시 반환)
    - 캐시 없을 때만 NEIS 1~4반 병렬 조회
 ===================== */
-export async function getGradeSubjects(grade) {
+export async function getGradeSubjects(grade, classNum = 1) {
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-  const cacheKey = `neis_subjects_${grade}_${today}`;
+  const cacheKey = `neis_subjects_${grade}_${classNum}_${today}`;
 
   // 캐시 확인
   const cached = localStorage.getItem(cacheKey);
@@ -146,8 +146,8 @@ export async function getGradeSubjects(grade) {
 
   const { start, end } = getWeekRange();
 
-  // 1반만 조회 (같은 학년은 과목 동일, 4번→1번 호출로 속도 개선)
-  const data = await getWeekTimetable(grade, 1, start, end);
+  // 해당 반 기준으로 과목 조회 (소개과/임베과 구분)
+  const data = await getWeekTimetable(grade, classNum, start, end);
 
   const subjects = new Set();
   Object.values(data).forEach((periods) => {
@@ -163,7 +163,7 @@ export async function getGradeSubjects(grade) {
 
   // 이전 날짜 캐시 정리
   Object.keys(localStorage)
-    .filter((k) => k.startsWith(`neis_subjects_${grade}_`) && k !== cacheKey)
+    .filter((k) => k.startsWith(`neis_subjects_${grade}_${classNum}_`) && k !== cacheKey)
     .forEach((k) => localStorage.removeItem(k));
 
   return sorted;
