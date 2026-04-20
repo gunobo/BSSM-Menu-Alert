@@ -13,9 +13,9 @@ const MAX_PERIODS = 7;
 const GRADES = [1, 2, 3];
 const MAX_CLASSES = 4;
 
-// 학년+반 → 과 이름 (2,3학년만 구분)
+// 학년+반 → 과 이름
 function getDepartmentLabel(grade, classNum) {
-  if (grade === 1) return null;
+  if (grade === 1) return "공통과정";
   if (classNum <= 2) return "소프트웨어개발과";
   return "임베디드소프트웨어과";
 }
@@ -176,13 +176,11 @@ export default function TimetableManager() {
               </button>
             ))}
           </div>
-          {getDepartmentLabel(grade, classNum) && (
-            <div className="tt-admin-selector-group">
-              <span className="tt-admin-dept-badge">
-                🏫 {getDepartmentLabel(grade, classNum)}
-              </span>
-            </div>
-          )}
+          <div className="tt-admin-selector-group">
+            <span className="tt-admin-dept-badge">
+              🏫 {getDepartmentLabel(grade, classNum)}
+            </span>
+          </div>
         </div>
 
         {/* 시간표 그리드 */}
