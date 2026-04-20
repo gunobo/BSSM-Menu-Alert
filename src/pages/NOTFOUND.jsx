@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "./footer";
-import "../styles/notFound.css";
+import "../styles/notfound.css";
 
 export default function NotFound() {
   const navigate = useNavigate();
