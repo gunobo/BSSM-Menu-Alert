@@ -97,6 +97,18 @@ services:
       - frontend
       - backend
 
+  # ── Discord 알림 Watcher ─────────────────────────────────────
+  watcher:
+    image: alpine
+    container_name: bssm_watcher
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./watcher.sh:/watcher.sh:ro
+    command: sh /watcher.sh
+    environment:
+      DISCORD_WEBHOOK: ${DISCORD_WEBHOOK}
+
 volumes:
   db_data:
   redis_data:
