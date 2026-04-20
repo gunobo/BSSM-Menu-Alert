@@ -34,7 +34,7 @@ services:
 
   # ── Spring Boot Backend ───────────────────────────────────
   backend:
-    build: ./BSSMMEALALERT_bakcend
+    build: ../BSSMMEALALERT_bakcend
     container_name: bssm_backend
     restart: unless-stopped
     depends_on:
