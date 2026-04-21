@@ -144,7 +144,13 @@ export async function getGradeSubjects(grade, classNum = 1) {
     }
   }
 
-  const { start, end } = getWeekRange();
+  // 이번 달 1일 ~ 말일 범위로 조회
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const start = `${year}${String(month).padStart(2, "0")}01`;
+  const lastDay = new Date(year, month, 0).getDate();
+  const end = `${year}${String(month).padStart(2, "0")}${String(lastDay).padStart(2, "0")}`;
 
   // 해당 반 기준으로 과목 조회 (소개과/임베과 구분)
   const data = await getWeekTimetable(grade, classNum, start, end);
