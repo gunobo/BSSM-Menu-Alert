@@ -1,0 +1,92 @@
+/* 건의 상세 카드 컨테이너 */
+.report-detail-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 30px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+/* 상단 헤더 영역 */
+.report-detail-header {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+/* 분류 배지 */
+.report-type-badge {
+  background: #e1f0ff;
+  color: #4a90e2;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+/* 제목 */
+.report-detail-title {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+/* 메타 정보 (날짜, 번호) */
+.report-meta-info {
+  display: flex;
+  color: #888;
+  font-size: 0.9rem;
+  gap: 20px;
+}
+
+/* 본문 영역 */
+.report-detail-body {
+  min-height: 200px;
+  line-height: 1.8;
+  color: #444;
+  font-size: 1.1rem;
+  white-space: pre-wrap; /* 줄바꿈 유지 필수 */
+}
+
+/* 부가 정보 박스 (신고/대상 정보) */
+.report-extra-box {
+  margin-top: 40px;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border-left: 4px solid #ff4d4f;
+}
+
+.report-extra-box h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.report-extra-box p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* 하단 버튼 푸터 */
+.report-detail-footer {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.back-to-list-btn {
+  padding: 12px 30px;
+  background: #f0f0f0;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #666;
+  transition: background 0.2s;
+}
+
+.back-to-list-btn:hover {
+  background: #e0e0e0;
+}

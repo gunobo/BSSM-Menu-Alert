@@ -331,6 +331,13 @@ input:checked + .slider:before {
   border-radius: 8px;
   border: 1px solid #5b7cff;
 }
+.profile-under-btns {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+}
 /* =====================
    모바일 대응 (768px 이하)
 ===================== */

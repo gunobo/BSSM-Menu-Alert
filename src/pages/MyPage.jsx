@@ -106,8 +106,8 @@ export default function MyPage() {
       allow_notifications: allowNotifications,
       allow_allergy_notifications: allowAllergyNotifications,
       allow_favorite_notifications: allowFavoriteNotifications,
-      class: user?.class,
-      classnum: user?.classnum
+      students_class: user?.students_class,
+      students_class_num: user?.students_class_num
     }
 
     let isSuccess = false;
@@ -166,7 +166,7 @@ export default function MyPage() {
         if (window.Android) {
           window.location.href = "/";
         } else {
-          navigate("/");
+          window.location.href = "/";
         }
       }, 100);
     }
@@ -231,11 +231,16 @@ export default function MyPage() {
           <div className="profile-section">
             <p><strong>이름:</strong> {user?.name}</p>
             <p><strong>이메일:</strong> {user?.email}</p>
-            <p><strong>학반:</strong> {user?.class}학년 {user?.classnum}반</p>
           </div>
-          <button className="nav-btn" onClick={() => navigate("/privacy")}>
-            개인정보처리방침 보기
-          </button>
+          <div className="profile-under-btns">
+            <button className="nav-btn" onClick={() => navigate("/privacy")}>
+              개인정보처리방침 보기
+            </button>
+            <button className="nav-btn" onClick={() => navigate("/my-report")}>
+              건의 관리하기
+            </button>
+          </div>
+          
 
           <hr style={{ margin: "20px 0", opacity: 0.1 }} />
 
@@ -311,30 +316,6 @@ export default function MyPage() {
                 className="favorite-input"
               />
             </div>
-          </section>
-
-          <section className="settings-section">
-            <h3>학반 설정</h3>
-            <div className="set-class">
-              <label>
-                <input
-                  type="number"
-                  value={user?.class || ''}
-                  onChange={(e) => setUser({ ...user, class: parseInt(e.target.value) })}
-                  max={3}
-                  min={1}
-                />학년
-              </label>
-              <label>
-                <input
-                  type="number"
-                  value={user?.classnum || ''}
-                  onChange={(e) => setUser({ ...user, classnum: parseInt(e.target.value) })}
-                  max={4}
-                  min={1}
-                />반
-              </label>
-              </div>
           </section>
 
           <button onClick={handleSave} className="save-btn">

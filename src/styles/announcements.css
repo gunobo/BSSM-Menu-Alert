@@ -202,6 +202,38 @@
   cursor: not-allowed;
 }
 
+/* 기존 CSS에 이 부분만 확실히 있는지 확인해 주세요 */
+.table-header, .table-row {
+  display: flex;
+  align-items: center; /* 체크박스와 텍스트 높이 맞춤 */
+}
+
+/* 체크박스 칼럼이 너무 좁지 않게 고정 */
+.table-header, .table-row {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* 👈 분류와 내용 사이의 간격을 줍니다 */
+}
+
+.col-id { 
+  width: 80px; /* 👈 분류 글자 길이에 맞춰 고정 너비를 주면 정렬이 깔끔해집니다 */
+  flex-shrink: 0;
+  text-align: left; /* 왼쪽 정렬로 변경 */
+  font-family: 'Inter', sans-serif;
+  color: #5b7cff; /* 강조색 */
+  font-weight: 700;
+}
+
+.col-title { 
+  flex: 1; /* 👈 남는 공간을 내용이 다 차지하도록 설정 */
+  font-weight: 600; 
+  color: #1e293b; 
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* 내용이 너무 길면 ... 처리 */
+}
+
+
 @media screen and (max-width: 768px) {
   .notice-page {
     padding-top: 64px;
@@ -401,5 +433,14 @@
   .page-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  .table-header, .table-row {
+    gap: 10px; /* 모바일은 간격을 조금 줄임 */
+  }
+  
+  .col-id {
+    width: 60px;
+    font-size: 10px;
   }
 }
