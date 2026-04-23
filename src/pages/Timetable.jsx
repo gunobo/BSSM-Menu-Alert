@@ -7,6 +7,7 @@ import { getPublicBaseTimetable } from "../api/timetableApi";
 import Footer from "./footer";
 import "../styles/home.css";
 import Navbar from "./Navbar"
+import ReportModal from "../modal/ReportModal"
 
 const GRADES = [1, 2, 3];
 const MAX_CLASSES = 4;
@@ -59,6 +60,9 @@ export default function Timetable() {
   const weekDays = useMemo(() => getWeekDays(selectedDate), [selectedDate]);
   const weekStart = weekDays[0];
   const weekEnd = weekDays[4];
+
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportTarget, setReportTarget] = useState(null);
 
   const weekLabel = useMemo(() => {
     const s = weekStart;
@@ -325,6 +329,7 @@ export default function Timetable() {
       </main>
 
       <Footer />
+      {showReportModal && <ReportModal target={reportTarget} onClose={() => setShowReportModal(false)} />}
     </>
   );
 }
