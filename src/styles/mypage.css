@@ -13,7 +13,7 @@
   justify-content: space-between;
   padding: 0 32px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  z-index: 1000; 
+  z-index: 9999 !important; 
 }
 
 .nav-logo {
@@ -82,7 +82,7 @@
   border-radius: 24px !important;
   padding: 40px !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05) !important; /* 부드러운 그림자 */
-  z-index: 9999 !important;
+  z-index: 1999 !important;
 }
 
 .main-card h2 {

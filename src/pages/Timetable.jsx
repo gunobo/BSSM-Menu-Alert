@@ -6,6 +6,7 @@ import { getWeekTimetable } from "../api/NeisApi";
 import { getPublicBaseTimetable } from "../api/timetableApi";
 import Footer from "./footer";
 import "../styles/home.css";
+import Navbar from "./Navbar"
 
 const GRADES = [1, 2, 3];
 const MAX_CLASSES = 4;
@@ -45,7 +46,7 @@ export default function Timetable() {
   });
 
   const [timetable, setTimetable] = useState({});
-  const [baseTimetable, setBaseTimetable] = useState(null); // subjects[periodIdx][dayIdx]
+  const [baseTimetable, setBaseTimetable] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState(() => new Date());
@@ -62,10 +63,9 @@ export default function Timetable() {
   const weekLabel = useMemo(() => {
     const s = weekStart;
     const e = weekEnd;
-    return `${s.slice(0,4)}년 ${parseInt(s.slice(4,6))}월 ${parseInt(s.slice(6,8))}일 ~ ${parseInt(e.slice(4,6))}월 ${parseInt(e.slice(6,8))}일`;
+    return `${s.slice(0, 4)}년 ${parseInt(s.slice(4, 6))}월 ${parseInt(s.slice(6, 8))}일 ~ ${parseInt(e.slice(4, 6))}월 ${parseInt(e.slice(6, 8))}일`;
   }, [weekStart, weekEnd]);
 
-  // 달력 팝업 외부 클릭 닫기
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (calRef.current && !calRef.current.contains(e.target)) {
@@ -76,7 +76,6 @@ export default function Timetable() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 인증 체크 + 학반 초기화
   useEffect(() => {
     const check = async () => {
       const token = sessionStorage.getItem("accessToken");
@@ -102,13 +101,11 @@ export default function Timetable() {
     return () => window.removeEventListener("authChange", check);
   }, []);
 
-  // 기본 시간표 불러오기 (학년/반 바뀔 때)
   useEffect(() => {
     setBaseTimetable(null);
     getPublicBaseTimetable(grade, classNum).then(setBaseTimetable);
   }, [grade, classNum]);
 
-  // NEIS에서 시간표 불러오기
   const fetchTimetable = useCallback(async () => {
     setLoading(true);
     try {
@@ -125,7 +122,6 @@ export default function Timetable() {
     fetchTimetable();
   }, [fetchTimetable]);
 
-  // 기본 시간표에서 특정 칸 과목 가져오기
   const getBaseSubject = useCallback((periodIdx, dayIdx) => {
     return baseTimetable?.[periodIdx]?.[dayIdx] ?? "";
   }, [baseTimetable]);
@@ -180,29 +176,7 @@ export default function Timetable() {
 
   return (
     <>
-      <nav className="navbar">
-        <div className="nav-left">
-          <div className="nav-logo" style={{ cursor: "pointer" }}>
-            <img src={bssmLogo} alt="BSSM 홈페이지 이동"
-              onClick={() => window.open("https://school.busanedu.net/bssm-h", "_blank")} />
-            <h2 onClick={() => navigate("/")}>BSSM 급식알리미</h2>
-          </div>
-          <div className="nav-menu">
-            <button className="menu-item" onClick={() => navigate("/")}>급식확인</button>
-            <button className="menu-item active" onClick={() => navigate("/timetable")}>시간표</button>
-            <button className="menu-item" onClick={() => navigate("/announcements")}>공지게시판</button>
-            <button className="menu-item" onClick={() => navigate("/appdownload")}>어플 다운로드</button>
-          </div>
-        </div>
-        <div className="nav-right">
-          <div className="nav-buttons">
-            <button className="nav-report-btn" onClick={handleNavReport}>🚨 건의</button>
-            {isAuth
-              ? <button className="nav-btn" onClick={() => navigate("/mypage")}>마이페이지</button>
-              : <button className="nav-btn" onClick={() => navigate("/login")}>로그인</button>}
-          </div>
-        </div>
-      </nav>
+      <Navbar selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
 
       <section className="hero tt-hero">
         <div className="container">
@@ -211,7 +185,7 @@ export default function Timetable() {
       </section>
 
       <main className="container tt-container">
-        {/* 학반 선택 */}
+        {/* 학반 & 날짜 설정 영역 */}
         <div className="tt-setting">
           <div className="tt-controls" ref={classPopupRef}>
             <span className="tt-week-label">{grade}학년 {classNum}반</span>
@@ -242,7 +216,6 @@ export default function Timetable() {
             )}
           </div>
 
-          {/* 주 선택 */}
           <div className="tt-week-nav" ref={calRef}>
             <span className="tt-week-label">{weekLabel}</span>
             <button className="tt-cal-trigger" onClick={() => {
@@ -289,7 +262,7 @@ export default function Timetable() {
           </div>
         </div>
 
-        {/* 시간표 테이블 */}
+        {/* 시간표 카드 */}
         <div className="tt-card">
           {loading ? (
             <p className="status-msg">시간표를 불러오는 중...</p>
@@ -304,7 +277,7 @@ export default function Timetable() {
                       return (
                         <th key={day} className={`tt-day-header ${isTodayCol ? "today" : ""}`}>
                           <span className="tt-day-name">{DAY_NAMES[i]}</span>
-                          <span className="tt-day-date">{parseInt(day.slice(4,6))}/{parseInt(day.slice(6,8))}</span>
+                          <span className="tt-day-date">{parseInt(day.slice(4, 6))}/{parseInt(day.slice(6, 8))}</span>
                           {isTodayCol && <span className="tt-today-badge">오늘</span>}
                         </th>
                       );
@@ -322,11 +295,8 @@ export default function Timetable() {
                         const neisSubject = slot?.subject || "";
                         const baseSubject = getBaseSubject(periodIdx, dayIdx);
 
-                        // NEIS 데이터 없고 기본 시간표 있으면 기본 시간표로 대체
                         const displaySubject = neisSubject || baseSubject;
-                        // NEIS 데이터가 있고 기본 시간표와 다르면 변경된 것
                         const isChanged = neisSubject && baseSubject && neisSubject !== baseSubject;
-                        // NEIS 데이터 없이 기본 시간표만 표시 중
                         const isBaseOnly = !neisSubject && !!baseSubject;
 
                         return (
@@ -351,52 +321,6 @@ export default function Timetable() {
               </table>
             </div>
           )}
-        </div>
-
-        {/* 모바일: 일별 카드 뷰 */}
-        <div className="tt-mobile-view">
-          {weekDays.map((day, dayIdx) => {
-            const isTodayCol = day === todayStr;
-            const neisPeriods = timetable[day] || [];
-
-            // 기본 시간표로 전체 슬롯 구성 (최대 7교시)
-            const allPeriods = Array.from({ length: maxPeriods }, (_, pi) => {
-              const neisSlot = neisPeriods.find((p) => p.period === pi + 1);
-              const neisSubject = neisSlot?.subject || "";
-              const baseSubject = getBaseSubject(pi, dayIdx);
-              const displaySubject = neisSubject || baseSubject;
-              const isChanged = neisSubject && baseSubject && neisSubject !== baseSubject;
-              const isBaseOnly = !neisSubject && !!baseSubject;
-              return { period: pi + 1, displaySubject, isChanged, isBaseOnly };
-            }).filter((s) => s.displaySubject);
-
-            return (
-              <div key={day} className={`tt-mobile-day-card ${isTodayCol ? "today" : ""}`}>
-                <div className="tt-mobile-day-header">
-                  <span className="tt-mobile-day-name">{DAY_NAMES[dayIdx]}</span>
-                  <span className="tt-mobile-day-date">{parseInt(day.slice(4,6))}/{parseInt(day.slice(6,8))}</span>
-                  {isTodayCol && <span className="tt-today-badge">오늘</span>}
-                </div>
-                <div className="tt-mobile-periods">
-                  {loading ? (
-                    <p className="status-msg" style={{ fontSize: "0.8rem" }}>로딩 중...</p>
-                  ) : allPeriods.length > 0 ? (
-                    allPeriods.map((slot) => (
-                      <div key={slot.period} className={`tt-mobile-slot ${slot.isChanged ? "changed" : ""}`}>
-                        <span className="tt-mobile-period">{slot.period}</span>
-                        <div className="tt-mobile-subject">
-                          {slot.displaySubject}
-                          {slot.isChanged && <span className="tt-changed-badge">변경</span>}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="tt-no-class">수업 없음</p>
-                  )}
-                </div>
-              </div>
-            );
-          })}
         </div>
       </main>
 

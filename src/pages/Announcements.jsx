@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../styles/announcements.css";
 import bssmLogo from "../assets/bssmlogo.png";
 import Footer from "./footer";
+import Navbar from "./Navbar"
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -13,6 +14,14 @@ export default function Announcements() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  
+
+  const todayStr = useMemo(() => {
+      const now = new Date();
+      const offset = now.getTimezoneOffset() * 60000;
+      return new Date(now.getTime() - offset).toISOString().slice(0, 10);
+    }, []);
+  const [selectedDate, setSelectedDate] = useState(todayStr);
 
   useEffect(() => {
     const fetchNotices = async () => {
@@ -35,23 +44,7 @@ export default function Announcements() {
 
   return (
     <div className="notice-page">
-      <nav className="navbar">
-        <div className="nav-left">
-          <div className="nav-logo" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
-            <img src={bssmLogo} alt="BSSM Logo" />
-            <h2>BSSM 급식알리미</h2>
-          </div>
-        </div>
-        <div className="nav-menu">
-          <button className="menu-item" onClick={() => navigate("/")}>급식확인</button>
-          <button className="menu-item" onClick={() => navigate("/timetable")}>시간표</button>
-          <button className="menu-item active" onClick={() => navigate("/announcements")}>공지게시판</button>
-          <button className="menu-item" onClick={() => navigate("/appdownload")}>어플 다운로드</button>
-        </div>
-        <div className="nav-right">
-          <button className="nav-btn" onClick={() => navigate(-1)}>뒤로가기</button>
-        </div>
-      </nav>
+      <Navbar selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
 
       <header className="notice-header">
         <div className="container">

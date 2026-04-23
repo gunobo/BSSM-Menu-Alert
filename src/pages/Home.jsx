@@ -10,6 +10,7 @@ import ReportModal from "../modal/ReportModal";
 import NoticeModal from "../modal/NoticeModal";
 import CommentModal from "../modal/CommentModal";
 import Footer from "./footer";
+import Navbar from "./Navbar";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -266,40 +267,7 @@ export default function Home() {
 
   return (
     <>
-      <nav className="navbar">
-        <div className="nav-left">
-          <div className="nav-logo" style={{ cursor: 'pointer' }}>
-            <img src={bssmLogo} alt="BSSM 홈페이지 이동" onClick={handleLogoClick} />
-            <h2 onClick={() => navigate("/")}>BSSM 급식알리미</h2>
-          </div>
-          <div className="nav-menu">
-            <button className="menu-item active" onClick={() => navigate("/")}>급식확인</button>
-            <button className="menu-item" onClick={() => navigate("/timetable")}>시간표</button>
-            <button className="menu-item" onClick={() => navigate("/announcements")}>공지게시판</button>
-            <button className="menu-item" onClick={() => navigate("/appdownload")}>어플 다운로드</button>
-          </div>
-        </div>
-
-        <div className="nav-right">
-          {/* ✅ 데스크톱 전용 날짜 선택 */}
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="nav-date-input desktop-only"
-          />
-          <div className="nav-buttons">
-            <button className="nav-report-btn" onClick={handleNavReport}>🚨 건의</button>
-            {isAuth ? (
-              <button className="nav-btn" onClick={() => navigate("/mypage")}>마이페이지</button>
-            ) : (
-              <button className="nav-btn" onClick={() => navigate("/login")}>로그인</button>
-            )}
-          </div>
-        </div>
-      </nav>
-
-      {/* ✅ 모바일 전용 날짜 선택 (검색창 위) */}
+      <Navbar selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
       
 
       <section className="hero">
