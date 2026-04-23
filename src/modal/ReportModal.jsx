@@ -53,7 +53,7 @@ export default function ReportModal({ target, onClose }) {
           <label>건의 사유</label>
           <select value={reason} onChange={(e) => setReason(e.target.value)}>
             <option value="부적절한 정보">부적절한 정보</option>
-            <option value="오타 및 오류">오타 및 오류</option>
+            <option value="오타">오타</option>
             <option value="기능 오류">기능 오류</option>
             <option value="급식 건의">급식 건의</option>
             <option value="기타">기타</option>
