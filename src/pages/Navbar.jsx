@@ -129,7 +129,6 @@ export default function Navbar({ selectedDate, setSelectedDate }) {
 
       {/* 모달 렌더링 */}
       {showReportModal && <ReportModal target={reportTarget} onClose={() => setShowReportModal(false)} />}
-      <NoticeModal notice={activeNotice} onClose={() => setShowNoticeModal(false)} />
     </>
   );
 }
