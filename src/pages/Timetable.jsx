@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 import bssmLogo from "../assets/bssmlogo.png";
 import { isLoggedIn, getUser } from "../api/auth";
 import { getWeekTimetable } from "../api/NeisApi";
-import { getPublicBaseTimetable } from "../api/timetableApi";
+import { getPublicBaseTimetable, getPublicTeacherMap, getPublicOverrides } from "../api/timetableApi";
 import Footer from "./footer";
 import "../styles/home.css";
 import Navbar from "./Navbar"
 import ReportModal from "../modal/ReportModal"
+import TeacherTimetableModal from "../modal/TeacherTimetableModal"
 
 const GRADES = [1, 2, 3];
 const MAX_CLASSES = 4;
@@ -47,7 +48,10 @@ export default function Timetable() {
   });
 
   const [timetable, setTimetable] = useState({});
-  const [baseTimetable, setBaseTimetable] = useState(null);
+  const [baseTimetable, setBaseTimetable] = useState(null);   // { subjects[][], teachers[][] }
+  const [teacherMap, setTeacherMap] = useState({});           // subjectAlias 로드용 (교사 표시에는 미사용)
+  const [subjectAlias, setSubjectAlias] = useState({});
+  const [overrides, setOverrides] = useState({});             // { date: { period: { teacher, subject } } }
   const [loading, setLoading] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState(() => new Date());
@@ -63,6 +67,7 @@ export default function Timetable() {
 
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTarget, setReportTarget] = useState(null);
+  const [showTeacherModal, setShowTeacherModal] = useState(false);
 
   const weekLabel = useMemo(() => {
     const s = weekStart;
@@ -107,16 +112,30 @@ export default function Timetable() {
 
   useEffect(() => {
     setBaseTimetable(null);
+    setTeacherMap({});
+    setSubjectAlias({});
+    // baseTimetable = { subjects[][], teachers[][] }
     getPublicBaseTimetable(grade, classNum).then(setBaseTimetable);
+    getPublicTeacherMap(grade, classNum).then((res) => {
+      if (res) {
+        setTeacherMap(res.teacherMap ?? {});
+        setSubjectAlias(res.subjectAlias ?? {});
+      }
+    });
   }, [grade, classNum]);
 
   const fetchTimetable = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getWeekTimetable(grade, classNum, weekStart, weekEnd);
-      setTimetable(data);
+      const [data, ov] = await Promise.all([
+        getWeekTimetable(grade, classNum, weekStart, weekEnd).catch(() => ({})),
+        getPublicOverrides(grade, classNum, weekStart, weekEnd).catch(() => ({})),
+      ]);
+      setTimetable(data ?? {});
+      setOverrides(ov ?? {});
     } catch {
       setTimetable({});
+      setOverrides({});
     } finally {
       setLoading(false);
     }
@@ -127,7 +146,11 @@ export default function Timetable() {
   }, [fetchTimetable]);
 
   const getBaseSubject = useCallback((periodIdx, dayIdx) => {
-    return baseTimetable?.[periodIdx]?.[dayIdx] ?? "";
+    return baseTimetable?.subjects?.[periodIdx]?.[dayIdx] ?? "";
+  }, [baseTimetable]);
+
+  const getBaseTeacher = useCallback((periodIdx, dayIdx) => {
+    return baseTimetable?.teachers?.[periodIdx]?.[dayIdx] ?? "";
   }, [baseTimetable]);
 
   const handleGradeChange = (g) => { setGrade(g); localStorage.setItem("tt_grade", g); };
@@ -264,6 +287,23 @@ export default function Timetable() {
               </div>
             )}
           </div>
+          <div className="tt-controls">
+            <button className="tt-teacher" onClick={() => navigate("/timetable/t")}>
+              👩‍🏫 교사 시간표
+            </button>
+          </div>
+        </div>
+
+        {/* 범례 */}
+        <div className="tt-legend">
+          <span className="tt-legend-item">
+            <span className="tt-changed-badge">변경</span>
+            나이스 기준 수업 변경됨
+          </span>
+          <span className="tt-legend-item">
+            <span className="tt-legend-dot base-only" />
+            기본 시간표 기준 (나이스 미등록)
+          </span>
         </div>
 
         {/* 시간표 카드 */}
@@ -298,20 +338,52 @@ export default function Timetable() {
                         const slot = periods.find((p) => p.period === periodIdx + 1);
                         const neisSubject = slot?.subject || "";
                         const baseSubject = getBaseSubject(periodIdx, dayIdx);
+                        const overrideInfo = overrides?.[day]?.[periodIdx + 1];
 
-                        const displaySubject = neisSubject || baseSubject;
+                        // 기본 시간표 기준 교시에 대한 관리자 수정 오버라이드
+                        // overrideInfo.overrideSubject: null=미수정, ""=수업없음, "시험" 등
+                        const hasBaseOverride = !neisSubject &&
+                          overrideInfo &&
+                          overrideInfo.overrideSubject !== undefined &&
+                          overrideInfo.overrideSubject !== null;
+                        // 실제 표시할 기본 시간표 과목 (오버라이드 있으면 그걸 사용, "" = 수업없음)
+                        const effectiveBase = hasBaseOverride ? (overrideInfo.overrideSubject ?? "") : baseSubject;
+
+                        const displaySubject = neisSubject || effectiveBase;
                         const isChanged = neisSubject && baseSubject && neisSubject !== baseSubject;
-                        const isBaseOnly = !neisSubject && !!baseSubject;
+                        // base-only: NEIS 없고, 기본 시간표는 있고, 관리자 수정 없는 경우에만 회색 점 표시
+                        const isBaseOnly = !neisSubject && !!displaySubject && !hasBaseOverride;
+                        const displayName = subjectAlias[displaySubject] || displaySubject;
+
+                        // 교사 표시 우선순위:
+                        // - 수업 변경 시: 오버라이드 교사만 (기본 교사는 다른 과목 담당이므로 숨김)
+                        // - 정상 수업 시: 오버라이드 교사 → 기본 시간표 교사
+                        const overrideTeacher = overrideInfo?.teacher ?? "";
+                        const baseTeacher = getBaseTeacher(periodIdx, dayIdx);
+                        const teacherLabel = isChanged
+                          ? overrideTeacher
+                          : (overrideTeacher || baseTeacher);
 
                         return (
                           <td key={day} className={`tt-subject-cell ${isTodayCol ? "today-col" : ""}`}>
                             {displaySubject ? (
                               <div
                                 className={`tt-subject-chip ${isChanged ? "changed" : ""} ${isBaseOnly ? "base-only" : ""}`}
-                                title={isChanged ? `기준: ${baseSubject}` : isBaseOnly ? "기본 시간표" : ""}
+                                title={
+                                  isChanged
+                                    ? `기준: ${baseSubject}`
+                                    : isBaseOnly
+                                    ? "기본 시간표"
+                                    : displayName !== displaySubject
+                                    ? `원과목명: ${displaySubject}`
+                                    : ""
+                                }
                               >
-                                {displaySubject}
+                                {displayName}
                                 {isChanged && <span className="tt-changed-badge">변경</span>}
+                                {teacherLabel && (
+                                  <span className="tt-teacher-name">{teacherLabel}</span>
+                                )}
                               </div>
                             ) : (
                               <span className="tt-empty">-</span>
@@ -330,6 +402,7 @@ export default function Timetable() {
 
       <Footer />
       {showReportModal && <ReportModal target={reportTarget} onClose={() => setShowReportModal(false)} />}
+      {showTeacherModal && <TeacherTimetableModal onClose={() => setShowTeacherModal(false)} />}
     </>
   );
 }

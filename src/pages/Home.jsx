@@ -241,6 +241,13 @@ export default function Home() {
     else alert(`해당 메뉴가 포함된 급식이 없습니다.`);
   };
 
+  const moveDate = (delta) => {
+    const d = new Date(selectedDate);
+    d.setDate(d.getDate() + delta);
+    const offset = d.getTimezoneOffset() * 60000;
+    setSelectedDate(new Date(d.getTime() - offset).toISOString().slice(0, 10));
+  };
+
   const handleNavReport = () => {
     if (!isLoggedIn()) return alert("로그인 후 이용 가능합니다!");
     setReportTarget({ id: 0, type: "ETC", name: "서비스 건의 및 신고" });
@@ -309,7 +316,11 @@ export default function Home() {
           )}
 
           <div className="selected-day-info">
-            <h2>{selectedDate} 식단</h2>
+            <div className="date-nav">
+              <button className="date-nav-btn" onClick={() => moveDate(-1)}>◀</button>
+              <h2>{selectedDate} 식단{selectedDate === todayStr && <span className="today-badge-meal">오늘</span>}</h2>
+              <button className="date-nav-btn" onClick={() => moveDate(1)}>▶</button>
+            </div>
             <button className="noti-request-btn" onClick={() => Notification.requestPermission()}>🔔 알림 권한</button>
           </div>
 

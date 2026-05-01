@@ -26,6 +26,7 @@ import AppDownload from "./pages/AppDownload.jsx";
 import PrivacyPolicy from "./pages/Privacypolicy.jsx";
 import DeleteAccount from "./pages/Deleteaccount.jsx";
 import TimetablePage from "./pages/Timetable.jsx";
+import TeacherTimetablePage from "./pages/TeacherTimetable.jsx";
 import ReportList from "./pages/ReportList.jsx"
 import ReportDetail from "./pages/ReportDetail.jsx"
 
@@ -199,6 +200,7 @@ export default function App() {
       <Route path="/privacy" element={<PrivacyPolicy />} /> {/* 추가 */}
       <Route path="/delete-account" element={<DeleteAccount />} />
       <Route path="/timetable" element={<TimetablePage />}/>
+      <Route path="/timetable/t" element={<TeacherTimetablePage />}/>
       <Route path="/my-report" element={<ReportList />}/>
       <Route path="/my-report/:id" element={<ReportDetail />} />
       <Route path="/adminpages"

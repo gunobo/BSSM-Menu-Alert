@@ -259,10 +259,58 @@ main.container {
 
 .selected-day-info {
   width: 100%;
+  position: relative;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-bottom: 30px;
+}
+
+.date-nav {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.date-nav h2 {
+  margin: 0 !important;
+  display: flex;
+  align-items: center !important;
+  justify-content: center;
+  gap: 8px;
+}
+
+.date-nav-btn {
+  background: none;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 0.9rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s;
+  line-height: 1;
+}
+
+.date-nav-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+.today-badge-meal {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: #6366f1;
+  color: #fff;
+  border-radius: 5px;
+  padding: 2px 7px;
+  vertical-align: middle;
 }
 
 /* [6] MEAL GRID */
@@ -973,6 +1021,103 @@ main.container {
   color: #64748b;
 }
 
+/* 교사 이름 */
+.tt-teacher-name {
+  display: block;
+  font-size: 0.68rem;
+  color: #64748b;
+  font-weight: 400;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+.tt-teacher-unknown {
+  color: #f59e0b;
+  font-style: italic;
+}
+
+/* 시간표 범례 */
+.tt-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  padding: 10px 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.tt-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.tt-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.tt-legend-dot.base-only {
+  background: #94a3b8;
+  border: 1.5px solid #cbd5e1;
+}
+
+/* 교사 시간표 버튼 */
+.tt-teacher {
+  padding: 6px 14px;
+  border: 1.5px solid #4f8ef7;
+  border-radius: 8px;
+  background: #fff;
+  color: #4f8ef7;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.tt-teacher:hover {
+  background: #4f8ef7;
+  color: #fff;
+}
+
+/* 교사 시간표 모달 */
+.tt-teacher-modal {
+  max-width: 720px;
+  width: 95vw;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+.tt-teacher-modal-body {
+  padding: 16px 0 0;
+}
+.tt-teacher-select-row {
+  margin-bottom: 8px;
+}
+.tt-teacher-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.tt-teacher-slot-class {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #4f8ef7;
+  background: #eff6ff;
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+.tt-teacher-slot-subject {
+  font-size: 0.78rem;
+  color: #334155;
+}
+
 /* 변경 배지 */
 .tt-changed-badge {
   display: inline-block;
@@ -1151,12 +1296,20 @@ main.container {
   }
 
   .selected-day-info {
-    flex-direction: row !important;
-    justify-content: space-between !important;
+    justify-content: flex-end !important;
   }
 
   .selected-day-info h2 {
     font-size: 15px !important;
+  }
+
+  .date-nav {
+    gap: 6px;
+  }
+
+  .date-nav-btn {
+    padding: 3px 9px;
+    font-size: 0.8rem;
   }
 
   .meal-grid {
@@ -1357,4 +1510,46 @@ main.container {
     height: 45px; /* 셀 높이를 고정하여 한눈에 보이게 함 */
     vertical-align: middle;
   }
+}
+
+/* 교사 매핑 관리 테이블 */
+.tt-teacher-map-table th,
+.tt-teacher-map-table td {
+  padding: 7px 8px;
+  font-size: 0.83rem;
+  vertical-align: middle;
+}
+.tt-teacher-map-table input.tt-admin-select {
+  min-width: 90px;
+  font-size: 0.81rem;
+  padding: 4px 7px;
+}
+
+/* 교사 시간표 페이지 (/timetable/t) */
+.tt-teacher-page-select {
+  padding: 8px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #334155;
+  background: #fff;
+  cursor: pointer;
+  min-width: 180px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.tt-teacher-page-select:focus { border-color: #4f8ef7; }
+
+/* 교사 시간표 칩 안 학년-반 배지 */
+.tt-teacher-class-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  background: #eff6ff;
+  color: #3b82f6;
+  border-radius: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-right: 4px;
+  vertical-align: middle;
 }
