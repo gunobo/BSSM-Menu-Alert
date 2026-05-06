@@ -371,7 +371,7 @@ export default function Timetable() {
                                 className={`tt-subject-chip ${isChanged ? "changed" : ""} ${isBaseOnly ? "base-only" : ""}`}
                                 title={
                                   isChanged
-                                    ? `기준: ${baseSubject}`
+                                    ? `기존: ${baseSubject}`
                                     : isBaseOnly
                                     ? "기본 시간표"
                                     : displayName !== displaySubject
