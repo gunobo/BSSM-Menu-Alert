@@ -223,8 +223,8 @@ export default function TimetableManager() {
                         const teacher = teachers[pi]?.[di] ?? "";
                         const teacherOptions = subj ? (subjectTeacherMap[subj] ?? []) : [];
                         const extraTeacher = teacher && !teacherOptions.includes(teacher) ? teacher : null;
-                        // 교사가 2명 이상일 때만 드롭다운 표시
-                        const needTeacherSelect = teacherOptions.length >= 2 || !!extraTeacher;
+                        // 교사가 1명 이상이면 드롭다운 표시
+                        const needTeacherSelect = teacherOptions.length >= 1 || !!extraTeacher;
 
                         return (
                           <td key={di} className="tt-admin-subject-cell">
