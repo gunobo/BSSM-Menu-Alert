@@ -60,7 +60,7 @@ export default function LoginHistoryPage() {
   return (
     <div className="admin-section" style={{ width: "100%" }}>
       <div className="section-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-        <h3>접속 이력 (총 {totalElements.toLocaleString()}건)</h3>
+        <h3>접속 이력 <span style={{ fontSize: "13px", color: "var(--text-muted)", fontWeight: 400 }}>— 계정별 · IP별 최신 1건 (총 {totalElements.toLocaleString()}건)</span></h3>
         <button onClick={fetchHistory} className="btn-refresh">🔄 새로고침</button>
       </div>
 
