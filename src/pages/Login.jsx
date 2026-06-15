@@ -87,6 +87,26 @@ export default function Login() {
     }
   };
 
+  const getDeviceIp = () => new Promise((resolve) => {
+    try {
+      const pc = new RTCPeerConnection({ iceServers: [] });
+      pc.createDataChannel("");
+      pc.createOffer().then((o) => pc.setLocalDescription(o));
+      pc.onicecandidate = (e) => {
+        if (e && e.candidate) {
+          const match = e.candidate.candidate.match(/(\d+\.\d+\.\d+\.\d+)/);
+          if (match && !match[1].startsWith("0.")) {
+            resolve(match[1]);
+            pc.close();
+          }
+        }
+      };
+      setTimeout(() => resolve(null), 1500);
+    } catch {
+      resolve(null);
+    }
+  });
+
   const handleLoginSuccess = async (credentialResponse) => {
     if (!credentialResponse.credential) return;
 
@@ -94,12 +114,14 @@ export default function Login() {
 
     try {
       console.log("🔐 로그인 처리 시작...");
-      
+
+      const deviceIp = await getDeviceIp();
+
       // ✅ ServerUrl 변수를 사용하여 요청 (위에서 기본값이 설정됨)
       const res = await fetch(`${ServerUrl}/auth/google`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: credentialResponse.credential }),
+        body: JSON.stringify({ token: credentialResponse.credential, deviceIp }),
       });
 
       if (res.ok) {
