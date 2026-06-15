@@ -5,6 +5,7 @@ import AnnouncementEditor from "./admin/AnnouncementEditor";
 import AnnouncementList from "./admin/AnnouncementList";     
 import UserManagement from "./admin/UserManagement";
 import UserSearch from "./admin/UserSearchPage";
+import LoginHistoryPage from "./admin/LoginHistoryPage";
 import AdminCommentManager from "./admin/AdminCommentManager"; 
 import PushNotificationManager from "./admin/PushNotificationManager"; 
 import NotificationStats from "./admin/NotificationStats"; 
@@ -164,11 +165,17 @@ export default function AdminPage() {
                   >
                     └ 유저 목록
                   </button>
-                  <button 
-                    className={activeMenu === "user-search" ? "active" : ""} 
+                  <button
+                    className={activeMenu === "user-search" ? "active" : ""}
                     onClick={() => handleMenuClick("user-search")}
                   >
                     └ 유저 검색
+                  </button>
+                  <button
+                    className={activeMenu === "login-history" ? "active" : ""}
+                    onClick={() => handleMenuClick("login-history")}
+                  >
+                    └ 접속 이력 (IP)
                   </button>
                 </div>
               )}
@@ -298,6 +305,7 @@ export default function AdminPage() {
               activeMenu === "dashboard" ? "통계 및 관리" :
               activeMenu === "users" ? "사용자 관리" :
               activeMenu === "user-search" ? "사용자 검색" :
+              activeMenu === "login-history" ? "접속 이력 (IP)" :
               activeMenu === "comments" ? "전체 댓글 관리" :
               activeMenu === "push-notis" ? "푸시 알림 전송" :
               activeMenu === "push-stats" ? "알림 통계 및 내역" :
@@ -318,6 +326,7 @@ export default function AdminPage() {
                 {activeMenu === "dashboard" && <AdminDashboard />}
                 {activeMenu === "users" && <UserManagement />}
                 {activeMenu === "user-search" && <UserSearch />}
+                {activeMenu === "login-history" && <LoginHistoryPage />}
                 {activeMenu === "comments" && <AdminCommentManager />}
                 {activeMenu === "push-notis" && <PushNotificationManager />}
                 {activeMenu === "push-stats" && <NotificationStats />}
