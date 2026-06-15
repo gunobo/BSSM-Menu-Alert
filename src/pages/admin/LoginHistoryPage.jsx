@@ -114,7 +114,7 @@ export default function LoginHistoryPage() {
                   history.map((h, idx) => (
                     <tr key={h.id}>
                       <td style={{ color: "var(--text-muted)", fontSize: "12px" }}>
-                        {page * 50 + idx + 1}
+                        {totalElements - (page * 50 + idx)}
                       </td>
                       <td>{h.userName || "-"}</td>
                       <td style={{ fontSize: "13px" }}>{h.email}</td>
