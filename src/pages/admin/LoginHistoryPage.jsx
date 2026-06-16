@@ -60,7 +60,7 @@ export default function LoginHistoryPage() {
   return (
     <div className="admin-section" style={{ width: "100%" }}>
       <div className="section-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-        <h3>접속 이력 <span style={{ fontSize: "13px", color: "var(--text-muted)", fontWeight: 400 }}>— 계정별 · IP별 최신 1건 (총 {totalElements.toLocaleString()}건)</span></h3>
+        <h3>접속 이력 <span style={{ fontSize: "13px", color: "var(--text-muted)", fontWeight: 400 }}>총 {totalElements.toLocaleString()}건</span></h3>
         <button onClick={fetchHistory} className="btn-refresh">🔄 새로고침</button>
       </div>
 
@@ -118,16 +118,9 @@ export default function LoginHistoryPage() {
                       <td>{h.userName || "-"}</td>
                       <td style={{ fontSize: "13px" }}>{h.email}</td>
                       <td>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-                          <span style={{ fontSize: "11px", color: "var(--text-muted)", marginBottom: "1px" }}>공인</span>
-                          <code style={{ backgroundColor: "var(--code-bg, #f1f3f5)", padding: "2px 8px", borderRadius: "4px", fontSize: "13px", fontFamily: "monospace" }}>
-                            {h.networkIp || "-"}
-                          </code>
-                          <span style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px", marginBottom: "1px" }}>기기</span>
-                          <code style={{ backgroundColor: "var(--code-bg, #f1f3f5)", padding: "2px 8px", borderRadius: "4px", fontSize: "13px", fontFamily: "monospace", color: h.deviceIp ? "inherit" : "#bbb" }}>
-                            {h.deviceIp || "감지 불가"}
-                          </code>
-                        </div>
+                        <code style={{ backgroundColor: "var(--code-bg, #f1f3f5)", padding: "2px 8px", borderRadius: "4px", fontSize: "13px", fontFamily: "monospace" }}>
+                          {h.networkIp || "-"}
+                        </code>
                       </td>
                       <td style={{ fontSize: "13px", color: "var(--text-muted)" }}>
                         {formatDate(h.loginAt)}

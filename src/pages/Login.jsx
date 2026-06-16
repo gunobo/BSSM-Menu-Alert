@@ -87,39 +87,6 @@ export default function Login() {
     }
   };
 
-  const getDeviceIp = () => new Promise((resolve) => {
-    try {
-      const pc = new RTCPeerConnection({
-        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-      });
-      const ips = new Set();
-      pc.createDataChannel("");
-      pc.createOffer().then((o) => pc.setLocalDescription(o));
-      pc.onicecandidate = (e) => {
-        if (!e || !e.candidate) {
-          // 수집 완료 — 로컬 IP 우선, 없으면 공인 IP
-          pc.close();
-          const local = [...ips].find(
-            (ip) => ip.startsWith("192.168.") || ip.startsWith("10.") || ip.startsWith("172.")
-          );
-          resolve(local || [...ips][0] || null);
-          return;
-        }
-        const match = e.candidate.candidate.match(/(\d+\.\d+\.\d+\.\d+)/);
-        if (match && match[1] !== "0.0.0.0") ips.add(match[1]);
-      };
-      setTimeout(() => {
-        pc.close();
-        const local = [...ips].find(
-          (ip) => ip.startsWith("192.168.") || ip.startsWith("10.") || ip.startsWith("172.")
-        );
-        resolve(local || [...ips][0] || null);
-      }, 3000);
-    } catch {
-      resolve(null);
-    }
-  });
-
   const handleLoginSuccess = async (credentialResponse) => {
     if (!credentialResponse.credential) return;
 
@@ -128,13 +95,10 @@ export default function Login() {
     try {
       console.log("🔐 로그인 처리 시작...");
 
-      const deviceIp = await getDeviceIp();
-
-      // ✅ ServerUrl 변수를 사용하여 요청 (위에서 기본값이 설정됨)
       const res = await fetch(`${ServerUrl}/auth/google`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: credentialResponse.credential, deviceIp }),
+        body: JSON.stringify({ token: credentialResponse.credential }),
       });
 
       if (res.ok) {
