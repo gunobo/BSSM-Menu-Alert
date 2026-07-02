@@ -7,6 +7,13 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    build: {
+      minify: 'esbuild',
+      target: 'esnext',
+    },
+    esbuild: {
+      drop: mode === 'production' ? ['console', 'debugger'] : [],
+    },
     server: {
       headers: {
         "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
