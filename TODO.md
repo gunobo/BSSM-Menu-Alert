@@ -40,18 +40,12 @@
 
 ## 🔁 마이그레이션
 
-### 백엔드 → FastAPI (Python)
-- [ ] 프로젝트 초기 세팅 (`pyproject.toml` / `uv`)
-- [ ] DB 연결 — SQLAlchemy 2.x + Alembic
-- [ ] 인증 — Google ID 토큰 검증 + JWT 발급
-- [ ] 기존 엔드포인트 포팅 (`/auth`, `/user`, `/admin`, NEIS 프록시, FCM)
-- [ ] `systemd` 서비스 등록 (`uvicorn` + 기존 JAR 대체)
-- [ ] **httpOnly Cookie** 전환 — sessionStorage JWT → 백엔드 쿠키 발급 (XSS 원천 차단)
-- [ ] **학교 홈피 크롤링** (`requests` + `BeautifulSoup`)
+> 백엔드 관련 TODO는 `BSSMMEALALERT_bakcend/TODO.md` 참고
+
+- [ ] **httpOnly Cookie 전환** — 백엔드 쿠키 발급 시 프론트 토큰 저장 방식 변경 필요
 
 ---
 
 ## 🛠️ 코드 품질
 - [ ] **React Query 도입** — Axios + useState 조합을 캐싱/자동갱신으로 교체
 - [ ] **에러 바운더리** 추가
-- [ ] **GitHub Actions CI** — push 시 자동 빌드 검증
