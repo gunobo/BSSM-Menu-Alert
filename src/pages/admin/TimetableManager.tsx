@@ -5,6 +5,7 @@ import {
   getChangeLog,
   getPublicTeacherMap,
   dayName,
+  type ChangeLogEntry,
 } from "../../api/timetableApi";
 import { getUser } from "../../api/auth";
 import { getGradeSubjects } from "../../api/NeisApi";
@@ -14,17 +15,19 @@ const MAX_PERIODS = 7;
 const GRADES = [1, 2, 3];
 const MAX_CLASSES = 4;
 
-function getDepartmentLabel(grade, classNum) {
+interface StatusMessage { type: string; text: string; }
+
+function getDepartmentLabel(grade: number, classNum: number) {
   if (grade === 1) return "공통과정";
   if (classNum <= 2) return "소프트웨어개발과";
   return "임베디드소프트웨어과";
 }
 
-function makeEmpty() {
+function makeEmpty(): string[][] {
   return Array.from({ length: MAX_PERIODS }, () => Array(5).fill(""));
 }
 
-function formatDateTime(date) {
+function formatDateTime(date: Date | null) {
   if (!date) return "-";
   return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")} ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 }
@@ -32,17 +35,17 @@ function formatDateTime(date) {
 export default function TimetableManager() {
   const [grade, setGrade] = useState(1);
   const [classNum, setClassNum] = useState(1);
-  const [subjects, setSubjects] = useState(makeEmpty());
-  const [teachers, setTeachers] = useState(makeEmpty()); // 교시별 담당 교사
-  const [subjectOptions, setSubjectOptions] = useState([]);
+  const [subjects, setSubjects] = useState<string[][]>(makeEmpty());
+  const [teachers, setTeachers] = useState<string[][]>(makeEmpty()); // 교시별 담당 교사
+  const [subjectOptions, setSubjectOptions] = useState<string[]>([]);
   // { [subject]: string[] } — 해당 반에 등록된 과목별 교사 목록
-  const [subjectTeacherMap, setSubjectTeacherMap] = useState({});
+  const [subjectTeacherMap, setSubjectTeacherMap] = useState<Record<string, string[]>>({});
   const [optionsLoading, setOptionsLoading] = useState(false);
   const [adminName, setAdminName] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState(null);
-  const [changeLog, setChangeLog] = useState([]);
+  const [message, setMessage] = useState<StatusMessage | null>(null);
+  const [changeLog, setChangeLog] = useState<ChangeLogEntry[]>([]);
   const [logLoading, setLogLoading] = useState(false);
 
   const savedSubjectsRef = useRef(makeEmpty());
@@ -119,14 +122,14 @@ export default function TimetableManager() {
     loadChangeLog();
   }, [loadTimetable, loadChangeLog]);
 
-  const handleSubjectChange = (pi, di, value) =>
+  const handleSubjectChange = (pi: number, di: number, value: string) =>
     setSubjects((prev) => {
       const next = prev.map((r) => [...r]);
       next[pi][di] = value;
       return next;
     });
 
-  const handleTeacherChange = (pi, di, value) =>
+  const handleTeacherChange = (pi: number, di: number, value: string) =>
     setTeachers((prev) => {
       const next = prev.map((r) => [...r]);
       next[pi][di] = value;
@@ -142,7 +145,7 @@ export default function TimetableManager() {
       setMessage({ type: "success", text: `${grade}학년 ${classNum}반 기본 시간표가 저장되었습니다.` });
       await loadChangeLog();
     } catch (err) {
-      setMessage({ type: "error", text: err?.message ?? "저장 중 오류가 발생했습니다." });
+      setMessage({ type: "error", text: (err as Error)?.message ?? "저장 중 오류가 발생했습니다." });
     } finally {
       setSaving(false);
     }

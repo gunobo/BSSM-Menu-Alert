@@ -1,16 +1,20 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import MdEditor from "react-markdown-editor-lite";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import MarkdownIt from "markdown-it";
 import "react-markdown-editor-lite/lib/index.css";
 import "../../styles/Editor.css";
 
 const mdParser = new MarkdownIt();
 
-export default function AnnouncementEditor({ editData, onComplete }) {
+interface AnnouncementData { id?: number; title?: string; content?: string; imageUrl?: string; }
+
+export default function AnnouncementEditor({ editData, onComplete }: { editData?: AnnouncementData | null; onComplete?: () => void }) {
   const [data, setData] = useState({ title: "", content: "" });
-  const [file, setFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -34,19 +38,19 @@ export default function AnnouncementEditor({ editData, onComplete }) {
     }
   }, [editData]);
 
-  const handleEditorChange = ({ text }) => {
+  const handleEditorChange = ({ text }: { text: string }) => {
     setData((prev) => ({ ...prev, content: text }));
   };
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
       setPreviewUrl(URL.createObjectURL(selectedFile));
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!data.title || !data.content) return alert("제목과 내용을 모두 채워주세요.");
     
@@ -84,7 +88,8 @@ export default function AnnouncementEditor({ editData, onComplete }) {
       setPreviewUrl(null);
     } catch (err) {
       console.error(err);
-      alert("처리 실패: " + (err.response?.data?.message || err.message));
+      const e = err as { response?: { data?: { message?: string } }; message?: string };
+      alert("처리 실패: " + (e.response?.data?.message || e.message));
     } finally {
       setIsSubmitting(false);
     }

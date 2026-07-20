@@ -1,20 +1,27 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
-  getTeacherMap, saveTeacherMap, getTeacherRoster, getGradeSubjectsFromBackend
+  getTeacherMap, saveTeacherMap, getTeacherRoster, getGradeSubjectsFromBackend,
+  type TeacherRosterEntry,
 } from "../../api/timetableApi";
 
 const GRADES = [1, 2, 3];
 const CLASS_NUMS = [1, 2, 3, 4]; // 저장 시 모든 반에 동일하게 적용 (내부용)
 
+interface StatusMessage { type: string; text: string; }
+
 // ─── 태그 방식 교사 멀티 선택 컴포넌트 ──────────────────────────────
-function TeacherTagSelect({ value = [], onChange, roster = [] }) {
+function TeacherTagSelect({ value = [] as string[], onChange, roster = [] as TeacherRosterEntry[] }: {
+  value?: string[];
+  onChange: (tags: string[]) => void;
+  roster?: TeacherRosterEntry[];
+}) {
   const [open, setOpen] = useState(false);
   const [inputVal, setInputVal] = useState("");
   const [dropPos, setDropPos] = useState({ top: 0, left: 0, width: 0 });
-  const wrapRef = useRef(null);
-  const inputRef = useRef(null);
-  const rosterNames = roster.map((r) => r.name ?? r);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const rosterNames = roster.map((r) => r.name);
 
   const calcPos = () => {
     if (wrapRef.current) {
@@ -24,8 +31,8 @@ function TeacherTagSelect({ value = [], onChange, roster = [] }) {
   };
 
   useEffect(() => {
-    const handler = (e) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+    const handler = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -42,14 +49,14 @@ function TeacherTagSelect({ value = [], onChange, roster = [] }) {
     };
   }, [open]);
 
-  const addTeacher = (name) => {
+  const addTeacher = (name: string) => {
     const trimmed = name.trim();
     if (!trimmed || value.includes(trimmed)) return;
     onChange([...value, trimmed]);
     setInputVal("");
   };
 
-  const removeTeacher = (name) => onChange(value.filter((t) => t !== name));
+  const removeTeacher = (name: string) => onChange(value.filter((t) => t !== name));
 
   const suggestions = rosterNames
     .filter((n) => !value.includes(n) && n.includes(inputVal))
@@ -115,15 +122,15 @@ function TeacherTagSelect({ value = [], onChange, roster = [] }) {
 // ────────────────────────────────────────────────────────────────────
 export default function TeacherMapManager() {
   const [grade, setGrade] = useState(1);
-  const [subjects, setSubjects] = useState([]);
+  const [subjects, setSubjects] = useState<string[]>([]);
   // { [subject]: string[] } — 반 구분 없이 과목당 교사 목록
-  const [teacherTags, setTeacherTags] = useState({});
+  const [teacherTags, setTeacherTags] = useState<Record<string, string[]>>({});
   // { [subject]: "표시명" }
-  const [aliasInputs, setAliasInputs] = useState({});
-  const [roster, setRoster] = useState([]);
+  const [aliasInputs, setAliasInputs] = useState<Record<string, string>>({});
+  const [roster, setRoster] = useState<TeacherRosterEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState(null);
+  const [message, setMessage] = useState<StatusMessage | null>(null);
   const [newSubject, setNewSubject] = useState("");
   const [showAddSubject, setShowAddSubject] = useState(false);
 
@@ -145,16 +152,16 @@ export default function TeacherMapManager() {
       const merged = [...new Set([...subjectList, ...savedSubjects])].sort((a, b) => a.localeCompare(b, "ko"));
       setSubjects(merged);
 
-      const tTags = {};
-      const aInputs = {};
+      const tTags: Record<string, string[]> = {};
+      const aInputs: Record<string, string> = {};
       merged.forEach((subj) => {
         // 반 구분 없이: "1"반 데이터 기준으로 불러오고, 없으면 다른 반에서라도 합집합
-        const allTeachers = new Set();
+        const allTeachers = new Set<string>();
         CLASS_NUMS.forEach((c) => {
-          (saved?.teacherMap?.[subj]?.[String(c)] ?? []).forEach((t) => allTeachers.add(t));
+          (((saved?.teacherMap as Record<string, Record<string, string[]>> | undefined)?.[subj]?.[String(c)]) ?? []).forEach((t) => allTeachers.add(t));
         });
         tTags[subj] = [...allTeachers];
-        aInputs[subj] = saved?.subjectAlias?.[subj] ?? "";
+        aInputs[subj] = (saved?.subjectAlias as Record<string, string> | undefined)?.[subj] ?? "";
       });
       setTeacherTags(tTags);
       setAliasInputs(aInputs);
@@ -167,10 +174,10 @@ export default function TeacherMapManager() {
 
   useEffect(() => { load(); }, [load]);
 
-  const handleTagChange = (subject, newTags) =>
+  const handleTagChange = (subject: string, newTags: string[]) =>
     setTeacherTags((prev) => ({ ...prev, [subject]: newTags }));
 
-  const handleAliasChange = (subject, val) =>
+  const handleAliasChange = (subject: string, val: string) =>
     setAliasInputs((prev) => ({ ...prev, [subject]: val }));
 
   const handleAddSubject = () => {
@@ -183,7 +190,7 @@ export default function TeacherMapManager() {
     setShowAddSubject(false);
   };
 
-  const handleRemoveSubject = (subj) => {
+  const handleRemoveSubject = (subj: string) => {
     if (!window.confirm(`"${subj}" 과목을 목록에서 삭제할까요?`)) return;
     setSubjects((prev) => prev.filter((s) => s !== subj));
     setTeacherTags((prev) => { const n = { ...prev }; delete n[subj]; return n; });
@@ -196,25 +203,25 @@ export default function TeacherMapManager() {
     try {
       // 백엔드 형식: { subject: { classNum: string[] } }
       // 반 구분 없으므로 모든 반에 동일하게 저장
-      const teacherMap = {};
+      const teacherMap: Record<string, Record<string, string[]>> = {};
       Object.entries(teacherTags).forEach(([subj, arr]) => {
-        const filtered = ((arr as string[]) ?? []).filter(Boolean);
-        if ((filtered as string[]).length > 0) {
-          const classMap = {};
+        const filtered = (arr ?? []).filter(Boolean);
+        if (filtered.length > 0) {
+          const classMap: Record<string, string[]> = {};
           CLASS_NUMS.forEach((c) => { classMap[String(c)] = filtered; });
           teacherMap[subj] = classMap;
         }
       });
 
-      const subjectAlias = {};
+      const subjectAlias: Record<string, string> = {};
       Object.entries(aliasInputs).forEach(([subj, alias]) => {
-        if ((alias as string)?.trim()) subjectAlias[subj] = (alias as string).trim();
+        if (alias?.trim()) subjectAlias[subj] = alias.trim();
       });
 
       await saveTeacherMap(grade, teacherMap, subjectAlias);
       setMessage({ type: "success", text: `${grade}학년 교사 매핑이 저장되었습니다.` });
     } catch (err) {
-      setMessage({ type: "error", text: err?.message ?? "저장 중 오류가 발생했습니다." });
+      setMessage({ type: "error", text: (err as Error)?.message ?? "저장 중 오류가 발생했습니다." });
     } finally {
       setSaving(false);
     }

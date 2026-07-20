@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { getTeacherRoster, addTeacherRoster, updateTeacherRoster, deleteTeacherRoster } from "../../api/timetableApi";
+import { getTeacherRoster, addTeacherRoster, updateTeacherRoster, deleteTeacherRoster, type TeacherRosterEntry } from "../../api/timetableApi";
+
+interface StatusMessage { type: string; text: string; }
 
 export default function TeacherRosterManager() {
-  const [teachers, setTeachers] = useState([]);
+  const [teachers, setTeachers] = useState<TeacherRosterEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState("");
   const [newDept, setNewDept] = useState("");
   const [adding, setAdding] = useState(false);
-  const [editId, setEditId] = useState(null);
+  const [editId, setEditId] = useState<number | null>(null);
   const [editName, setEditName] = useState("");
   const [editDept, setEditDept] = useState("");
-  const [message, setMessage] = useState(null);
+  const [message, setMessage] = useState<StatusMessage | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -30,29 +32,29 @@ export default function TeacherRosterManager() {
       await load();
       setMessage({ type: "success", text: "교직원이 추가되었습니다." });
     } catch (e) {
-      setMessage({ type: "error", text: e.message });
+      setMessage({ type: "error", text: (e as Error).message });
     } finally { setAdding(false); }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     if (!window.confirm("삭제하시겠습니까?")) return;
     try {
       await deleteTeacherRoster(id);
       setTeachers((prev) => prev.filter((t) => t.id !== id));
       setMessage({ type: "success", text: "삭제되었습니다." });
     } catch (e) {
-      setMessage({ type: "error", text: e.message });
+      setMessage({ type: "error", text: (e as Error).message });
     }
   };
 
-  const handleEditSave = async (id) => {
+  const handleEditSave = async (id: number) => {
     try {
       await updateTeacherRoster(id, editName, editDept);
       setEditId(null);
       await load();
       setMessage({ type: "success", text: "수정되었습니다." });
     } catch (e) {
-      setMessage({ type: "error", text: e.message });
+      setMessage({ type: "error", text: (e as Error).message });
     }
   };
 

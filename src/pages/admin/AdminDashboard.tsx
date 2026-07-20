@@ -24,21 +24,30 @@ ChartJS.register(
   Legend
 );
 
+interface DailyStatEntry { dayOfWeek: string; likeCount: number; commentCount: number; }
+interface PopularMenuEntry { date: string; type: string; votes: number; }
+interface ReportedReview { id: number; userName: string; content: string; reason: string; userEmail?: string; }
+interface AppStatEntry { appType: string; downloadCount: number; lastDownloadedAt: string | null; }
+
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<{
+    totalUsers: number; todayLikes: number; totalComments: number;
+    reportedReviews: ReportedReview[]; popularMenus: PopularMenuEntry[];
+    topCommentedMenus: unknown[]; dailyStats: DailyStatEntry[];
+  }>({
     totalUsers: 0, todayLikes: 0, totalComments: 0,
     reportedReviews: [], popularMenus: [], topCommentedMenus: [], dailyStats: []
   });
 
-  const [appStats, setAppStats] = useState([]);
-  const [statsError, setStatsError] = useState(null);
-  
-  const [selectedReport, setSelectedReport] = useState(null);
+  const [appStats, setAppStats] = useState<AppStatEntry[]>([]);
+  const [statsError, setStatsError] = useState<string | null>(null);
+
+  const [selectedReport, setSelectedReport] = useState<ReportedReview | null>(null);
   const [processMessage, setProcessMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [notice, setNotice] = useState({ title: "", content: "" });
-  const [imageFile, setImageFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
 
   const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -107,8 +116,9 @@ export default function AdminDashboard() {
   };
 
   // --- 기존 핸들러 함수들 ---
-  const handleProcessReport = async (status) => {
+  const handleProcessReport = async (status: string) => {
     if (!processMessage.trim()) return alert("사유를 입력하세요.");
+    if (!selectedReport) return;
     try {
       await axios.post(`${API_BASE_URL}/admin/reports/${selectedReport.id}/process`, {
         status, message: processMessage, userEmail: selectedReport.userEmail
@@ -119,15 +129,15 @@ export default function AdminDashboard() {
     } catch (err) { alert("오류 발생"); }
   };
 
-  const openModal = (report) => { setSelectedReport(report); setShowModal(true); };
+  const openModal = (report: ReportedReview) => { setSelectedReport(report); setShowModal(true); };
   const closeModal = () => { setSelectedReport(null); setProcessMessage(""); setShowModal(false); };
-  
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) { setImageFile(file); setPreviewUrl(URL.createObjectURL(file)); }
   };
 
-  const handleSendNotice = async (e) => {
+  const handleSendNotice = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!notice.title || !notice.content) return alert("내용 입력 필수");
     setIsSending(true);
@@ -142,9 +152,10 @@ export default function AdminDashboard() {
       });
       alert("발송 완료"); setNotice({ title: "", content: "" }); setImageFile(null); setPreviewUrl(null);
     } catch (err) {
-      const status = err.response?.status;
+      const e = err as { response?: { status?: number; data?: unknown }; message?: string };
+      const status = e.response?.status;
       if (status === 403) alert("권한이 없습니다.");
-      else alert("발송 실패: " + (err.response?.data || err.message));
+      else alert("발송 실패: " + (e.response?.data || e.message));
     } finally { setIsSending(false); }
   };
 

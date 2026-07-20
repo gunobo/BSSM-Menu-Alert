@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import type { Comment } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-export default function CommentModal({ mealKey, mealType, mealDate, onClose }) {
+interface CommentModalProps {
+  mealKey: string;
+  mealType: string;
+  mealDate: string;
+  onClose: () => void;
+}
+
+export default function CommentModal({ mealKey, mealType, mealDate, onClose }: CommentModalProps) {
   const [comment, setComment] = useState("");
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(false);
 
   // 댓글 목록 가져오기

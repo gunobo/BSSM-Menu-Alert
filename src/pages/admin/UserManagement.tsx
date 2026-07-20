@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "../../styles/admin.css";
+import type { User } from "../../types";
 
 export default function UserManagement() {
-  const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   // --- 모달 관련 상태 ---
@@ -24,7 +25,7 @@ export default function UserManagement() {
       setUsers(response.data);
       
       if (selectedUser) {
-        const updated = response.data.find(u => u.email === selectedUser.email);
+        const updated = (response.data as User[]).find(u => u.email === selectedUser.email);
         if (updated) setSelectedUser(updated);
       }
     } catch (err) {
@@ -57,6 +58,7 @@ export default function UserManagement() {
   };
 
   const handleBanSubmit = async () => {
+    if (!selectedUser) return;
     const isBanning = !selectedUser.banned; 
     if (isBanning && !banReason.trim()) return alert("차단 사유를 입력해주세요.");
 
@@ -83,7 +85,7 @@ export default function UserManagement() {
     }
   };
 
-  const getUserDisplayName = (user) => {
+  const getUserDisplayName = (user: User | null) => {
     if (!user) return "";
     if (user.userName && user.userName.trim() !== "") return user.userName;
     if (user.email) return user.email.split("@")[0];
@@ -172,8 +174,8 @@ export default function UserManagement() {
             <div className="info-group">
               <label>🚫 알레르기 정보</label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
-                {selectedUser.allergies?.length > 0 ? (
-                  selectedUser.allergies.map(a => <span key={a} className="tag-item">{a}</span>)
+                {(selectedUser.allergies?.length ?? 0) > 0 ? (
+                  selectedUser.allergies!.map(a => <span key={a} className="tag-item">{a}</span>)
                 ) : <p style={{ color: '#bbb', fontSize: '14px' }}>설정 없음</p>}
               </div>
             </div>
@@ -181,8 +183,8 @@ export default function UserManagement() {
             <div className="info-group">
               <label>💖 선호 메뉴</label>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
-                {selectedUser.favoriteMenus?.length > 0 ? (
-                  selectedUser.favoriteMenus.map(m => <span key={m} className="tag-item-fav">{m}</span>)
+                {(selectedUser.favoriteMenus?.length ?? 0) > 0 ? (
+                  selectedUser.favoriteMenus!.map(m => <span key={m} className="tag-item-fav">{m}</span>)
                 ) : <p style={{ color: '#bbb', fontSize: '14px' }}>등록 없음</p>}
               </div>
             </div>
@@ -222,17 +224,17 @@ export default function UserManagement() {
       </section>
 
       {/* 3. 차단 설정 모달 */}
-      {isModalOpen && (
+      {isModalOpen && selectedUser && (
         <div className="admin-modal-overlay">
           <div className="admin-modal">
             <h3 style={{ color: selectedUser.banned ? 'var(--success-green)' : 'var(--danger-red)', border: 'none' }}>
               {selectedUser.banned ? "🔓 차단 해제" : "🚫 사용자 차단"}
             </h3>
-            
+
             <div className="modal-info">
                 <strong>대상:</strong> {getUserDisplayName(selectedUser)}
             </div>
-            
+
             {!selectedUser.banned ? (
               <div className="admin-form">
                 <label style={{ fontSize: '14px', fontWeight: '700' }}>차단 기간</label>
@@ -265,7 +267,7 @@ export default function UserManagement() {
               >
                 취소
               </button>
-              <button className={selectedUser.banned ? "btn-resolve" : "btn-reject"} onClick={handleBanSubmit}>
+              <button className={selectedUser?.banned ? "btn-resolve" : "btn-reject"} onClick={handleBanSubmit}>
                 {selectedUser.banned ? "해제 확정" : "차단 확정"}
               </button>
             </div>

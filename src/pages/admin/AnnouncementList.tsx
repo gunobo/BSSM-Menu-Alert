@@ -3,8 +3,16 @@ import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-export default function AnnouncementList({ onEdit }) { // ✅ AdminPage에서 넘겨준 onEdit 프롭스
-  const [notices, setNotices] = useState([]);
+interface NoticeItem {
+  id: number;
+  type: string;
+  title: string;
+  createdBy?: string;
+  createdAt: string;
+}
+
+export default function AnnouncementList({ onEdit }: { onEdit: (notice: NoticeItem) => void }) {
+  const [notices, setNotices] = useState<NoticeItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchNotices = async () => {
@@ -24,7 +32,7 @@ export default function AnnouncementList({ onEdit }) { // ✅ AdminPage에서 �
 
   useEffect(() => { fetchNotices(); }, []);
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     if (!window.confirm("정말로 삭제하시겠습니까?")) return;
     try {
       const token = sessionStorage.getItem("accessToken");
@@ -34,9 +42,10 @@ export default function AnnouncementList({ onEdit }) { // ✅ AdminPage에서 �
       alert("삭제되었습니다.");
       fetchNotices();
     } catch (err) {
-      const status = err.response?.status;
+      const e = err as { response?: { status?: number; data?: { message?: string } }; message?: string };
+      const status = e.response?.status;
       if (status === 401 || status === 403) alert("권한이 없습니다.");
-      else alert("삭제 실패: " + (err.response?.data?.message || err.message));
+      else alert("삭제 실패: " + (e.response?.data?.message || e.message));
     }
   };
 

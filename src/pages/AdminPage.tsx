@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { getUser } from "../api/auth"; // API 호출 함수 임포트 확인
+import { useNavigate, useParams } from "react-router-dom";
+import { getUser } from "../api/auth";
+import type { User, Notice } from "../types";
 import AdminDashboard from "./admin/AdminDashboard";
 import AnnouncementEditor from "./admin/AnnouncementEditor"; 
 import AnnouncementList from "./admin/AnnouncementList";     
@@ -17,15 +19,17 @@ import OverrideManager from "./admin/OverrideManager";
 import "../styles/admin.css";
 
 export default function AdminPage() {
-  const [activeMenu, setActiveMenu] = useState("dashboard");
-  const [isNoticeOpen, setIsNoticeOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isPushMenuOpen, setIsPushMenuOpen] = useState(false);
-  const [isAppMenuOpen, setIsAppMenuOpen] = useState(false);
-  const [selectedNotice, setSelectedNotice] = useState(null);
-  
+  const { menu } = useParams<{ menu?: string }>();
+  const navigate = useNavigate();
+  const activeMenu = menu || "dashboard";
+  const [isNoticeOpen, setIsNoticeOpen] = useState(activeMenu.includes("announcement"));
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(["users", "user-search", "login-history"].includes(activeMenu));
+  const [isPushMenuOpen, setIsPushMenuOpen] = useState(activeMenu.includes("push") || activeMenu.includes("stats"));
+  const [isAppMenuOpen, setIsAppMenuOpen] = useState(activeMenu.includes("app"));
+  const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
+
   // ✅ 사용자 상태 관리
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,7 +52,7 @@ export default function AdminPage() {
   const userRole = user?.role || "ROLE_USER";
 
   // ✅ 권한별 접근 가능한 메뉴 정의
-  const hasAccess = (menu) => {
+  const hasAccess = (menu: string) => {
     // ADMIN은 모든 메뉴 접근 가능
     if (userRole === "ROLE_ADMIN" || userRole === "ADMIN") return true;
 
@@ -77,22 +81,22 @@ export default function AdminPage() {
   const canSeeUserMenu = isAdmin;
   const canSeeAppMenu = isAdmin;
 
-  const handleMenuClick = (menu) => {
-    if (!hasAccess(menu)) {
+  const handleMenuClick = (menuKey: string) => {
+    if (!hasAccess(menuKey)) {
       alert("⚠️ 해당 메뉴에 대한 접근 권한이 없습니다.");
       return;
     }
-    setActiveMenu(menu);
-    setSelectedNotice(null); 
+    setSelectedNotice(null);
+    navigate(menuKey === "dashboard" ? "/admin" : `/admin/${menuKey}`);
   };
 
-  const handleEditNotice = (notice) => {
+  const handleEditNotice = (notice: Notice) => {
     if (!hasAccess("announcement-write")) {
       alert("⚠️ 수정 권한이 없습니다.");
       return;
     }
-    setSelectedNotice(notice);      
-    setActiveMenu("announcement-write"); 
+    setSelectedNotice(notice);
+    navigate("/admin/announcement-write");
   };
 
   // ✅ 권한 표시 배지
@@ -106,7 +110,7 @@ export default function AdminPage() {
       "ROLE_USER": { text: "일반", color: "#868e96" }
     };
     
-    const badge = badges[userRole] || badges["ROLE_USER"];
+    const badge = (badges as Record<string, { text: string; color: string }>)[userRole] || badges["ROLE_USER"];
     
     return (
       <span style={{
@@ -336,9 +340,9 @@ export default function AdminPage() {
                 {activeMenu === "teacher-roster" && <TeacherRosterManager />}
                 {activeMenu === "teacher-map" && <TeacherMapManager />}
                 {activeMenu === "announcement-write" && (
-                  <AnnouncementEditor 
-                    editData={selectedNotice} 
-                    onComplete={() => setActiveMenu("announcement-manage")} 
+                  <AnnouncementEditor
+                    editData={selectedNotice}
+                    onComplete={() => navigate("/admin/announcement-manage")}
                   />
                 )}
                 {activeMenu === "announcement-manage" && (
@@ -350,8 +354,8 @@ export default function AdminPage() {
               <div style={{ textAlign: "center", padding: "100px 0" }}>
                 <h2 style={{ color: "#fa5252" }}>🔒 접근 권한이 없습니다.</h2>
                 <p>관리자에게 문의하시거나 권한을 확인해주세요.</p>
-                <button 
-                  onClick={() => setActiveMenu("dashboard")}
+                <button
+                  onClick={() => navigate("/admin")}
                   style={{ marginTop: "20px", padding: "10px 20px", cursor: "pointer" }}
                 >
                   대시보드로 돌아가기

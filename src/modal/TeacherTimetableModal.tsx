@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { getTeacherList, getTeacherSchedule } from "../api/timetableApi";
+import type { TeacherScheduleEntry } from "../types";
 
 const DAY_NAMES = ["월", "화", "수", "목", "금"];
 const MAX_PERIODS = 7;
 
-export default function TeacherTimetableModal({ onClose }) {
-  const [teachers, setTeachers] = useState([]);
+interface TeacherTimetableModalProps {
+  onClose: () => void;
+}
+
+export default function TeacherTimetableModal({ onClose }: TeacherTimetableModalProps) {
+  const [teachers, setTeachers] = useState<string[]>([]);
   const [selectedTeacher, setSelectedTeacher] = useState("");
-  const [schedule, setSchedule] = useState([]);
+  const [schedule, setSchedule] = useState<TeacherScheduleEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [listLoading, setListLoading] = useState(true);
 
@@ -27,7 +32,7 @@ export default function TeacherTimetableModal({ onClose }) {
   }, [selectedTeacher]);
 
   // schedule 배열 → period/dayIdx 기준 맵으로 변환
-  const scheduleMap = {};
+  const scheduleMap: Record<number, Record<number, { grade: number; classNum: number; subject: string }>> = {};
   schedule.forEach(({ period, dayIdx, grade, classNum, subject }) => {
     if (!scheduleMap[period]) scheduleMap[period] = {};
     scheduleMap[period][dayIdx] = { grade, classNum, subject };

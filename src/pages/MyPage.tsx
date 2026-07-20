@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser, updateUserInfo, logout, saveFcmToken } from "../api/auth";
+import type { User } from "../types";
 import "../styles/mypage.css";
 import bssmLogo from "../assets/bssmlogo.png";
 import Footer from "./footer";
@@ -9,8 +10,8 @@ export default function MyPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   
-  const [user, setUser] = useState(null);
-  const [allergies, setAllergies] = useState([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [allergies, setAllergies] = useState<string[]>([]);
   const [favoriteMenus, setFavoriteMenus] = useState("");
 
   const [allowNotifications, setAllowNotifications] = useState(false);
@@ -28,7 +29,7 @@ export default function MyPage() {
         const userData = await getUser();
         if (userData) {
           setUser(userData);
-          setAllergies(userData.allergies || []);
+          setAllergies((userData.allergies as unknown as string[]) || []);
           setFavoriteMenus(userData.favoriteMenus?.join(", ") || "");
           
           setAllowNotifications(
@@ -75,7 +76,7 @@ export default function MyPage() {
     }
   };
 
-  const handleToggle = async (type, isChecked) => {
+  const handleToggle = async (type: string, isChecked: boolean) => {
     if (isChecked) {
       const hasPermission = await requestNotificationPermission();
       if (!hasPermission && !window.Android) { 
@@ -88,7 +89,7 @@ export default function MyPage() {
     if (type === "favorite") setAllowFavoriteNotifications(isChecked);
   };
 
-  const handleAllergyChange = (allergy) => {
+  const handleAllergyChange = (allergy: string) => {
     setAllergies((prev) =>
       prev.includes(allergy) ? prev.filter((a) => a !== allergy) : [...prev, allergy]
     );
@@ -182,7 +183,7 @@ export default function MyPage() {
     const fcmToken = localStorage.getItem("fcmToken");
     
     // 비동기로 서버에 알리지만, 실패해도 무시
-    logout(fcmToken).catch(err => {
+    logout(fcmToken ?? undefined).catch((err: unknown) => {
       console.error("서버 로그아웃 실패 (무시):", err);
     });
     
@@ -296,7 +297,7 @@ export default function MyPage() {
             <div className="allergy-option">
               {allergyOptions.map((item) => (
                 <label key={item} className="allergy-label">
-                  <input type="checkbox" checked={allergies.includes(item)} onChange={() => handleAllergyChange(item)} />
+                  <input type="checkbox" checked={(allergies as string[]).includes(item)} onChange={() => handleAllergyChange(item)} />
                   {item}
                 </label>
               ))}

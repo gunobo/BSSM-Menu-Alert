@@ -3,12 +3,13 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { logout, isLoggedIn } from "../api/auth";
 import "../styles/delete-account.css";
+import type { UserInfo } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export default function DeleteAccount() {
   const navigate = useNavigate();
-  const [userInfo, setUserInfo] = useState(null);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmText, setConfirmText] = useState("");
@@ -65,8 +66,9 @@ export default function DeleteAccount() {
       navigate("/");
 
     } catch (error) {
+      const axiosErr = error as { response?: { data?: { message?: string } } };
       console.error("계정 삭제 실패:", error);
-      alert(error.response?.data?.message || "계정 삭제 중 오류가 발생했습니다.");
+      alert(axiosErr.response?.data?.message || "계정 삭제 중 오류가 발생했습니다.");
     } finally {
       setIsDeleting(false);
       setShowConfirmModal(false);

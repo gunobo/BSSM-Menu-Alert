@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUser, isLoggedIn } from "../api/auth";
+import type { User } from "../types";
 import "../styles/footer.css";
 import githublogo from "../assets/github.png";
 
 export default function Footer() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -16,15 +17,14 @@ export default function Footer() {
       }
     };
     fetchUser();
-    
+
     window.addEventListener("authChange", fetchUser);
     return () => window.removeEventListener("authChange", fetchUser);
   }, []);
 
   const hasAdminAccess = user && ["TEACHER", "MODERATOR", "ADMIN","ROLE_TEACHER","ROLE_MODERATOR","ROLE_ADMIN"].includes(user.role);
 
-  // 외부 링크 이동 함수 (window.open 사용)
-  const openExternalLink = (url) => {
+  const openExternalLink = (url: string) => {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
@@ -48,23 +48,22 @@ export default function Footer() {
             <a href="https://github.com/gunobo" target="_blank" rel="noreferrer" title="GitHub">
               <img src={githublogo} alt="GitHub" className="footer-icon-img" />
             </a>
-            
-            <button 
-              onClick={() => openExternalLink("https://www.notion.so/BSSM-2f4989ca644280d69691d37de08e486a?source=copy_link")} 
-              className="icon-btn" 
+
+            <button
+              onClick={() => openExternalLink("https://www.notion.so/BSSM-2f4989ca644280d69691d37de08e486a?source=copy_link")}
+              className="icon-btn"
               title="Wiki"
             >
               📖 위키
             </button>
 
             {hasAdminAccess && (
-              <button onClick={() => navigate("/adminpages")} className="icon-btn" title="Admin">
+              <button onClick={() => navigate("/admin")} className="icon-btn" title="Admin">
                 ⚙️ 관리자
               </button>
             )}
           </div>
 
-          {/* 관련 링크 옵션 대신 하단 버튼으로 변경 */}
           <div className="footer-links">
             <button className="link-btn" onClick={() => openExternalLink("https://school.busanedu.net/bssm-h")}>
               BSSM 홈페이지

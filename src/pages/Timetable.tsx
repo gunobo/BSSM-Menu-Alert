@@ -6,21 +6,38 @@ import { getWeekTimetable } from "../api/NeisApi";
 import { getPublicBaseTimetable, getPublicTeacherMap, getPublicOverrides } from "../api/timetableApi";
 import Footer from "./footer";
 import "../styles/home.css";
-import Navbar from "./Navbar"
-import ReportModal from "../modal/ReportModal"
-import TeacherTimetableModal from "../modal/TeacherTimetableModal"
+import Navbar from "./Navbar";
+import ReportModal from "../modal/ReportModal";
+import TeacherTimetableModal from "../modal/TeacherTimetableModal";
+import type { User, ReportTarget } from "../types";
+
+interface BaseTimetableData {
+  subjects: string[][];
+  teachers: string[][];
+}
+
+interface TimetableSlot {
+  period: number;
+  subject: string;
+  teacher?: string;
+}
+
+interface OverrideInfo {
+  teacher?: string;
+  overrideSubject?: string | null;
+}
 
 const GRADES = [1, 2, 3];
 const MAX_CLASSES = 4;
 const DAY_NAMES = ["월", "화", "수", "목", "금"];
 const CAL_DAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
-function toYMD(date) {
+function toYMD(date: Date) {
   const offset = date.getTimezoneOffset() * 60000;
   return new Date(date.getTime() - offset).toISOString().slice(0, 10).replace(/-/g, "");
 }
 
-function getWeekDays(date) {
+function getWeekDays(date: Date) {
   const d = new Date(date);
   const day = d.getDay();
   const diffToMon = day === 0 ? -6 : 1 - day;
@@ -36,7 +53,7 @@ function getWeekDays(date) {
 export default function Timetable() {
   const navigate = useNavigate();
   const [isAuth, setIsAuth] = useState(isLoggedIn());
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
 
   const [grade, setGrade] = useState(() => {
     const saved = localStorage.getItem("tt_grade");
@@ -47,18 +64,18 @@ export default function Timetable() {
     return saved ? Number(saved) : 1;
   });
 
-  const [timetable, setTimetable] = useState({});
-  const [baseTimetable, setBaseTimetable] = useState(null);   // { subjects[][], teachers[][] }
-  const [teacherMap, setTeacherMap] = useState({});           // subjectAlias 로드용 (교사 표시에는 미사용)
-  const [subjectAlias, setSubjectAlias] = useState({});
-  const [overrides, setOverrides] = useState({});             // { date: { period: { teacher, subject } } }
+  const [timetable, setTimetable] = useState<Record<string, TimetableSlot[]>>({});
+  const [baseTimetable, setBaseTimetable] = useState<BaseTimetableData | null>(null);   // { subjects[][], teachers[][] }
+  const [teacherMap, setTeacherMap] = useState<Record<string, string>>({});           // subjectAlias 로드용 (교사 표시에는 미사용)
+  const [subjectAlias, setSubjectAlias] = useState<Record<string, string>>({});
+  const [overrides, setOverrides] = useState<Record<string, Record<number, OverrideInfo>>>({});             // { date: { period: { teacher, subject } } }
   const [loading, setLoading] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   const [showCalendar, setShowCalendar] = useState(false);
   const [calYear, setCalYear] = useState(() => new Date().getFullYear());
   const [calMonth, setCalMonth] = useState(() => new Date().getMonth());
-  const calRef = useRef(null);
+  const calRef = useRef<HTMLDivElement | null>(null);
 
   const todayStr = useMemo(() => toYMD(new Date()), []);
   const weekDays = useMemo(() => getWeekDays(selectedDate), [selectedDate]);
@@ -66,7 +83,7 @@ export default function Timetable() {
   const weekEnd = weekDays[4];
 
   const [showReportModal, setShowReportModal] = useState(false);
-  const [reportTarget, setReportTarget] = useState(null);
+  const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
   const [showTeacherModal, setShowTeacherModal] = useState(false);
 
   const weekLabel = useMemo(() => {
@@ -76,8 +93,8 @@ export default function Timetable() {
   }, [weekStart, weekEnd]);
 
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (calRef.current && !calRef.current.contains(e.target)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (calRef.current && !calRef.current.contains(e.target as Node)) {
         setShowCalendar(false);
       }
     };
@@ -115,11 +132,11 @@ export default function Timetable() {
     setTeacherMap({});
     setSubjectAlias({});
     // baseTimetable = { subjects[][], teachers[][] }
-    getPublicBaseTimetable(grade, classNum).then(setBaseTimetable);
+    getPublicBaseTimetable(grade, classNum).then((data) => setBaseTimetable(data as BaseTimetableData | null));
     getPublicTeacherMap(grade, classNum).then((res) => {
       if (res) {
-        setTeacherMap(res.teacherMap ?? {});
-        setSubjectAlias(res.subjectAlias ?? {});
+        setTeacherMap((res.teacherMap ?? {}) as unknown as Record<string, string>);
+        setSubjectAlias((res.subjectAlias ?? {}) as unknown as Record<string, string>);
       }
     });
   }, [grade, classNum]);
@@ -131,8 +148,8 @@ export default function Timetable() {
         getWeekTimetable(grade, classNum, weekStart, weekEnd).catch(() => ({})),
         getPublicOverrides(grade, classNum, weekStart, weekEnd).catch(() => ({})),
       ]);
-      setTimetable(data ?? {});
-      setOverrides(ov ?? {});
+      setTimetable((data ?? {}) as Record<string, TimetableSlot[]>);
+      setOverrides((ov ?? {}) as Record<string, Record<number, OverrideInfo>>);
     } catch {
       setTimetable({});
       setOverrides({});
@@ -145,16 +162,16 @@ export default function Timetable() {
     fetchTimetable();
   }, [fetchTimetable]);
 
-  const getBaseSubject = useCallback((periodIdx, dayIdx) => {
+  const getBaseSubject = useCallback((periodIdx: number, dayIdx: number) => {
     return baseTimetable?.subjects?.[periodIdx]?.[dayIdx] ?? "";
   }, [baseTimetable]);
 
-  const getBaseTeacher = useCallback((periodIdx, dayIdx) => {
+  const getBaseTeacher = useCallback((periodIdx: number, dayIdx: number) => {
     return baseTimetable?.teachers?.[periodIdx]?.[dayIdx] ?? "";
   }, [baseTimetable]);
 
-  const handleGradeChange = (g) => { setGrade(g); localStorage.setItem("tt_grade", g); };
-  const handleClassChange = (c) => { setClassNum(c); localStorage.setItem("tt_class", c); };
+  const handleGradeChange = (g: number) => { setGrade(g); localStorage.setItem("tt_grade", String(g)); };
+  const handleClassChange = (c: number) => { setClassNum(c); localStorage.setItem("tt_class", String(c)); };
 
   const maxPeriods = useMemo(() => {
     let max = 7;
@@ -171,25 +188,25 @@ export default function Timetable() {
     return cells;
   }, [calYear, calMonth]);
 
-  const isInSelectedWeek = (date) => {
+  const isInSelectedWeek = (date: Date | null) => {
     if (!date) return false;
     return weekDays.includes(toYMD(date));
   };
 
-  const isToday = (date) => date && toYMD(date) === todayStr;
+  const isToday = (date: Date | null) => date && toYMD(date) === todayStr;
 
-  const handleCalDateClick = (date) => {
+  const handleCalDateClick = (date: Date | null) => {
     if (!date) return;
     setSelectedDate(date);
     setShowCalendar(false);
   };
 
   const [showClassPopup, setShowClassPopup] = useState(false);
-  const classPopupRef = useRef(null);
+  const classPopupRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (classPopupRef.current && !classPopupRef.current.contains(e.target)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (classPopupRef.current && !classPopupRef.current.contains(e.target as Node)) {
         setShowClassPopup(false);
       }
     };
@@ -334,7 +351,7 @@ export default function Timetable() {
                       <td className="tt-period-cell">{periodIdx + 1}교시</td>
                       {weekDays.map((day, dayIdx) => {
                         const isTodayCol = day === todayStr;
-                        const periods = timetable[day] || [];
+                        const periods: TimetableSlot[] = timetable[day] || [];
                         const slot = periods.find((p) => p.period === periodIdx + 1);
                         const neisSubject = slot?.subject || "";
                         const baseSubject = getBaseSubject(periodIdx, dayIdx);
@@ -401,7 +418,7 @@ export default function Timetable() {
       </main>
 
       <Footer />
-      {showReportModal && <ReportModal target={reportTarget} onClose={() => setShowReportModal(false)} />}
+      {showReportModal && reportTarget && <ReportModal target={reportTarget} onClose={() => setShowReportModal(false)} />}
       {showTeacherModal && <TeacherTimetableModal onClose={() => setShowTeacherModal(false)} />}
     </>
   );

@@ -12,7 +12,7 @@ const AppDownload = () => {
   // ✅ API 베이스 경로 설정
   const API_BASE_URL = import.meta.env.VITE_API_URL || "";
   
-  const getDownloadUrl = (type) => {
+  const getDownloadUrl = (type: string) => {
     const base = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
     if (base.endsWith('/api')) {
       return `${base}/admin/app/download/${type}`;
@@ -27,7 +27,7 @@ const AppDownload = () => {
   /**
    * ✅ [핵심 수정] Mixed Content 이슈 해결을 위한 다운로드 로직
    */
-  const handleAppDownload = (type) => {
+  const handleAppDownload = (type: string) => {
     if (type === 'apk') {
       alert("Android 설치 파일(APK) 다운로드를 시작합니다.");
     }
@@ -52,7 +52,7 @@ const AppDownload = () => {
     document.body.removeChild(link);
   };
 
-  const handleStoreClick = (platform) => {
+  const handleStoreClick = (platform: string) => {
     if (platform === 'ios') {
       alert("App Store 출시 준비중입니다! 아래 설치법을 참고하여 앱을 설치해주세요.");
     } else {
@@ -115,9 +115,9 @@ const AppDownload = () => {
                     <button className="nav-btn download-action-btn" onClick={() => handleStoreClick('android')}>
                       Google Play로 이동
                     </button>
-                    <button 
-                      className="nav-btn download-action-btn" 
-                      onClick={handleAppDownload}
+                    <button
+                      className="nav-btn download-action-btn"
+                      onClick={() => handleAppDownload('apk')}
                     >
                       apk 다운로드 받기
                     </button>

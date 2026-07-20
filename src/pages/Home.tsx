@@ -11,14 +11,15 @@ import NoticeModal from "../modal/NoticeModal";
 import CommentModal from "../modal/CommentModal";
 import Footer from "./footer";
 import Navbar from "./Navbar";
+import type { User, NeisMeal, RankingItem, ReportTarget, Notice, CommentTarget } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export default function Home() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isAuth, setIsAuth] = useState(isLoggedIn());
-  const sseRef = useRef(null);
+  const sseRef = useRef<EventSource | null>(null);
 
   const todayStr = useMemo(() => {
     const now = new Date();
@@ -35,35 +36,35 @@ export default function Home() {
   }, []);
 
   const [selectedDate, setSelectedDate] = useState(todayStr);
-  const [monthData, setMonthData] = useState({});
-  const [meals, setMeals] = useState([]);
+  const [monthData, setMonthData] = useState<Record<string, NeisMeal[]>>({});
+  const [meals, setMeals] = useState<NeisMeal[]>([]);
   const [loading, setLoading] = useState(true);
-  const [flipped, setFlipped] = useState([]);
+  const [flipped, setFlipped] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const [dbRanking, setDbRanking] = useState([]);
-  const [myLikes, setMyLikes] = useState([]);
+  const [dbRanking, setDbRanking] = useState<RankingItem[]>([]);
+  const [myLikes, setMyLikes] = useState<string[]>([]);
 
   const [showReportModal, setShowReportModal] = useState(false);
-  const [reportTarget, setReportTarget] = useState(null);
+  const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
 
-  const [activeNotice, setActiveNotice] = useState(null);
+  const [activeNotice, setActiveNotice] = useState<Notice | null>(null);
   const [showNoticeModal, setShowNoticeModal] = useState(false);
 
   const [showCommentModal, setShowCommentModal] = useState(false);
-  const [commentTarget, setCommentTarget] = useState(null);
+  const [commentTarget, setCommentTarget] = useState<CommentTarget | null>(null);
 
   const handleLogoClick = () => {
     window.open("https://school.busanedu.net/bssm-h", "_blank");
   };
 
-  const formatRankingDate = (dateStr) => {
+  const formatRankingDate = (dateStr: string) => {
     if (!dateStr) return "";
     const cleanDate = dateStr.replace(/-/g, "");
     return `${parseInt(cleanDate.substring(4, 6))}월 ${parseInt(cleanDate.substring(6, 8))}일`;
   };
 
-  const subscribeToNotifications = useCallback((userId) => {
+  const subscribeToNotifications = useCallback((userId: string | number) => {
     if (!userId || userId === "undefined") return;
     try {
       if (sseRef.current) sseRef.current.close();
@@ -88,7 +89,7 @@ export default function Home() {
     }
   }, []);
 
-  const fetchMyLikes = useCallback(async (userId) => {
+  const fetchMyLikes = useCallback(async (userId: string | number) => {
     try {
       const token = sessionStorage.getItem("accessToken");
       if (!token || !userId) return;
@@ -173,7 +174,7 @@ export default function Home() {
     return () => { if (sseRef.current) sseRef.current.close(); };
   }, [fetchRanking, fetchLatestNotice]);
 
-  const handleLike = async (e, mealKey, mealType) => {
+  const handleLike = async (e: React.MouseEvent, mealKey: string, mealType: string) => {
     e.stopPropagation();
     const token = sessionStorage.getItem("accessToken");
     const userIdentifier = user?.id || user?.email;
@@ -197,14 +198,15 @@ export default function Home() {
       }
       fetchRanking(); 
     } catch (err) {
-      if (err.response?.status === 401 || err.response?.status === 403) {
+      const axiosErr = err as { response?: { status?: number } };
+      if (axiosErr.response?.status === 401 || axiosErr.response?.status === 403) {
         logout();
         navigate("/login");
       }
     }
   };
 
-  const handleOpenComment = (e, meal) => {
+  const handleOpenComment = (e: React.MouseEvent, meal: NeisMeal) => {
     e.stopPropagation(); 
     const mealKey = meal.DDISH_NM.split("(")[0].trim();
     const mealType = meal.MMEAL_SC_NM;
@@ -216,10 +218,10 @@ export default function Home() {
 
   useEffect(() => {
     const [year, month] = selectedDate.split("-").map(Number);
-    async function fetchMonthData(y, m) {
+    async function fetchMonthData(y: number, m: number) {
       try {
         const data = await getMonthMeals(y, m);
-        setMonthData(data || {});
+        setMonthData((data || {}) as Record<string, NeisMeal[]>);
       } catch (err) { console.error("급식 데이터 로드 실패:", err); }
     }
     fetchMonthData(year, month);
@@ -241,7 +243,7 @@ export default function Home() {
     else alert(`해당 메뉴가 포함된 급식이 없습니다.`);
   };
 
-  const moveDate = (delta) => {
+  const moveDate = (delta: number) => {
     const d = new Date(selectedDate);
     d.setDate(d.getDate() + delta);
     const offset = d.getTimezoneOffset() * 60000;
@@ -258,11 +260,11 @@ export default function Home() {
     const cleanToday = todayStr.replace(/-/g, "");
     const targetMeals = monthData[todayStr] || monthData[cleanToday] || [];
     if (!user || !user.favoriteMenus || targetMeals.length === 0) return [];
-    const found = [];
+    const found: { type: string; name: string }[] = [];
     targetMeals.forEach((meal) => {
       const menuLines = meal.DDISH_NM.split("<br/>");
       menuLines.forEach((line) => {
-        user.favoriteMenus.forEach((fav) => {
+        (user.favoriteMenus ?? []).forEach((fav) => {
           if (line.includes(fav.trim())) {
             found.push({ type: meal.MMEAL_SC_NM, name: line.split("(")[0].trim() });
           }
@@ -331,7 +333,7 @@ export default function Home() {
               {meals.length > 0 ? (
                 meals.map((meal, idx) => {
                   const allergyList = extractAllergyFromDish(meal.DDISH_NM);
-                  const danger = user?.allergies ? allergyList.some((a) => user.allergies.includes(a)) : false;
+                  const danger = allergyList.some((a) => user?.allergies?.includes(a as unknown as number));
                   const mealKey = meal.DDISH_NM.split("(")[0].trim();
                   const mealType = meal.MMEAL_SC_NM;
                   const cleanSelectedDate = selectedDate.replace(/-/g, "");
@@ -364,7 +366,7 @@ export default function Home() {
                             </div>
                           </div>
                           <div className="meal-text-container">
-                            {meal.DDISH_NM.split("<br/>").map((line, i) => {
+                            {meal.DDISH_NM.split("<br/>").map((line: string, i: number) => {
                               const isFav = user?.favoriteMenus?.some((fav) => line.includes(fav.trim()));
                               return (
                                 <div key={i} className={`menu-line ${isFav ? "fav-highlight" : ""}`}>
@@ -382,7 +384,7 @@ export default function Home() {
                             {allergyList.length > 0 ? (
                               allergyList.map((name, i) => {
                                 const allergyNum = Object.keys(allergyMap).find(
-                                  (key) => allergyMap[key] === name
+                                  (key) => (allergyMap as Record<string, string>)[key] === name
                                 );
                                 return (
                                   <div key={i} className="allergy-row">
@@ -437,13 +439,13 @@ export default function Home() {
 
       <Footer />
 
-      {showReportModal && <ReportModal target={reportTarget} onClose={() => setShowReportModal(false)} />}
+      {showReportModal && reportTarget && <ReportModal target={reportTarget} onClose={() => setShowReportModal(false)} />}
       <NoticeModal notice={activeNotice} onClose={handleCloseNotice} />
       
-      {showCommentModal && (
-        <CommentModal 
-          {...commentTarget} 
-          onClose={() => setShowCommentModal(false)} 
+      {showCommentModal && commentTarget && (
+        <CommentModal
+          {...commentTarget}
+          onClose={() => setShowCommentModal(false)}
         />
       )}
     </>

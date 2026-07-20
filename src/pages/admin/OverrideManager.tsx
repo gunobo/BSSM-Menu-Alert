@@ -19,12 +19,12 @@ const BASE_OVERRIDE_PRESETS = [
   { label: "자습", value: "자습" },
 ];
 
-function toYMD(date) {
+function toYMD(date: Date) {
   const offset = date.getTimezoneOffset() * 60000;
   return new Date(date.getTime() - offset).toISOString().slice(0, 10).replace(/-/g, "");
 }
 
-function getWeekDays(date) {
+function getWeekDays(date: Date) {
   const d = new Date(date);
   const day = d.getDay();
   const diffToMon = day === 0 ? -6 : 1 - day;
@@ -37,12 +37,12 @@ function getWeekDays(date) {
   });
 }
 
-function weekLabel(days) {
+function weekLabel(days: string[]) {
   const s = days[0], e = days[4];
   return `${s.slice(0, 4)}년 ${parseInt(s.slice(4, 6))}월 ${parseInt(s.slice(6, 8))}일 ~ ${parseInt(e.slice(4, 6))}월 ${parseInt(e.slice(6, 8))}일`;
 }
 
-function formatDate(ymd) {
+function formatDate(ymd: string) {
   return `${parseInt(ymd.slice(4, 6))}/${parseInt(ymd.slice(6, 8))}`;
 }
 
@@ -55,21 +55,24 @@ export default function OverrideManager() {
   const weekFrom = weekDays[0];
   const weekTo = weekDays[4];
 
-  const [baseTimetable, setBaseTimetable] = useState(null);
-  const [neisTimetable, setNeisTimetable] = useState({});
-  const [teacherMap, setTeacherMap] = useState({});   // subject → string[]
-  const [savedOverrides, setSavedOverrides] = useState({}); // "date_period" → { id, teacher, overrideSubject }
+  interface OverrideRecord { id?: number; teacher: string; overrideSubject: string | null | undefined; }
+  interface StatusMessage { type: string; text: string; }
+
+  const [baseTimetable, setBaseTimetable] = useState<import("../../api/timetableApi").BaseTimetableData | null>(null);
+  const [neisTimetable, setNeisTimetable] = useState<Record<string, Array<{ period: number; subject: string }>>>({});
+  const [teacherMap, setTeacherMap] = useState<Record<string, string[]>>({});   // subject → string[]
+  const [savedOverrides, setSavedOverrides] = useState<Record<string, OverrideRecord>>({}); // "date_period" → { id, teacher, overrideSubject }
   // 입력값 (NEIS 변경 교시): { "date_period": string } → teacher
-  const [inputs, setInputs] = useState({});
+  const [inputs, setInputs] = useState<Record<string, string>>({});
   // 입력값 (기본 시간표 수정): { "date_period": string } → overrideSubject
-  const [baseInputs, setBaseInputs] = useState({});
+  const [baseInputs, setBaseInputs] = useState<Record<string, string>>({});
 
   const [loading, setLoading] = useState(false);
-  const [savingKey, setSavingKey] = useState(null);
-  const [message, setMessage] = useState(null);
-  const [baseMessage, setBaseMessage] = useState(null);
+  const [savingKey, setSavingKey] = useState<string | null>(null);
+  const [message, setMessage] = useState<StatusMessage | null>(null);
+  const [baseMessage, setBaseMessage] = useState<StatusMessage | null>(null);
 
-  const key = (date, period) => `${date}_${period}`;
+  const key = (date: string, period: number) => `${date}_${period}`;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -84,11 +87,12 @@ export default function OverrideManager() {
       ]);
 
       setBaseTimetable(base);
-      setNeisTimetable(neis ?? {});
+      setNeisTimetable((neis ?? {}) as Record<string, Array<{ period: number; subject: string }>>);
       setTeacherMap(teacherRes?.teacherMap ?? {});
 
-      const saved = {};
-      (overrides ?? []).forEach((o) => {
+      interface OverrideItem { date: string; period: number; id?: number; teacher?: string; overrideSubject?: string | null; }
+      const saved: Record<string, OverrideRecord> = {};
+      ((overrides ?? []) as OverrideItem[]).forEach((o) => {
         saved[key(o.date, o.period)] = {
           id: o.id,
           teacher: o.teacher ?? "",
@@ -98,9 +102,9 @@ export default function OverrideManager() {
       setSavedOverrides(saved);
 
       // 입력값 초기화
-      const initInputs = {};
-      const initBaseInputs = {};
-      (overrides ?? []).forEach((o) => {
+      const initInputs: Record<string, string> = {};
+      const initBaseInputs: Record<string, string> = {};
+      ((overrides ?? []) as OverrideItem[]).forEach((o) => {
         const k = key(o.date, o.period);
         if (o.overrideSubject !== null && o.overrideSubject !== undefined) {
           // 기본 시간표 수정 오버라이드
@@ -113,7 +117,7 @@ export default function OverrideManager() {
       setInputs(initInputs);
       setBaseInputs(initBaseInputs);
     } catch (e) {
-      setMessage({ type: "error", text: "데이터 로드 실패: " + (e?.message ?? "") });
+      setMessage({ type: "error", text: "데이터 로드 실패: " + ((e as Error)?.message ?? "") });
     } finally {
       setLoading(false);
     }
@@ -121,10 +125,13 @@ export default function OverrideManager() {
 
   useEffect(() => { load(); }, [load]);
 
+  type ChangedSlot = { date: string; dayIdx: number; period: number; baseSubject: string; neisSubject: string; key: string; };
+  type BaseOnlySlot = { date: string; dayIdx: number; period: number; baseSubject: string; key: string; };
+
   // 변경된 교시 목록 계산 (NEIS vs 기본)
-  const changedSlots = useMemo(() => {
+  const changedSlots = useMemo<ChangedSlot[]>(() => {
     if (!baseTimetable) return [];
-    const result = [];
+    const result: ChangedSlot[] = [];
     weekDays.forEach((date, dayIdx) => {
       const neisSlots = neisTimetable[date] ?? [];
       for (let p = 1; p <= MAX_PERIODS; p++) {
@@ -141,9 +148,9 @@ export default function OverrideManager() {
   }, [baseTimetable, neisTimetable, weekDays]);
 
   // 기본 시간표 기준(NEIS 미등록) 교시 목록 계산
-  const baseOnlySlots = useMemo(() => {
+  const baseOnlySlots = useMemo<BaseOnlySlot[]>(() => {
     if (!baseTimetable) return [];
-    const result = [];
+    const result: BaseOnlySlot[] = [];
     weekDays.forEach((date, dayIdx) => {
       const neisSlots = neisTimetable[date] ?? [];
       for (let p = 1; p <= MAX_PERIODS; p++) {
@@ -161,7 +168,7 @@ export default function OverrideManager() {
   }, [baseTimetable, neisTimetable, weekDays]);
 
   // NEIS 변경 교시 교사 저장
-  const handleSave = async (slot) => {
+  const handleSave = async (slot: ChangedSlot) => {
     const { date, period, neisSubject, key: k } = slot;
     const teacher = (inputs[k] ?? "").trim();
     setSavingKey(k);
@@ -179,14 +186,14 @@ export default function OverrideManager() {
         text: `${DAY_NAMES[slot.dayIdx]}요일 ${period}교시 (${neisSubject}) ${teacher ? `"${teacher}" 저장 완료` : "교사 등록 취소"}`,
       });
     } catch (e) {
-      setMessage({ type: "error", text: e?.message ?? "저장 실패" });
+      setMessage({ type: "error", text: (e as Error)?.message ?? "저장 실패" });
     } finally {
       setSavingKey(null);
     }
   };
 
   // 기본 시간표 수정 저장
-  const handleBaseOverrideSave = async (slot, overrideSubject) => {
+  const handleBaseOverrideSave = async (slot: BaseOnlySlot, overrideSubject: string | undefined) => {
     const { date, period, baseSubject, key: k } = slot;
     setSavingKey("base_" + k);
     setBaseMessage(null);
@@ -211,13 +218,13 @@ export default function OverrideManager() {
         text: `${DAY_NAMES[slot.dayIdx]}요일 ${period}교시 (${baseSubject}) ${label}`,
       });
     } catch (e) {
-      setBaseMessage({ type: "error", text: e?.message ?? "저장 실패" });
+      setBaseMessage({ type: "error", text: (e as Error)?.message ?? "저장 실패" });
     } finally {
       setSavingKey(null);
     }
   };
 
-  const handleWeekMove = (delta) => {
+  const handleWeekMove = (delta: number) => {
     const d = new Date(selectedDate);
     d.setDate(d.getDate() + delta * 7);
     setSelectedDate(d);

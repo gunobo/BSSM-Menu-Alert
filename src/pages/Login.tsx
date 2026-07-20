@@ -27,7 +27,7 @@ export default function Login() {
     };
   }, []);
 
-  const registerFcm = async (accessToken) => {
+  const registerFcm = async (accessToken: string) => {
     try {
       console.log("🔔 FCM 등록 시작...");
       const isAndroid = !!(window.Android && window.Android.googleLogin);
@@ -36,7 +36,7 @@ export default function Login() {
       let fcmToken = null;
 
       if (isAndroid) {
-        if (window.Android.requestFcmToken) {
+        if (window.Android?.requestFcmToken) {
           window.Android.requestFcmToken();
         }
         
@@ -51,8 +51,9 @@ export default function Login() {
         const permission = await Notification.requestPermission();
         if (permission !== "granted") return;
         
-        fcmToken = await getToken(messaging, { 
-          vapidKey: FcmVapidKey?.trim() 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        fcmToken = await getToken(messaging as any, {
+          vapidKey: FcmVapidKey?.trim()
         });
         
         if (fcmToken) {
@@ -87,7 +88,7 @@ export default function Login() {
     }
   };
 
-  const handleLoginSuccess = async (credentialResponse) => {
+  const handleLoginSuccess = async (credentialResponse: { credential?: string }) => {
     if (!credentialResponse.credential) return;
 
     setIsLoggingIn(true);
@@ -142,7 +143,7 @@ export default function Login() {
         <div className="google-login-container" style={{ position: 'relative', display: 'inline-block' }}>
           {window.Android && (
             <div 
-              onClick={!isLoggingIn ? handleNativeLoginRequest : null}
+              onClick={!isLoggingIn ? handleNativeLoginRequest : undefined}
               style={{
                 position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
                 zIndex: 9999, cursor: isLoggingIn ? 'default' : 'pointer',

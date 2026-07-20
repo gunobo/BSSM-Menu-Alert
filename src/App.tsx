@@ -150,7 +150,15 @@ export default function App() {
       <Route path="/my-report" element={<ReportList />} />
       <Route path="/my-report/:id" element={<ReportDetail />} />
       <Route
-        path="/adminpages"
+        path="/admin"
+        element={
+          <AdminRoute>
+            <AdminPage />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/:menu"
         element={
           <AdminRoute>
             <AdminPage />

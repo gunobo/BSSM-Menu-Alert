@@ -2,8 +2,17 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../../styles/adminComment.css";
 
+interface AdminComment {
+  id: number;
+  mealDate: string;
+  mealType: string;
+  username: string;
+  email: string;
+  content: string;
+}
+
 export default function AdminCommentManager() {
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState<AdminComment[]>([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -46,7 +55,7 @@ export default function AdminCommentManager() {
     fetchComments();
   }, []);
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     if (!window.confirm("이 댓글을 삭제하시겠습니까? 복구할 수 없습니다.")) return;
     try {
       const token = sessionStorage.getItem("accessToken");

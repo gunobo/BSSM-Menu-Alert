@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
+import type { LoginHistory } from "../../types";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 export default function LoginHistoryPage() {
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState<LoginHistory[]>([]);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [page, setPage] = useState(0);
@@ -37,7 +38,7 @@ export default function LoginHistoryPage() {
     fetchHistory();
   }, [fetchHistory]);
 
-  const handleSearch = (e) => {
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPage(0);
     setEmailFilter(inputValue.trim());
@@ -49,7 +50,7 @@ export default function LoginHistoryPage() {
     setPage(0);
   };
 
-  const formatDate = (iso) => {
+  const formatDate = (iso: string | null) => {
     if (!iso) return "-";
     return new Date(iso).toLocaleString("ko-KR", {
       year: "numeric", month: "2-digit", day: "2-digit",

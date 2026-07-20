@@ -18,6 +18,86 @@ export interface User {
   allow_favorite_notifications?: boolean;
   class?: number;
   classnum?: number;
+  students_class?: number;
+  students_class_num?: number;
+  userName?: string;
+  banReason?: string;
+  banExpiresAt?: string | null;
+}
+
+// ── 유저 상세 정보 (탈퇴 페이지용) ────────────────────────────
+export interface UserInfo {
+  id?: number;
+  email?: string;
+  name?: string;
+  picture?: string;
+  likeCount?: number;
+  commentCount?: number;
+}
+
+// ── 나이스 급식 데이터 ─────────────────────────────────────────
+export interface NeisMeal {
+  DDISH_NM: string;
+  MMEAL_SC_NM: string;
+  MMEAL_SC_CODE?: string;
+}
+
+// ── 랭킹 아이템 ───────────────────────────────────────────────
+export interface RankingItem {
+  mealDate: string;
+  mealType: string;
+  mealKey?: string;
+  likeCount: number;
+}
+
+// ── 신고/건의 대상 ─────────────────────────────────────────────
+export interface ReportTarget {
+  id: number;
+  type: string;
+  name: string;
+}
+
+// ── 신고/건의 ─────────────────────────────────────────────────
+export interface Report {
+  id: number;
+  type?: string;
+  reason?: string;
+  content?: string;
+  createdAt?: string;
+  targetId?: number;
+  isReported?: boolean;
+}
+
+// ── 공지 (팝업/상세용) ────────────────────────────────────────
+export interface Notice {
+  id: number;
+  title: string;
+  content?: string;
+  imageUrl?: string;
+  type?: string;
+  createdAt?: string;
+}
+
+// ── 한줄평 댓글 ───────────────────────────────────────────────
+export interface Comment {
+  username?: string;
+  content: string;
+}
+
+// ── 댓글 모달 대상 ────────────────────────────────────────────
+export interface CommentTarget {
+  mealKey: string;
+  mealType: string;
+  mealDate: string;
+}
+
+// ── 교사 시간표 항목 ──────────────────────────────────────────
+export interface TeacherScheduleEntry {
+  period: number;
+  dayIdx: number;
+  grade: number;
+  classNum: number;
+  subject: string;
 }
 
 // ── Navbar Props ──────────────────────────────────────────────

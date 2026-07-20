@@ -3,7 +3,7 @@ import axios from "axios";
 import "../../styles/AppFileManager.css";
 
 export default function AppFileManager() {
-  const [file, setFile] = useState(null);
+  const [file, setFile] = useState<File | null>(null);
   const [type, setType] = useState("apk");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -31,7 +31,7 @@ export default function AppFileManager() {
         timeout: 0, 
         onUploadProgress: (progressEvent) => {
           const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
+            (progressEvent.loaded * 100) / (progressEvent.total ?? 1)
           );
           setUploadProgress(percentCompleted);
         },
@@ -43,9 +43,10 @@ export default function AppFileManager() {
       (document.getElementById("appFile") as HTMLInputElement).value = "";
       setUploadProgress(0);
     } catch (err) {
-      console.error("업로드 실패 상세:", err.response || err);
+      const e = err as { response?: { status?: number } };
+      console.error("업로드 실패 상세:", e.response || err);
       // 403 에러 발생 시 더 구체적인 메시지 출력
-      if (err.response?.status === 403) {
+      if (e.response?.status === 403) {
         alert("권한이 없거나 로그인이 만료되었습니다. 다시 로그인해주세요.");
       } else {
         alert("업로드 중 오류가 발생했습니다. (파일 용량 혹은 네트워크 확인)");
@@ -83,7 +84,7 @@ export default function AppFileManager() {
               id="appFile"
               className="admin-input-premium"
               accept={type === "apk" ? ".apk" : ".ipa"}
-              onChange={(e) => setFile(e.target.files[0])}
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             />
           </div>
 

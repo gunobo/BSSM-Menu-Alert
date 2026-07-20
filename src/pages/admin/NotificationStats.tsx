@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../../styles/NotificationStats.css";
+import type { NotificationLog } from "../../types";
 
 export default function NotificationStats() {
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<{ recentLogs: NotificationLog[]; totalSentCount: number }>({
     recentLogs: [],
     totalSentCount: 0,
   });
@@ -45,7 +46,7 @@ export default function NotificationStats() {
   const currentLogs = stats.recentLogs.slice(indexOfFirstLog, indexOfLastLog);
   const totalPages = Math.ceil(stats.recentLogs.length / rowsPerPage);
 
-  const calculateSuccessRate = (success, total) => {
+  const calculateSuccessRate = (success: number, total: number) => {
     if (!total || total === 0) return "0%";
     return ((success / total) * 100).toFixed(1) + "%";
   };

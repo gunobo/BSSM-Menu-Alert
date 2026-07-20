@@ -1,8 +1,14 @@
 import { useState } from "react";
 import axios from "axios";
-import "../styles/report.css"; 
+import "../styles/report.css";
+import type { ReportTarget } from "../types";
 
-export default function ReportModal({ target, onClose }) {
+interface ReportModalProps {
+  target: ReportTarget;
+  onClose: () => void;
+}
+
+export default function ReportModal({ target, onClose }: ReportModalProps) {
   const [reason, setReason] = useState("부적절한 정보");
   const [content, setContent] = useState("");
   const API_BASE_URL = import.meta.env.VITE_API_URL;
@@ -37,8 +43,9 @@ export default function ReportModal({ target, onClose }) {
         onClose();
       }
     } catch (err) {
-      console.error("건의 에러 상세:", err.response?.data || err.message);
-      alert(`건의 제출 실패: ${err.response?.data?.message || "서버 오류"}`);
+      const axiosErr = err as { response?: { data?: { message?: string } }; message?: string };
+      console.error("건의 에러 상세:", axiosErr.response?.data || axiosErr.message);
+      alert(`건의 제출 실패: ${axiosErr.response?.data?.message || "서버 오류"}`);
     }
   };
 

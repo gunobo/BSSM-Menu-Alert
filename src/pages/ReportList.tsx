@@ -3,15 +3,16 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { getUser } from "../api/auth";
 import Navbar from "./Navbar";
+import type { User, Report } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export default function ReportList() {
   const navigate = useNavigate();
-  const [reports, setReports] = useState([]);
-  const [user, setUser] = useState(null);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [selectedIds, setSelectedIds] = useState([]);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   const token = sessionStorage.getItem("accessToken") || localStorage.getItem("accessToken");
 
@@ -30,7 +31,7 @@ export default function ReportList() {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      const sortedData = res.data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      const sortedData = (res.data as Report[]).sort((a, b) => new Date(b.createdAt ?? "").getTime() - new Date(a.createdAt ?? "").getTime());
       setReports(sortedData);
     } catch (err) {
       console.error("데이터 로딩 중 에러:", err);
@@ -43,14 +44,14 @@ export default function ReportList() {
     loadInitialData();
   }, [navigate]);
 
-  const handleSelect = (e, id) => {
+  const handleSelect = (e: React.SyntheticEvent, id: number) => {
     e.stopPropagation(); // 행 클릭(상세 이동) 방지
-    setSelectedIds(prev => 
+    setSelectedIds(prev =>
       prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
     );
   };
 
-  const handleSelectAll = (e) => {
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
       setSelectedIds(reports.map(r => r.id));
     } else {

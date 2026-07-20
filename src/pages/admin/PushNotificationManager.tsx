@@ -1,20 +1,24 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../../styles/PushNotificationManager.css";
+import type { User } from "../../types";
 
 export default function PushNotificationManager() {
-  const [pushData, setPushData] = useState({
+  const [pushData, setPushData] = useState<{
+    title: string; body: string; targetDate: string; scheduledTime: string;
+    targetType: string; targetEmails: string[]; deviceTarget: string;
+  }>({
     title: "",
     body: "",
     targetDate: "",
     scheduledTime: "",
-    targetType: "ALL", 
-    targetEmails: [], 
+    targetType: "ALL",
+    targetEmails: [],
     // ✅ 추가: 발송 대상 기기 설정 (ALL, MOBILE, WEB)
-    deviceTarget: "ALL", 
+    deviceTarget: "ALL",
   });
 
-  const [users, setUsers] = useState([]); 
+  const [users, setUsers] = useState<User[]>([]); 
   const [adminInfo, setAdminInfo] = useState({ email: "", name: "" });
   const [searchTerm, setSearchTerm] = useState("");
   const [searchType, setSearchType] = useState("username");
@@ -74,7 +78,7 @@ export default function PushNotificationManager() {
     handleUserSearch(); 
   }, []);
 
-  const toggleUserSelection = (email) => {
+  const toggleUserSelection = (email: string) => {
     setPushData((prev) => {
       const isSelected = prev.targetEmails.includes(email);
       const newEmails = isSelected

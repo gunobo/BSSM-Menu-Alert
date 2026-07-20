@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import "../styles/announcements.css"; 
+import "../styles/announcements.css";
 import Footer from "./footer";
 import Navbar from "./Navbar";
+import type { Report } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export default function ReportDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [report, setReport] = useState(null);
+  const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
 
   // ✅ 수정 모드 상태 관리

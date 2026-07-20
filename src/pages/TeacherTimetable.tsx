@@ -4,17 +4,18 @@ import { getTeacherList, getTeacherSchedule } from "../api/timetableApi";
 import Navbar from "./Navbar";
 import Footer from "./footer";
 import "../styles/home.css";
+import type { TeacherScheduleEntry } from "../types";
 
 const DAY_NAMES = ["월", "화", "수", "목", "금"];
 const MAX_PERIODS = 7;
 
 export default function TeacherTimetable() {
   const navigate = useNavigate();
-  const [teachers, setTeachers] = useState([]);
+  const [teachers, setTeachers] = useState<string[]>([]);
   const [selectedTeacher, setSelectedTeacher] = useState(() =>
     localStorage.getItem("tt_teacher") ?? ""
   );
-  const [schedule, setSchedule] = useState([]);
+  const [schedule, setSchedule] = useState<TeacherScheduleEntry[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [loading, setLoading] = useState(false);
 
@@ -34,7 +35,7 @@ export default function TeacherTimetable() {
       .finally(() => setLoading(false));
   }, [selectedTeacher]);
 
-  const scheduleMap = {};
+  const scheduleMap: Record<number, Record<number, { grade: number; classNum: number; subject: string }>> = {};
   schedule.forEach(({ period, dayIdx, grade, classNum, subject }) => {
     if (!scheduleMap[period]) scheduleMap[period] = {};
     scheduleMap[period][dayIdx] = { grade, classNum, subject };

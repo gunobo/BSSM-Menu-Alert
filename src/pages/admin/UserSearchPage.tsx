@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "../../styles/admin-search.css";
+import type { User } from "../../types";
 
 export default function UserSearchPage() {
-  const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchType, setSearchType] = useState("username");
   const [loading, setLoading] = useState(false);
@@ -64,16 +65,17 @@ export default function UserSearchPage() {
       const roleName = selectedRole.replace("ROLE_", "");
       alert(`${selectedUser.userName}님의 권한이 ${roleName}(으)로 변경되었습니다.`);
 
-      setSelectedUser({ ...selectedUser, role: selectedRole });
+      setSelectedUser({ ...selectedUser, role: selectedRole as User["role"] });
       setUsers(users.map(u =>
-        u.email === selectedUser.email ? { ...u, role: selectedRole } : u
+        u.email === selectedUser.email ? { ...u, role: selectedRole as User["role"] } : u
       ));
       setShowRoleModal(false);
     } catch (err) {
       console.error("권한 변경 실패:", err);
-      const status = err.response?.status;
+      const e = err as { response?: { status?: number; data?: unknown } };
+      const status = e.response?.status;
       if (status === 403) alert("권한이 없습니다.");
-      else alert(err.response?.data || "권한 변경에 실패했습니다.");
+      else alert(e.response?.data || "권한 변경에 실패했습니다.");
     } finally {
       setRoleLoading(false);
     }
@@ -108,7 +110,8 @@ export default function UserSearchPage() {
       ));
     } catch (err) {
       console.error("차단 처리 실패:", err);
-      const status = err.response?.status;
+      const e = err as { response?: { status?: number } };
+      const status = e.response?.status;
       if (status === 403) alert("권한이 없습니다.");
       else alert("차단 처리에 실패했습니다.");
     }

@@ -5,6 +5,7 @@ import { getUser, isLoggedIn } from "../api/auth";
 import ReportModal from "../modal/ReportModal";
 import NoticeModal from "../modal/NoticeModal";
 import axios from "axios";
+import type { User, ReportTarget, Notice } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -12,14 +13,14 @@ import type { NavbarProps } from "../types";
 export default function Navbar({ selectedDate, setSelectedDate }: NavbarProps) {
   const navigate = useNavigate();
   const location = useLocation(); // 현재 경로 확인용
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isAuth, setIsAuth] = useState(isLoggedIn());
-  const sseRef = useRef(null);
+  const sseRef = useRef<EventSource | null>(null);
 
   // 모달 상태
   const [showReportModal, setShowReportModal] = useState(false);
-  const [reportTarget, setReportTarget] = useState(null);
-  const [activeNotice, setActiveNotice] = useState(null);
+  const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
+  const [activeNotice, setActiveNotice] = useState<Notice | null>(null);
   const [showNoticeModal, setShowNoticeModal] = useState(false);
 
   const handleLogoClick = () => {
@@ -27,7 +28,7 @@ export default function Navbar({ selectedDate, setSelectedDate }: NavbarProps) {
   };
 
   // 실시간 알림 구독 로직
-  const subscribeToNotifications = useCallback((userId) => {
+  const subscribeToNotifications = useCallback((userId: string | number) => {
     if (!userId || userId === "undefined") return;
     try {
       if (sseRef.current) sseRef.current.close();
@@ -90,7 +91,7 @@ export default function Navbar({ selectedDate, setSelectedDate }: NavbarProps) {
   };
 
   // 현재 활성화된 메뉴인지 확인하는 함수
-  const isActive = (path) => (location.pathname === path ? "active" : "");
+  const isActive = (path: string) => (location.pathname === path ? "active" : "");
 
   return (
     <>
@@ -113,7 +114,7 @@ export default function Navbar({ selectedDate, setSelectedDate }: NavbarProps) {
             <input
               type="date"
               value={selectedDate as string}
-              onChange={(e) => setSelectedDate(e.target.value)}
+              onChange={(e) => setSelectedDate?.(e.target.value)}
               className="nav-date-input desktop-only"
             />
           )}
@@ -129,7 +130,7 @@ export default function Navbar({ selectedDate, setSelectedDate }: NavbarProps) {
       </nav>
 
       {/* 모달 렌더링 */}
-      {showReportModal && <ReportModal target={reportTarget} onClose={() => setShowReportModal(false)} />}
+      {showReportModal && reportTarget && <ReportModal target={reportTarget} onClose={() => setShowReportModal(false)} />}
     </>
   );
 }

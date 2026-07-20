@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "../styles/report.css";
+import type { Notice } from "../types";
 
-export default function NoticeModal({ notice: propsNotice, onClose }) {
-  const [localNotice, setLocalNotice] = useState(null);
+interface NoticeModalProps {
+  notice: Notice | null;
+  onClose: () => void;
+}
+
+export default function NoticeModal({ notice: propsNotice, onClose }: NoticeModalProps) {
+  const [localNotice, setLocalNotice] = useState<Notice | null>(null);
   const API_BASE_URL = import.meta.env.VITE_API_URL;
   const todayStr = new Date().toISOString().slice(0, 10);
   const weekLaterStr = (() => {

@@ -4,19 +4,20 @@ import axios from "axios";
 import "../styles/announcements.css";
 import bssmLogo from "../assets/bssmlogo.png";
 import Footer from "./footer";
-import Navbar from "./Navbar"
-import ReportModal from "../modal/ReportModal"
+import Navbar from "./Navbar";
+import ReportModal from "../modal/ReportModal";
+import type { Notice, ReportTarget } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 export default function Announcements() {
   const navigate = useNavigate();
-  const [notices, setNotices] = useState([]);
+  const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showReportModal, setShowReportModal] = useState(false);
-  const [reportTarget, setReportTarget] = useState(null);
+  const [reportTarget, setReportTarget] = useState<ReportTarget | null>(null);
   
 
   const todayStr = useMemo(() => {
@@ -132,7 +133,7 @@ export default function Announcements() {
         </div>
       </main>
       <Footer />
-      {showReportModal && <ReportModal target={reportTarget} onClose={() => setShowReportModal(false)} />}
+      {showReportModal && reportTarget && <ReportModal target={reportTarget} onClose={() => setShowReportModal(false)} />}
     </div>
   );
 }
