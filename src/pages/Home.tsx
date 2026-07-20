@@ -208,7 +208,7 @@ export default function Home() {
 
   const handleOpenComment = (e: React.MouseEvent, meal: NeisMeal) => {
     e.stopPropagation(); 
-    const mealKey = meal.DDISH_NM.split("(")[0].trim();
+    const mealKey = (meal.DDISH_NM || "").split("(")[0].trim();
     const mealType = meal.MMEAL_SC_NM;
     const formattedDate = selectedDate.replace(/-/g, "");
 
@@ -262,7 +262,7 @@ export default function Home() {
     if (!user || !user.favoriteMenus || targetMeals.length === 0) return [];
     const found: { type: string; name: string }[] = [];
     targetMeals.forEach((meal) => {
-      const menuLines = meal.DDISH_NM.split("<br/>");
+      const menuLines = (meal.DDISH_NM || "").split("<br/>");
       menuLines.forEach((line) => {
         (user.favoriteMenus ?? []).forEach((fav) => {
           if (line.includes(fav.trim())) {
@@ -334,7 +334,7 @@ export default function Home() {
                 meals.map((meal, idx) => {
                   const allergyList = extractAllergyFromDish(meal.DDISH_NM);
                   const danger = allergyList.some((a) => user?.allergies?.includes(a as unknown as number));
-                  const mealKey = meal.DDISH_NM.split("(")[0].trim();
+                  const mealKey = (meal.DDISH_NM || "").split("(")[0].trim();
                   const mealType = meal.MMEAL_SC_NM;
                   const cleanSelectedDate = selectedDate.replace(/-/g, "");
                   const isLiked = isAuth && myLikes.includes(`${cleanSelectedDate}_${mealType}_${mealKey}`);
@@ -366,7 +366,7 @@ export default function Home() {
                             </div>
                           </div>
                           <div className="meal-text-container">
-                            {meal.DDISH_NM.split("<br/>").map((line: string, i: number) => {
+                            {(meal.DDISH_NM || "").split("<br/>").map((line: string, i: number) => {
                               const isFav = user?.favoriteMenus?.some((fav) => line.includes(fav.trim()));
                               return (
                                 <div key={i} className={`menu-line ${isFav ? "fav-highlight" : ""}`}>
