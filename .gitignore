@@ -32,3 +32,4 @@ dist-ssr
 # Docker 배포 시크릿
 secrets/
 BSSMEALALERT_bakcend/
+.claude/
