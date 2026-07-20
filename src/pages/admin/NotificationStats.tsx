@@ -127,7 +127,7 @@ export default function NotificationStats() {
               ))
             ) : (
               <tr>
-                <td colSpan="8" className="no-data">발송 내역이 존재하지 않습니다.</td>
+                <td colSpan={8} className="no-data">발송 내역이 존재하지 않습니다.</td>
               </tr>
             )}
           </tbody>

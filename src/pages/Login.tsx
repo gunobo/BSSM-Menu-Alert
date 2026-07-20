@@ -151,13 +151,15 @@ export default function Login() {
             />
           )}
 
-          <GoogleLogin
-            onSuccess={handleLoginSuccess}
-            onError={() => alert("구글 로그인 실패")}
-            ux_mode="popup" 
-            useOneTap={false}
-            disabled={isLoggingIn}
-          />
+          {!isLoggingIn && (
+            <GoogleLogin
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              onSuccess={handleLoginSuccess as any}
+              onError={() => alert("구글 로그인 실패")}
+              ux_mode="popup"
+              useOneTap={false}
+            />
+          )}
           <p onClick={() => navigate("/privacy")}>
             로그인 시 <strong> 개인정보처리방침</strong>에 동의한 것으로 간주합니다.
           </p>

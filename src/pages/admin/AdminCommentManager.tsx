@@ -126,7 +126,7 @@ export default function AdminCommentManager() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="4" className="msg-cell">데이터 로딩 중...</td></tr>
+              <tr><td colSpan={4} className="msg-cell">데이터 로딩 중...</td></tr>
             ) : comments.length > 0 ? (
               comments.map((c) => (
                 <tr key={c.id}>
@@ -145,7 +145,7 @@ export default function AdminCommentManager() {
                 </tr>
               ))
             ) : (
-              <tr><td colSpan="4" className="msg-cell empty">조회된 댓글이 없습니다.</td></tr>
+              <tr><td colSpan={4} className="msg-cell empty">조회된 댓글이 없습니다.</td></tr>
             )}
           </tbody>
         </table>

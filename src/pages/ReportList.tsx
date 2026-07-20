@@ -30,7 +30,7 @@ export default function ReportList() {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      const sortedData = res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const sortedData = res.data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setReports(sortedData);
     } catch (err) {
       console.error("데이터 로딩 중 에러:", err);

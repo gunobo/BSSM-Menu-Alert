@@ -198,8 +198,8 @@ export default function TeacherMapManager() {
       // 반 구분 없으므로 모든 반에 동일하게 저장
       const teacherMap = {};
       Object.entries(teacherTags).forEach(([subj, arr]) => {
-        const filtered = (arr ?? []).filter(Boolean);
-        if (filtered.length > 0) {
+        const filtered = ((arr as string[]) ?? []).filter(Boolean);
+        if ((filtered as string[]).length > 0) {
           const classMap = {};
           CLASS_NUMS.forEach((c) => { classMap[String(c)] = filtered; });
           teacherMap[subj] = classMap;
@@ -208,7 +208,7 @@ export default function TeacherMapManager() {
 
       const subjectAlias = {};
       Object.entries(aliasInputs).forEach(([subj, alias]) => {
-        if (alias?.trim()) subjectAlias[subj] = alias.trim();
+        if ((alias as string)?.trim()) subjectAlias[subj] = (alias as string).trim();
       });
 
       await saveTeacherMap(grade, teacherMap, subjectAlias);

@@ -8,7 +8,8 @@ import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
-export default function Navbar({ selectedDate, setSelectedDate }) {
+import type { NavbarProps } from "../types";
+export default function Navbar({ selectedDate, setSelectedDate }: NavbarProps) {
   const navigate = useNavigate();
   const location = useLocation(); // 현재 경로 확인용
   const [user, setUser] = useState(null);
@@ -111,7 +112,7 @@ export default function Navbar({ selectedDate, setSelectedDate }) {
           {location.pathname === "/" && selectedDate && (
             <input
               type="date"
-              value={selectedDate}
+              value={selectedDate as string}
               onChange={(e) => setSelectedDate(e.target.value)}
               className="nav-date-input desktop-only"
             />

@@ -132,11 +132,11 @@ export default function MyPage() {
               clearInterval(checkToken);
               console.log("💾 localStorage에서 토큰 확인:", token.substring(0, 30) + "...");
               console.log("✅ 토큰이 App.jsx에서 자동으로 서버에 저장됩니다");
-              resolve();
+              resolve(undefined);
             } else if (attempts >= 10) {
               clearInterval(checkToken);
               console.warn("⚠️ 토큰을 찾을 수 없음 (10초 대기)");
-              resolve();
+              resolve(undefined);
             } else {
               console.log(`⏳ 토큰 대기 중... ${attempts}/10초`);
             }
@@ -176,7 +176,7 @@ export default function MyPage() {
     if (!window.confirm("로그아웃 하시겠습니까?")) return;
 
     if (window.Android) {
-      Android.logout();
+(window.Android as Record<string, () => void>).logout?.();
     }
     
     const fcmToken = localStorage.getItem("fcmToken");

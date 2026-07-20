@@ -17,7 +17,7 @@ export default function LoginHistoryPage() {
   const fetchHistory = useCallback(async () => {
     setLoading(true);
     try {
-      const params = { page, size: 50 };
+      const params: Record<string, unknown> = { page, size: 50 };
       if (emailFilter) params.email = emailFilter;
       const res = await axios.get(`${API_URL}/admin/login-history`, {
         headers: { Authorization: `Bearer ${token}` },

@@ -223,7 +223,7 @@ export default function PushNotificationManager() {
           <label className="push-label">알림 내용</label>
           <textarea 
             className="push-input-field"
-            rows="3" 
+            rows={3} 
             value={pushData.body} 
             onChange={(e) => setPushData({...pushData, body: e.target.value})}
             placeholder="알림 내용을 상세히 입력하세요"

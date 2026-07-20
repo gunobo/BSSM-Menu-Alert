@@ -40,7 +40,7 @@ export default function AppFileManager() {
       alert(`${type.toUpperCase()} 파일이 성공적으로 교체되었습니다!`);
       setFile(null);
       // 파일 input 초기화를 위해 수동 조작이 필요할 수 있습니다.
-      document.getElementById("appFile").value = ""; 
+      (document.getElementById("appFile") as HTMLInputElement).value = "";
       setUploadProgress(0);
     } catch (err) {
       console.error("업로드 실패 상세:", err.response || err);
@@ -70,7 +70,7 @@ export default function AppFileManager() {
             onChange={(e) => {
                 setType(e.target.value);
                 setFile(null);
-                document.getElementById("appFile").value = "";
+                (document.getElementById("appFile") as HTMLInputElement).value = "";
             }}
           >
             <option value="apk">Android (APK)</option>

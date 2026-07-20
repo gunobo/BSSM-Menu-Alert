@@ -158,7 +158,7 @@ export default function Timetable() {
 
   const maxPeriods = useMemo(() => {
     let max = 7;
-    Object.values(timetable).forEach((p) => { if (p.length > max) max = p.length; });
+    Object.values(timetable as Record<string, unknown[]>).forEach((p) => { if (p.length > max) max = p.length; });
     return max;
   }, [timetable]);
 

@@ -198,7 +198,7 @@ export default function UserSearchPage() {
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan="4" className="empty-result">
+                  <td colSpan={4} className="empty-result">
                     {loading ? "검색 중..." : "검색 결과가 없습니다."}
                   </td>
                 </tr>
