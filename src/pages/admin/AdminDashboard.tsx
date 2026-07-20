@@ -85,7 +85,7 @@ export default function AdminDashboard() {
 
   // 📊 Chart.js 데이터 설정
   const chartData = {
-    labels: stats.dailyStats?.map(d => d.dayOfWeek.split('(')[0]) || [],
+    labels: stats.dailyStats?.map(d => (d.dayOfWeek || "").split('(')[0]) || [],
     datasets: [
       {
         label: '좋아요',
