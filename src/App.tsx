@@ -27,6 +27,7 @@ import TimetablePage from "./pages/Timetable";
 import TeacherTimetablePage from "./pages/TeacherTimetable";
 import ReportList from "./pages/ReportList";
 import ReportDetail from "./pages/ReportDetail";
+import SchedulePage from "./pages/Schedule";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -147,6 +148,7 @@ export default function App() {
       <Route path="/delete-account" element={<DeleteAccount />} />
       <Route path="/timetable" element={<TimetablePage />} />
       <Route path="/timetable/t" element={<TeacherTimetablePage />} />
+      <Route path="/schedule" element={<SchedulePage />} />
       <Route path="/my-report" element={<ReportList />} />
       <Route path="/my-report/:id" element={<ReportDetail />} />
       <Route

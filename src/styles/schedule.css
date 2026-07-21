@@ -1,0 +1,145 @@
+.sc-hero { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 48px 0 32px; }
+.sc-hero h1 { color: white; font-size: 2rem; font-weight: 700; text-align: center; }
+
+.sc-container { max-width: 700px; margin: 0 auto; padding: 24px 16px 48px; }
+
+.sc-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sc-grade-tabs { display: flex; gap: 8px; }
+.sc-grade-btn {
+  padding: 8px 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 20px;
+  background: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.sc-grade-btn.active { background: #6366f1; border-color: #6366f1; color: white; }
+
+.sc-month-nav { display: flex; align-items: center; gap: 12px; }
+.sc-nav-btn {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.sc-nav-btn:hover { background: #f1f5f9; }
+.sc-month-label { font-size: 1.1rem; font-weight: 700; color: #1e293b; min-width: 120px; text-align: center; }
+
+.sc-legend { display: flex; gap: 16px; margin-bottom: 12px; }
+.sc-legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: #64748b; }
+
+.sc-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.sc-dot.academic { background: #6366f1; }
+.sc-dot.exam { background: #ef4444; }
+
+.sc-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+
+.sc-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.sc-day-name {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #94a3b8;
+  padding: 8px 0;
+}
+.sc-day-name.sun { color: #ef4444; }
+.sc-day-name.sat { color: #6366f1; }
+
+.sc-cell {
+  min-height: 60px;
+  padding: 6px 4px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.12s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.sc-cell:hover:not(.empty) { background: #f8fafc; }
+.sc-cell.empty { cursor: default; }
+.sc-cell.today .sc-date-num {
+  background: #6366f1;
+  color: white;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sc-cell.selected { background: #eef2ff; }
+.sc-cell.sun .sc-date-num { color: #ef4444; }
+.sc-cell.sat .sc-date-num { color: #6366f1; }
+
+.sc-date-num {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #1e293b;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sc-dots { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; }
+
+.sc-detail {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #f1f5f9;
+}
+.sc-detail-title { font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 12px; }
+.sc-detail-empty { color: #94a3b8; font-size: 0.9rem; }
+
+.sc-event-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.sc-event-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.92rem;
+  color: #334155;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.sc-event-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.sc-event-badge.academic { background: #eef2ff; color: #6366f1; }
+.sc-event-badge.exam { background: #fef2f2; color: #ef4444; }
