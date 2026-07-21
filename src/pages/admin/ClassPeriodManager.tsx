@@ -11,6 +11,19 @@ interface Period {
   end_time: string;
 }
 
+interface MealTime {
+  type: string;
+  label: string;
+  start_time: string;
+  end_time: string;
+}
+
+const DEFAULT_MEALS: MealTime[] = [
+  { type: "breakfast", label: "조식", start_time: "07:30", end_time: "08:30" },
+  { type: "lunch",     label: "중식", start_time: "12:30", end_time: "13:20" },
+  { type: "dinner",    label: "석식", start_time: "18:10", end_time: "19:00" },
+];
+
 const DEFAULT_PERIODS: Period[] = [
   { period: 1, label: "1교시", start_time: "09:00", end_time: "09:45" },
   { period: 2, label: "2교시", start_time: "09:55", end_time: "10:40" },
@@ -29,6 +42,9 @@ export default function ClassPeriodManager() {
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
+  const [meals, setMeals] = useState<MealTime[]>(DEFAULT_MEALS);
+  const [mealSaving, setMealSaving] = useState(false);
+
   const [overrideDate, setOverrideDate] = useState(new Date().toISOString().slice(0, 10));
   const [overridePeriods, setOverridePeriods] = useState<Period[]>([]);
   const [overrideSaving, setOverrideSaving] = useState(false);
@@ -37,9 +53,11 @@ export default function ClassPeriodManager() {
   useEffect(() => {
     axios
       .get(`${API}/class-periods`, { params: { target_date: new Date().toISOString().slice(0, 10) } })
-      .then((r) => {
-        if (r.data && r.data.length > 0) setPeriods(r.data);
-      })
+      .then((r) => { if (r.data && r.data.length > 0) setPeriods(r.data); })
+      .catch(() => {});
+    axios
+      .get(`${API}/meal-times`)
+      .then((r) => { if (r.data && r.data.length > 0) setMeals(r.data); })
       .catch(() => {});
   }, []);
 
@@ -57,6 +75,23 @@ export default function ClassPeriodManager() {
 
   const removePeriod = (idx: number) => {
     setPeriods((prev) => prev.filter((_, i) => i !== idx).map((p, i) => ({ ...p, period: i + 1 })));
+  };
+
+  const updateMeal = (idx: number, field: keyof MealTime, value: string) => {
+    setMeals((prev) => prev.map((m, i) => (i === idx ? { ...m, [field]: value } : m)));
+  };
+
+  const saveMeals = async () => {
+    setMealSaving(true);
+    setMsg(null);
+    try {
+      await axios.put(`${API}/meal-times`, meals, { headers });
+      setMsg({ type: "ok", text: "급식 시간이 저장되었습니다." });
+    } catch {
+      setMsg({ type: "err", text: "급식 시간 저장 실패." });
+    } finally {
+      setMealSaving(false);
+    }
   };
 
   const saveDefault = async () => {
@@ -128,6 +163,54 @@ export default function ClassPeriodManager() {
           {msg.text}
         </div>
       )}
+
+      {/* 급식 시간 */}
+      <section className="admin-section" style={{ marginBottom: 32 }}>
+        <h3>🍱 급식 시간 설정</h3>
+        <p style={{ fontSize: "0.85rem", color: "#64748b", marginBottom: 16 }}>
+          타임라인에 표시될 조식/중식/석식 시간을 설정합니다.
+        </p>
+        <table className="admin-table">
+          <thead>
+            <tr><th>구분</th><th>이름</th><th>시작</th><th>종료</th></tr>
+          </thead>
+          <tbody>
+            {meals.map((m, i) => (
+              <tr key={i}>
+                <td style={{ width: 60, textAlign: "center", fontSize: "0.8rem", color: "#64748b" }}>
+                  {m.type === "breakfast" ? "조식" : m.type === "lunch" ? "중식" : "석식"}
+                </td>
+                <td>
+                  <input
+                    value={m.label}
+                    onChange={(e) => updateMeal(i, "label", e.target.value)}
+                    style={{ width: "100%", padding: "4px 8px", border: "1px solid #e2e8f0", borderRadius: 6 }}
+                  />
+                </td>
+                <td>
+                  <input type="time" value={m.start_time}
+                    onChange={(e) => updateMeal(i, "start_time", e.target.value)}
+                    style={{ padding: "4px 8px", border: "1px solid #e2e8f0", borderRadius: 6 }}
+                  />
+                </td>
+                <td>
+                  <input type="time" value={m.end_time}
+                    onChange={(e) => updateMeal(i, "end_time", e.target.value)}
+                    style={{ padding: "4px 8px", border: "1px solid #e2e8f0", borderRadius: 6 }}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <button
+          onClick={saveMeals}
+          disabled={mealSaving}
+          style={{ marginTop: 14, padding: "8px 20px", borderRadius: 8, background: "#5b7cff", color: "#fff", border: "none", cursor: "pointer", fontWeight: 600 }}
+        >
+          {mealSaving ? "저장 중..." : "급식 시간 저장"}
+        </button>
+      </section>
 
       {/* 기본 교시 */}
       <section className="admin-section">

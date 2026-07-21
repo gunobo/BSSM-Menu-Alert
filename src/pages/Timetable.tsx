@@ -10,6 +10,7 @@ import Navbar from "./Navbar";
 import ReportModal from "../modal/ReportModal";
 import TeacherTimetableModal from "../modal/TeacherTimetableModal";
 import PeriodWidget from "../components/PeriodWidget";
+import DayTimeline from "../components/DayTimeline";
 import type { User, ReportTarget } from "../types";
 
 interface BaseTimetableData {
@@ -230,6 +231,7 @@ export default function Timetable() {
       </section>
 
       <main className="container tt-container">
+        <DayTimeline />
         <PeriodWidget grade={grade} classNum={classNum} />
         {/* 학반 & 날짜 설정 영역 */}
         <div className="tt-setting">
