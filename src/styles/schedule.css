@@ -1,8 +1,24 @@
-.sc-hero { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); padding: 48px 0 32px; }
-.sc-hero h1 { color: white; font-size: 2rem; font-weight: 700; text-align: center; }
+/* ── Schedule Page ─────────────────────────────────────────── */
 
-.sc-container { max-width: 700px; margin: 0 auto; padding: 24px 16px 48px; }
+.sc-hero {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  padding: 40px 0 28px;
+}
+.sc-hero h1 {
+  color: #fff;
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: -0.02em;
+}
 
+.sc-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 24px 60px;
+}
+
+/* ── Toolbar ───────────────────────────────────────────────── */
 .sc-toolbar {
   display: flex;
   align-items: center;
@@ -12,134 +28,273 @@
   margin-bottom: 16px;
 }
 
-.sc-grade-tabs { display: flex; gap: 8px; }
+.sc-grade-tabs {
+  display: flex;
+  gap: 6px;
+  background: #e2e8f0;
+  padding: 4px;
+  border-radius: 12px;
+}
 .sc-grade-btn {
-  padding: 8px 20px;
-  border: 2px solid #e2e8f0;
-  border-radius: 20px;
-  background: white;
-  font-size: 0.9rem;
+  padding: 7px 18px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #64748b;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
 }
-.sc-grade-btn.active { background: #6366f1; border-color: #6366f1; color: white; }
+.sc-grade-btn.active {
+  background: #fff;
+  color: #4f46e5;
+  box-shadow: 0 1px 4px rgba(79, 70, 229, 0.15);
+}
 
-.sc-month-nav { display: flex; align-items: center; gap: 12px; }
+.sc-month-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 .sc-nav-btn {
-  background: none;
-  border: none;
-  font-size: 1rem;
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+  border-radius: 8px;
+  font-size: 0.8rem;
   color: #64748b;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
+  transition: background 0.12s, border-color 0.12s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.sc-nav-btn:hover { background: #f1f5f9; }
-.sc-month-label { font-size: 1.1rem; font-weight: 700; color: #1e293b; min-width: 120px; text-align: center; }
+.sc-nav-btn:hover { background: #f8fafc; border-color: #cbd5e1; }
+.sc-month-label {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #4f46e5;
+  min-width: 110px;
+  text-align: center;
+  letter-spacing: -0.01em;
+}
 
-.sc-legend { display: flex; gap: 16px; margin-bottom: 12px; }
-.sc-legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: #64748b; }
+/* ── Legend ────────────────────────────────────────────────── */
+.sc-legend {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.sc-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+}
 
+/* ── Calendar Card ─────────────────────────────────────────── */
+.sc-card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px 16px 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 24px rgba(0,0,0,0.04);
+}
+
+/* ── Grid ──────────────────────────────────────────────────── */
+.sc-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.sc-day-name {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  padding: 6px 0 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.sc-day-name.sun { color: #e11d48; }
+.sc-day-name.sat { color: #4f46e5; }
+
+.sc-cell {
+  min-height: 84px;
+  padding: 6px 5px 5px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.12s;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  position: relative;
+}
+.sc-cell:hover:not(.empty) { background: #f8fafc; }
+.sc-cell.empty { cursor: default; pointer-events: none; }
+
+.sc-cell.selected { background: #eef2ff !important; }
+.sc-cell.selected .sc-date-num:not(.today-num) { color: #4f46e5; }
+
+.sc-date-num {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #334155;
+  font-variant-numeric: tabular-nums;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+  align-self: flex-end;
+  margin-left: auto;
+}
+.sc-date-num.today-num {
+  background: #4f46e5;
+  color: #fff;
+}
+.sc-cell.sun .sc-date-num:not(.today-num) { color: #e11d48; }
+.sc-cell.sat .sc-date-num:not(.today-num) { color: #4f46e5; }
+
+/* ── Event chips inside cell ───────────────────────────────── */
+.sc-cell-events {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  min-height: 0;
+}
+
+.sc-chip {
+  font-size: 0.67rem;
+  font-weight: 600;
+  padding: 2px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+}
+.sc-chip.academic {
+  background: #eef2ff;
+  color: #4338ca;
+}
+.sc-chip.exam {
+  background: #fff1f2;
+  color: #be123c;
+}
+.sc-chip-more {
+  font-size: 0.63rem;
+  color: #94a3b8;
+  padding-left: 2px;
+}
+
+/* ── Detail Panel — fixed bottom sheet ─────────────────────── */
+.sc-detail {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(720px, calc(100vw - 32px));
+  padding: 16px 20px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.06);
+  z-index: 200;
+  animation: sc-detail-in 0.18s ease;
+}
+@keyframes sc-detail-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.sc-detail-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 10px;
+}
+.sc-detail-empty { color: #94a3b8; font-size: 0.88rem; }
+
+.sc-event-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.sc-event-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: #334155;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #f1f5f9;
+}
+.sc-event-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.sc-event-badge.academic { background: #eef2ff; color: #4338ca; }
+.sc-event-badge.exam { background: #fff1f2; color: #be123c; }
+
+/* ── Dots (legend only) ────────────────────────────────────── */
 .sc-dot {
   display: inline-block;
   width: 8px;
   height: 8px;
   border-radius: 50%;
-}
-.sc-dot.academic { background: #6366f1; }
-.sc-dot.exam { background: #ef4444; }
-
-.sc-card {
-  background: white;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-}
-
-.sc-cal-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
-}
-
-.sc-day-name {
-  text-align: center;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #94a3b8;
-  padding: 8px 0;
-}
-.sc-day-name.sun { color: #ef4444; }
-.sc-day-name.sat { color: #6366f1; }
-
-.sc-cell {
-  min-height: 60px;
-  padding: 6px 4px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.12s;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-.sc-cell:hover:not(.empty) { background: #f8fafc; }
-.sc-cell.empty { cursor: default; }
-.sc-cell.today .sc-date-num {
-  background: #6366f1;
-  color: white;
-  border-radius: 50%;
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.sc-cell.selected { background: #eef2ff; }
-.sc-cell.sun .sc-date-num { color: #ef4444; }
-.sc-cell.sat .sc-date-num { color: #6366f1; }
-
-.sc-date-num {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #1e293b;
-  width: 26px;
-  height: 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sc-dots { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; }
-
-.sc-detail {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #f1f5f9;
-}
-.sc-detail-title { font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: 12px; }
-.sc-detail-empty { color: #94a3b8; font-size: 0.9rem; }
-
-.sc-event-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-.sc-event-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.92rem;
-  color: #334155;
-  padding: 10px 14px;
-  border-radius: 8px;
-  background: #f8fafc;
-}
-
-.sc-event-badge {
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 10px;
   flex-shrink: 0;
 }
-.sc-event-badge.academic { background: #eef2ff; color: #6366f1; }
-.sc-event-badge.exam { background: #fef2f2; color: #ef4444; }
+.sc-dot.academic { background: #4f46e5; }
+.sc-dot.exam { background: #e11d48; }
+
+/* ── Loading ───────────────────────────────────────────────── */
+.status-msg { text-align: center; color: #94a3b8; padding: 40px 0; font-size: 0.9rem; }
+
+/* ── Dark mode ─────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --sc-bg: #0f172a;
+    --sc-card: #1e293b;
+    --sc-text: #f1f5f9;
+    --sc-muted: #94a3b8;
+    --sc-border: #334155;
+  }
+}
+:root[data-theme="light"] {
+  --sc-bg: #f1f5f9;
+  --sc-card: #ffffff;
+  --sc-text: #1e293b;
+  --sc-muted: #64748b;
+  --sc-border: #e2e8f0;
+}
+:root[data-theme="dark"] {
+  --sc-bg: #0f172a;
+  --sc-card: #1e293b;
+  --sc-text: #f1f5f9;
+  --sc-muted: #94a3b8;
+  --sc-border: #334155;
+}
+
+@media (prefers-color-scheme: dark) {
+  .sc-card { background: #1e293b; }
+  .sc-detail { background: #1e293b; border-color: #334155; box-shadow: 0 8px 40px rgba(0,0,0,0.4); }
+  .sc-event-item { background: #1e293b; border-color: #334155; color: #e2e8f0; }
+  .sc-month-label { color: #818cf8; }
+  .sc-date-num { color: #cbd5e1; }
+  .sc-cell:hover:not(.empty) { background: #334155; }
+  .sc-cell.selected { background: #1e1b4b !important; }
+  .sc-day-name { color: #64748b; }
+  .sc-grade-tabs { background: #334155; }
+  .sc-grade-btn.active { background: #1e293b; box-shadow: none; }
+  .sc-nav-btn { background: #1e293b; border-color: #334155; color: #94a3b8; }
+  .sc-chip.academic { background: #1e1b4b; color: #a5b4fc; }
+  .sc-chip.exam { background: #4c0519; color: #fda4af; }
+}

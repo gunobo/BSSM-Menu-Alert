@@ -105,6 +105,7 @@ export default function Navbar({ selectedDate, setSelectedDate }: NavbarProps) {
             <button className={`menu-item ${isActive("/")}`} onClick={() => navigate("/")}>급식확인</button>
             <button className={`menu-item ${isActive("/timetable")}`} onClick={() => navigate("/timetable")}>시간표</button>
             <button className={`menu-item ${isActive("/schedule")}`} onClick={() => navigate("/schedule")}>학사일정</button>
+            <button className={`menu-item ${isActive("/school-notice")}`} onClick={() => navigate("/school-notice")}>학교알림</button>
             <button className={`menu-item ${isActive("/announcements")}`} onClick={() => navigate("/announcements")}>공지게시판</button>
           </div>
         </div>

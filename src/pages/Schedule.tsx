@@ -42,7 +42,16 @@ export default function Schedule() {
           d.setDate(d.getDate() + 1);
         }
       }
-      setEvents([...academic, ...examEvents]);
+      const all = [...academic, ...examEvents];
+      setEvents(all);
+      // 현재 달이 오늘 달이면 오늘 날짜에 이벤트가 있을 때 자동 선택
+      const ty = today.getFullYear(), tm = today.getMonth() + 1;
+      if (year === ty && month === tm) {
+        const todayHasEvent = all.some(e => e.date === `${ty}${String(tm).padStart(2,"0")}${String(today.getDate()).padStart(2,"0")}`);
+        if (todayHasEvent) {
+          setSelected(`${ty}${String(tm).padStart(2,"0")}${String(today.getDate()).padStart(2,"0")}`);
+        }
+      }
     }).finally(() => setLoading(false));
   }, [year, month, grade]);
 
@@ -83,20 +92,20 @@ export default function Schedule() {
         </div>
       </section>
 
-      <main className="container sc-container">
-        {/* 학년 선택 */}
+      <main className="sc-container">
+        {/* 학년 선택 + 월 네비 */}
         <div className="sc-toolbar">
+          <div className="sc-month-nav">
+            <button className="sc-nav-btn" onClick={prevMonth}>◀</button>
+            <span className="sc-month-label">{year}년 {MONTH_NAMES[month-1]}</span>
+            <button className="sc-nav-btn" onClick={nextMonth}>▶</button>
+          </div>
           <div className="sc-grade-tabs">
             {GRADES.map(g => (
               <button key={g} className={`sc-grade-btn ${grade === g ? "active" : ""}`} onClick={() => setGrade(g)}>
                 {g}학년
               </button>
             ))}
-          </div>
-          <div className="sc-month-nav">
-            <button className="sc-nav-btn" onClick={prevMonth}>◀</button>
-            <span className="sc-month-label">{year}년 {MONTH_NAMES[month-1]}</span>
-            <button className="sc-nav-btn" onClick={nextMonth}>▶</button>
           </div>
         </div>
 
@@ -123,45 +132,50 @@ export default function Schedule() {
                   const isToday = ymd === todayYMD;
                   const isSelected = ymd === selected;
                   const dow = (firstDay + d - 1) % 7;
+                  const visibleChips = dayEvents.slice(0, 2);
+                  const extraCount = dayEvents.length - visibleChips.length;
                   return (
                     <div
                       key={ymd}
                       className={`sc-cell ${isToday ? "today" : ""} ${isSelected ? "selected" : ""} ${dow === 0 ? "sun" : dow === 6 ? "sat" : ""}`}
                       onClick={() => setSelected(isSelected ? null : ymd)}
                     >
-                      <span className="sc-date-num">{d}</span>
-                      <div className="sc-dots">
-                        {dayEvents.some(e => e.type === "academic") && <span className="sc-dot academic" />}
-                        {dayEvents.some(e => e.type === "exam") && <span className="sc-dot exam" />}
+                      <span className={`sc-date-num ${isToday ? "today-num" : ""}`}>{d}</span>
+                      <div className="sc-cell-events">
+                        {visibleChips.map((e, idx) => (
+                          <span key={idx} className={`sc-chip ${e.type}`}>{e.name}</span>
+                        ))}
+                        {extraCount > 0 && <span className="sc-chip-more">+{extraCount}개</span>}
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* 선택한 날 이벤트 */}
-              {selected && (
-                <div className="sc-detail">
-                  <h3 className="sc-detail-title">
-                    {parseInt(selected.slice(4,6))}월 {parseInt(selected.slice(6,8))}일
-                  </h3>
-                  {selectedEvents.length === 0 ? (
-                    <p className="sc-detail-empty">일정이 없습니다</p>
-                  ) : (
-                    <ul className="sc-event-list">
-                      {selectedEvents.map((e, i) => (
-                        <li key={i} className={`sc-event-item ${e.type}`}>
-                          <span className={`sc-event-badge ${e.type}`}>{e.type === "exam" ? "시험" : "학사"}</span>
-                          {e.name}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              )}
             </>
           )}
         </div>
+
+        {/* 선택한 날 이벤트 — 달력 카드 바깥 */}
+        {selected && (
+          <div className="sc-detail">
+            <h3 className="sc-detail-title">
+              {parseInt(selected.slice(4,6))}월 {parseInt(selected.slice(6,8))}일
+            </h3>
+            {selectedEvents.length === 0 ? (
+              <p className="sc-detail-empty">이 날은 등록된 일정이 없습니다.</p>
+            ) : (
+              <ul className="sc-event-list">
+                {selectedEvents.map((e, i) => (
+                  <li key={i} className="sc-event-item">
+                    <span className={`sc-event-badge ${e.type}`}>{e.type === "exam" ? "시험" : "학사"}</span>
+                    {e.name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
       </main>
 
       <Footer />
