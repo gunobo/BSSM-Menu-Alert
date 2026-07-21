@@ -13,6 +13,7 @@ import PushNotificationManager from "./admin/PushNotificationManager";
 import NotificationStats from "./admin/NotificationStats"; 
 import AppFileManager from "./admin/AppFileManager";
 import TimetableManager from "./admin/TimetableManager";
+import ClassPeriodManager from "./admin/ClassPeriodManager";
 import ExamScheduleManager from "./admin/ExamScheduleManager";
 import TeacherMapManager from "./admin/TeacherMapManager";
 import TeacherRosterManager from "./admin/TeacherRosterManager";
@@ -70,6 +71,7 @@ export default function AdminPage() {
       "override",            // 변경 교시 교사 등록
       "teacher-roster",      // 교직원 관리
       "teacher-map",         // 교사 매핑 관리
+      "class-period",        // 교시 시간 설정
     ];
 
     if (userRole === "ROLE_TEACHER") return moderatorMenus.includes(menu);
@@ -254,6 +256,14 @@ export default function AdminPage() {
             📅 기본 시간표 관리
           </button>
 
+          {/* ⏰ 교시 설정 */}
+          <button
+            className={activeMenu === "class-period" ? "active" : ""}
+            onClick={() => handleMenuClick("class-period")}
+          >
+            ⏰ 교시 시간 설정
+          </button>
+
           {/* 📝 변경 교시 교사 등록 */}
           <button
             className={activeMenu === "override" ? "active" : ""}
@@ -327,6 +337,7 @@ export default function AdminPage() {
               activeMenu === "teacher-roster" ? "교직원 관리" :
               activeMenu === "teacher-map" ? "교사 매핑 관리" :
               activeMenu === "exam-schedule" ? "시험 일정 관리" :
+              activeMenu === "class-period" ? "교시 시간 설정" :
               activeMenu === "announcement-write" ? (selectedNotice ? "공지사항 수정" : "공지사항 등록") : "공지사항 관리"
             }</h1>
             <p>BSSM 급식알리미 서비스 통합 관리 시스템</p>
@@ -349,6 +360,7 @@ export default function AdminPage() {
                 {activeMenu === "teacher-roster" && <TeacherRosterManager />}
                 {activeMenu === "teacher-map" && <TeacherMapManager />}
                 {activeMenu === "exam-schedule" && <ExamScheduleManager />}
+                {activeMenu === "class-period" && <ClassPeriodManager />}
                 {activeMenu === "announcement-write" && (
                   <AnnouncementEditor
                     editData={selectedNotice}
