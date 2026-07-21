@@ -13,6 +13,7 @@ import PushNotificationManager from "./admin/PushNotificationManager";
 import NotificationStats from "./admin/NotificationStats"; 
 import AppFileManager from "./admin/AppFileManager";
 import TimetableManager from "./admin/TimetableManager";
+import ExamScheduleManager from "./admin/ExamScheduleManager";
 import TeacherMapManager from "./admin/TeacherMapManager";
 import TeacherRosterManager from "./admin/TeacherRosterManager";
 import OverrideManager from "./admin/OverrideManager";
@@ -277,6 +278,13 @@ export default function AdminPage() {
             👩‍🏫 교사 매핑 관리
           </button>
 
+          <button
+            className={activeMenu === "exam-schedule" ? "active" : ""}
+            onClick={() => handleMenuClick("exam-schedule")}
+          >
+            📝 시험 일정 관리
+          </button>
+
           {/* 📱 앱 관리 - 관리자만 노출 */}
           {canSeeAppMenu && (
             <div className={`menu-group ${isAppMenuOpen ? "open" : ""}`}>
@@ -318,6 +326,7 @@ export default function AdminPage() {
               activeMenu === "override" ? "변경 교시 교사 등록" :
               activeMenu === "teacher-roster" ? "교직원 관리" :
               activeMenu === "teacher-map" ? "교사 매핑 관리" :
+              activeMenu === "exam-schedule" ? "시험 일정 관리" :
               activeMenu === "announcement-write" ? (selectedNotice ? "공지사항 수정" : "공지사항 등록") : "공지사항 관리"
             }</h1>
             <p>BSSM 급식알리미 서비스 통합 관리 시스템</p>
@@ -339,6 +348,7 @@ export default function AdminPage() {
                 {activeMenu === "override" && <OverrideManager />}
                 {activeMenu === "teacher-roster" && <TeacherRosterManager />}
                 {activeMenu === "teacher-map" && <TeacherMapManager />}
+                {activeMenu === "exam-schedule" && <ExamScheduleManager />}
                 {activeMenu === "announcement-write" && (
                   <AnnouncementEditor
                     editData={selectedNotice}
