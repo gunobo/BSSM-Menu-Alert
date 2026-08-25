@@ -53,7 +53,7 @@ export default function ClassPeriodManager() {
   useEffect(() => {
     axios
       .get(`${API}/class-periods`, { params: { target_date: new Date().toISOString().slice(0, 10) } })
-      .then((r) => { if (r.data && r.data.length > 0) setPeriods(r.data); })
+      .then((r) => { if (r.data) setPeriods(r.data); })
       .catch(() => {});
     axios
       .get(`${API}/meal-times`)
@@ -99,12 +99,17 @@ export default function ClassPeriodManager() {
     setMsg(null);
     try {
       await axios.put(`${API}/class-periods/default`, periods, { headers });
-      setMsg({ type: "ok", text: "기본 교시가 저장되었습니다." });
+      setMsg({ type: "ok", text: periods.length === 0 ? "기본 교시가 초기화되었습니다." : "기본 교시가 저장되었습니다." });
     } catch {
       setMsg({ type: "err", text: "저장 실패. 권한을 확인하세요." });
     } finally {
       setSaving(false);
     }
+  };
+
+  const clearDefault = () => {
+    if (!confirm("기본 교시를 모두 삭제하겠습니까? 저장 버튼을 눌러야 적용됩니다.")) return;
+    setPeriods([]);
   };
 
   const loadOverride = async () => {
@@ -275,9 +280,15 @@ export default function ClassPeriodManager() {
           </tbody>
         </table>
 
-        <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
+        <div style={{ display: "flex", gap: 10, marginTop: 14, flexWrap: "wrap" }}>
           <button onClick={addPeriod} style={{ padding: "8px 16px", borderRadius: 8, border: "1.5px dashed #cbd5e1", background: "transparent", cursor: "pointer", color: "#64748b" }}>
             + 교시 추가
+          </button>
+          <button
+            onClick={clearDefault}
+            style={{ padding: "8px 16px", borderRadius: 8, background: "#fff1f2", border: "1px solid #fecdd3", color: "#be123c", cursor: "pointer", fontWeight: 600 }}
+          >
+            전체 초기화
           </button>
           <button
             onClick={saveDefault}
@@ -287,6 +298,11 @@ export default function ClassPeriodManager() {
             {saving ? "저장 중..." : "기본 교시 저장"}
           </button>
         </div>
+        {periods.length === 0 && (
+          <p style={{ fontSize: "0.85rem", color: "#94a3b8", marginTop: 10 }}>
+            교시가 없습니다. 저장하면 타임라인에 교시가 표시되지 않습니다.
+          </p>
+        )}
       </section>
 
       {/* 날짜별 특별 교시 */}
