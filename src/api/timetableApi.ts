@@ -214,6 +214,13 @@ export async function saveBaseOverride(
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
 }
 
+export async function deleteAllTimetables(): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/admin/timetable/all`, {
+    method: "DELETE", headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+}
+
 export function dayName(idx: number): string {
   return DAY_NAMES[idx] ?? "";
 }

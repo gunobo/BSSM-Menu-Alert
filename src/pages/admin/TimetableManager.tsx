@@ -4,6 +4,7 @@ import {
   saveBaseTimetable,
   getChangeLog,
   getPublicTeacherMap,
+  deleteAllTimetables,
   dayName,
   type ChangeLogEntry,
 } from "../../api/timetableApi";
@@ -157,6 +158,20 @@ export default function TimetableManager() {
     setTeachers(makeEmpty());
   };
 
+  const handleClearAll = async () => {
+    if (!window.confirm("⚠️ 전체 초기화\n\n모든 학년·반의 기본 시간표, 특별 시간표, 변경 이력이 삭제됩니다.\n\n정말 삭제하시겠습니까?")) return;
+    try {
+      await deleteAllTimetables();
+      setSubjects(makeEmpty());
+      setTeachers(makeEmpty());
+      setChangeLog([]);
+      savedSubjectsRef.current = makeEmpty();
+      setMessage({ type: "success", text: "전체 시간표가 초기화되었습니다." });
+    } catch {
+      setMessage({ type: "error", text: "전체 초기화에 실패했습니다." });
+    }
+  };
+
   return (
     <div>
       <div className="admin-section">
@@ -280,7 +295,14 @@ export default function TimetableManager() {
         )}
 
         <div className="tt-admin-actions">
-          <button className="tt-admin-btn-clear" onClick={handleClear} disabled={saving || loading}>초기화</button>
+          <button className="tt-admin-btn-clear" onClick={handleClear} disabled={saving || loading}>이 반 초기화</button>
+          <button
+            onClick={handleClearAll}
+            disabled={saving || loading}
+            style={{ padding: "8px 16px", borderRadius: 8, background: "#fff1f2", border: "1px solid #fecdd3", color: "#be123c", cursor: "pointer", fontWeight: 600, fontSize: "0.9rem" }}
+          >
+            전체 초기화
+          </button>
           <button className="tt-admin-btn-save btn-submit" onClick={handleSave} disabled={saving || loading}>
             {saving ? "저장 중..." : "기본 시간표 저장"}
           </button>
