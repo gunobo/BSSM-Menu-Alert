@@ -77,7 +77,7 @@ export async function getGradeSubjects(grade: number, classNum = 1): Promise<str
     const res = await fetch(`${API_BASE_URL}/timetable/subjects?grade=${grade}`);
     if (!res.ok) return [];
     const data = await res.json();
-    const subjects: string[] = data.subjects ?? [];
+    const subjects: string[] = Array.isArray(data) ? data : (data.subjects ?? []);
     localStorage.setItem(cacheKey, JSON.stringify(subjects));
     Object.keys(localStorage)
       .filter((k) => k.startsWith(`neis_subjects_${grade}_${classNum}_`) && k !== cacheKey)

@@ -161,7 +161,7 @@ export async function getGradeSubjectsFromBackend(grade: number): Promise<string
     const res = await fetch(`${API_BASE_URL}/timetable/subjects?grade=${grade}`);
     if (!res.ok) return [];
     const data = await res.json();
-    return data.subjects ?? [];
+    return Array.isArray(data) ? data : (data.subjects ?? []);
   } catch { return []; }
 }
 
