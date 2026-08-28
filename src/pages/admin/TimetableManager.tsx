@@ -8,6 +8,7 @@ import {
   dayName,
   type ChangeLogEntry,
 } from "../../api/timetableApi";
+import { getWeekTimetable, getWeekRange } from "../../api/NeisApi";
 import { getUser } from "../../api/auth";
 import { getGradeSubjects } from "../../api/NeisApi";
 
@@ -88,26 +89,47 @@ export default function TimetableManager() {
     setMessage(null);
     try {
       const data = await getBaseTimetable(grade, classNum);
-      // subjects
-      const mergedSubj = makeEmpty();
-      if (Array.isArray(data?.subjects)) {
-        data.subjects.forEach((row, pi) => {
-          if (pi < MAX_PERIODS && Array.isArray(row))
-            row.forEach((s, di) => { if (di < 5) mergedSubj[pi][di] = s ?? ""; });
-        });
-      }
-      setSubjects(mergedSubj);
-      savedSubjectsRef.current = mergedSubj.map((r) => [...r]);
 
-      // teachers
-      const mergedTeacher = makeEmpty();
-      if (Array.isArray(data?.teachers)) {
-        data.teachers.forEach((row, pi) => {
-          if (pi < MAX_PERIODS && Array.isArray(row))
-            row.forEach((t, di) => { if (di < 5) mergedTeacher[pi][di] = t ?? ""; });
+      if (data) {
+        // DB에 저장된 시간표 불러오기
+        const mergedSubj = makeEmpty();
+        if (Array.isArray(data.subjects)) {
+          data.subjects.forEach((row, pi) => {
+            if (pi < MAX_PERIODS && Array.isArray(row))
+              row.forEach((s, di) => { if (di < 5) mergedSubj[pi][di] = s ?? ""; });
+          });
+        }
+        setSubjects(mergedSubj);
+        savedSubjectsRef.current = mergedSubj.map((r) => [...r]);
+
+        const mergedTeacher = makeEmpty();
+        if (Array.isArray(data.teachers)) {
+          data.teachers.forEach((row, pi) => {
+            if (pi < MAX_PERIODS && Array.isArray(row))
+              row.forEach((t, di) => { if (di < 5) mergedTeacher[pi][di] = t ?? ""; });
+          });
+        }
+        setTeachers(mergedTeacher);
+      } else {
+        // DB에 없으면 NEIS 주간 시간표로 초기값 채우기
+        const { start, end, days } = getWeekRange();
+        const neisData = await getWeekTimetable(grade, classNum, start, end);
+        const mergedSubj = makeEmpty();
+        days.forEach((dateStr, di) => {
+          const periods = neisData[dateStr] as { period: number; subject: string }[] | undefined;
+          if (Array.isArray(periods)) {
+            periods.forEach(({ period, subject }) => {
+              const pi = period - 1;
+              if (pi >= 0 && pi < MAX_PERIODS) mergedSubj[pi][di] = subject ?? "";
+            });
+          }
         });
+        setSubjects(mergedSubj);
+        savedSubjectsRef.current = makeEmpty();
+        setTeachers(makeEmpty());
+        const hasNeis = mergedSubj.some((row) => row.some((s) => s));
+        if (hasNeis) setMessage({ type: "success", text: "NEIS에서 이번 주 시간표를 불러왔습니다. 확인 후 저장하세요." });
       }
-      setTeachers(mergedTeacher);
     } catch (err) {
       console.error("시간표 불러오기 실패:", err);
       setSubjects(makeEmpty());
