@@ -97,7 +97,7 @@ export default function TimetableCompare() {
             const changed = !!(neisSubjectRaw && baseSubjectRaw && neisSubjectRaw !== baseSubjectRaw);
             const subject = applyAlias(changed ? neisSubjectRaw : baseSubjectRaw);
             const baseSubject = applyAlias(baseSubjectRaw);
-            const teacher = base?.teachers?.[p]?.[d] ?? "";
+            const teacher = changed ? "" : (base?.teachers?.[p]?.[d] ?? "");
             row.push({ subject, changed, baseSubject, teacher });
           }
           grid.push(row);
