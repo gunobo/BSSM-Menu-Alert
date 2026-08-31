@@ -105,7 +105,22 @@ function useClassData(grade: number, classNum: number, weekDays: string[]) {
 const A4_W = 794;   // px at 96dpi
 const A4_H = 1123;
 
-// ── 학급별 시간표 템플릿 (사용자 커스터마이징 영역) ──────────────────────────
+// ── 학급별 시간표 템플릿 ──────────────────────────────────────────────────────
+// 디자인 토큰
+const C = {
+  ink:       "#0c1b35",  // 딥네이비 잉크
+  paper:     "#f6f5f1",  // 온기 있는 종이색
+  blue:      "#1e4fa0",  // BSSM 블루
+  blueLight: "#e4ecfb",  // 요일 헤더 틴트
+  colA:      "#f9f8f4",  // 홀수 컬럼 (종이색)
+  colB:      "#f1f0eb",  // 짝수 컬럼 미세 오프셋
+  border:    "#dddbd3",  // 따뜻한 회색 선
+  muted:     "#8a9bb5",  // 슬레이트-블루 보조
+  amber:     "#bf5900",  // 변경 셀 앰버
+  amberBg:   "#fdf4e8",  // 변경 셀 배경
+  period:    "#e8edf5",  // 교시 컬럼 배경
+};
+
 function ClassTemplate({
   grade, classNum, weekDays,
 }: { grade: number; classNum: number; weekDays: string[] }) {
@@ -114,48 +129,85 @@ function ClassTemplate({
 
   const wk = weekDays[0];
   const wkEnd = weekDays[4];
-  const wkLabel = `${parseInt(wk.slice(4,6))}월 ${parseInt(wk.slice(6,8))}일 ~ ${parseInt(wkEnd.slice(4,6))}월 ${parseInt(wkEnd.slice(6,8))}일`;
+  const wkYear = wk.slice(0, 4);
+  const wkLabel = `${wkYear}년 ${parseInt(wk.slice(4,6))}월 ${parseInt(wk.slice(6,8))}일 — ${parseInt(wkEnd.slice(4,6))}월 ${parseInt(wkEnd.slice(6,8))}일`;
 
   return (
     <div style={{
       width: "100%", height: "100%",
       boxSizing: "border-box",
-      padding: "48px 44px 36px",
-      fontFamily: "'Apple SD Gothic Neo','Malgun Gothic',sans-serif",
+      background: C.paper,
+      fontFamily: "'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif",
       display: "flex", flexDirection: "column",
       position: "relative",
+      overflow: "hidden",
     }}>
-      {/* 배경 워터마크 로고 */}
-      <img src={bssmLogo} alt="" aria-hidden style={{
-        position: "absolute",
-        top: "50%", left: "50%",
-        transform: "translate(-50%, -50%)",
-        width: 320, height: 320,
-        objectFit: "contain",
-        opacity: 0.045,
-        pointerEvents: "none",
-        userSelect: "none",
-      }} />
-      {/* ── 상단 타이틀 (가운데 정렬) ── */}
-      <div style={{ textAlign: "center", marginBottom: 20 }}>
-        <div style={{ fontSize: 24, fontWeight: 800, color: "#0f172a", letterSpacing: "-0.02em", lineHeight: 1.15 }}>
-          {grade}학년 {classNum}반 시간표
+      {/* ── 상단 컬러 밴드 ── */}
+      <div style={{
+        background: C.blue,
+        padding: "22px 36px 18px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-end",
+        flexShrink: 0,
+      }}>
+        {/* 좌: 학교명 + 학급 */}
+        <div>
+          <div style={{ fontSize: 9.5, fontWeight: 400, color: "rgba(255,255,255,0.55)", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 8 }}>
+            부산소프트웨어마이스터고등학교
+          </div>
+          <div style={{ fontSize: 34, fontWeight: 900, color: "#ffffff", letterSpacing: "-0.03em", lineHeight: 1 }}>
+            {grade}학년 {classNum}반
+          </div>
+          <div style={{ fontSize: 13, fontWeight: 500, color: "rgba(255,255,255,0.65)", marginTop: 6, letterSpacing: "-0.01em" }}>
+            주간 시간표
+          </div>
         </div>
-        <div style={{ fontSize: 11, color: "#64748b", marginTop: 6, fontWeight: 500 }}>
-          기간: {wkLabel}
+        {/* 우: 날짜 + 로고 */}
+        <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 10 }}>
+          <img src={bssmLogo} alt="BSSM" aria-hidden style={{
+            width: 44, height: 44, objectFit: "contain",
+            opacity: 0.65, filter: "brightness(10)",
+          }} />
+          <div style={{ fontSize: 10, fontWeight: 400, color: "rgba(255,255,255,0.55)", lineHeight: 1.6 }}>
+            <div style={{ letterSpacing: "0.05em" }}>{wkLabel}</div>
+          </div>
         </div>
       </div>
 
       {/* ── 시간표 테이블 ── */}
-      <div style={{ flex: 1 }}>
-        <table style={{ borderCollapse: "collapse", width: "100%", tableLayout: "fixed" }}>
+      <div style={{ flex: 1, padding: "0", overflow: "hidden" }}>
+        <table style={{
+          borderCollapse: "collapse",
+          width: "100%",
+          height: "100%",
+          tableLayout: "fixed",
+        }}>
+          <colgroup>
+            <col style={{ width: 40 }} />
+            {DAY_NAMES.map((_, i) => <col key={i} />)}
+          </colgroup>
           <thead>
             <tr>
-              <th style={{ background: "#0f172a", color: "#fff", fontWeight: 700, fontSize: 10, padding: "5px 4px", textAlign: "center", width: 42 }}>교시</th>
+              <th style={{
+                background: C.ink, color: "rgba(255,255,255,0.45)",
+                fontWeight: 700, fontSize: 8.5,
+                letterSpacing: "0.12em", textTransform: "uppercase",
+                padding: "9px 4px", textAlign: "center",
+                borderRight: `1px solid ${C.border}`,
+              }}>교시</th>
               {DAY_NAMES.map((d, i) => (
-                <th key={d} style={{ background: "#0f172a", color: "#fff", fontWeight: 700, fontSize: 11, padding: "5px 4px", textAlign: "center" }}>
+                <th key={d} style={{
+                  background: i % 2 === 0 ? C.blue : "#173f85",
+                  color: "#fff",
+                  fontWeight: 700, fontSize: 13,
+                  padding: "9px 6px", textAlign: "center",
+                  borderRight: i < 4 ? `1px solid rgba(255,255,255,0.12)` : "none",
+                }}>
                   {d}
-                  <div style={{ fontWeight: 400, fontSize: 9, color: "#94a3b8", marginTop: 1 }}>{fmtDate(weekDays[i])}</div>
+                  <div style={{ fontWeight: 400, fontSize: 9, color: "rgba(255,255,255,0.52)", marginTop: 2, letterSpacing: "0.04em" }}>
+                    {fmtDate(weekDays[i])}
+                  </div>
                 </th>
               ))}
             </tr>
@@ -163,43 +215,94 @@ function ClassTemplate({
           <tbody>
             {grid.map((row, pi) => (
               <tr key={pi}>
-                <td style={{ background: "#f1f5f9", color: "#475569", fontWeight: 700, fontSize: 9, textAlign: "center", border: "1px solid #e2e8f0", padding: "4px 3px" }}>
-                  {pi + 1}
+                {/* 교시 컬럼 — 대형 반투명 숫자 레이어 */}
+                <td style={{
+                  background: C.period,
+                  borderRight: `2px solid ${C.border}`,
+                  borderBottom: `1px solid ${C.border}`,
+                  textAlign: "center",
+                  verticalAlign: "middle",
+                  position: "relative",
+                  padding: 0,
+                }}>
+                  {/* 배경 대형 숫자 */}
+                  <span style={{
+                    position: "absolute", inset: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 48, fontWeight: 900,
+                    color: C.blue, opacity: 0.08,
+                    lineHeight: 1, userSelect: "none", pointerEvents: "none",
+                  }}>{pi + 1}</span>
+                  <span style={{ position: "relative", fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: "0.04em" }}>
+                    {pi + 1}
+                  </span>
                 </td>
-                {row.map((cell, di) => (
-                  <td key={di} style={{
-                    border: "1px solid #e2e8f0",
-                    padding: "5px 5px",
-                    textAlign: "center",
-                    verticalAlign: "middle",
-                    background: cell.changed ? "#fffbeb" : "#fff",
-                    borderColor: cell.changed ? "#fbbf24" : "#e2e8f0",
-                  }}>
-                    <div style={{ fontSize: 10.5, fontWeight: 500, color: "#0f172a" }}>
-                      {cell.subject || "—"}
-                    </div>
-                    {cell.changed && (
-                      <div style={{ fontSize: 9, color: "#b45309", marginTop: 2 }}>
-                        {cell.baseSubject}
+                {row.map((cell, di) => {
+                  const isOddCol = di % 2 === 0;
+                  const bg = cell.changed ? C.amberBg : isOddCol ? C.colA : C.colB;
+                  return (
+                    <td key={di} style={{
+                      border: `1px solid ${C.border}`,
+                      borderLeft: di === 0 ? "none" : `1px solid ${C.border}`,
+                      padding: "7px 8px",
+                      textAlign: "center",
+                      verticalAlign: "middle",
+                      background: bg,
+                      position: "relative",
+                    }}>
+                      {/* 변경 셀 좌측 앰버 라인 */}
+                      {cell.changed && (
+                        <span style={{
+                          position: "absolute", left: 0, top: 0, bottom: 0,
+                          width: 3, background: C.amber,
+                          borderRadius: "0 2px 2px 0",
+                        }} />
+                      )}
+                      <div style={{ fontSize: 11, fontWeight: 600, color: C.ink, lineHeight: 1.3 }}>
+                        {cell.subject || <span style={{ color: C.muted, fontWeight: 400 }}>—</span>}
                       </div>
-                    )}
-                    {cell.teacher && (
-                      <div style={{ fontSize: 8, color: "#64748b", marginTop: 1, borderTop: "1px dashed #e2e8f0", paddingTop: 1 }}>
-                        {cell.teacher}
-                      </div>
-                    )}
-                  </td>
-                ))}
+                      {cell.changed && (
+                        <div style={{ fontSize: 8.5, color: C.amber, marginTop: 2, fontWeight: 500 }}>
+                          ← {cell.baseSubject}
+                        </div>
+                      )}
+                      {cell.teacher && (
+                        <div style={{ fontSize: 8.5, color: C.muted, marginTop: 3, fontWeight: 400 }}>
+                          {cell.teacher}
+                        </div>
+                      )}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      {/* ── 하단 브랜드 (가운데 정렬) ── */}
-      <div style={{ textAlign: "center", marginTop: 28 }}>
-        <div style={{ fontSize: 15, fontWeight: 800, color: "#0f172a", letterSpacing: "-0.01em" }}>BSSM급식알리미</div>
-        <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 3 }}>https://alert.bssm.dev</div>
+      {/* ── 하단 푸터 ── */}
+      <div style={{
+        flexShrink: 0,
+        borderTop: `1.5px solid ${C.border}`,
+        padding: "10px 36px",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        background: C.paper,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{
+            width: 5, height: 5, borderRadius: "50%",
+            background: C.amber, opacity: 0.9,
+          }} />
+          <span style={{ fontSize: 8, color: C.muted, letterSpacing: "0.06em" }}>
+            노란 선 셀 = 이번 주 시간표 변경
+          </span>
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: C.ink, letterSpacing: "-0.01em" }}>BSSM급식알리미</span>
+          <span style={{ fontSize: 9, color: C.muted, marginLeft: 8 }}>alert.bssm.dev</span>
+        </div>
       </div>
     </div>
   );
