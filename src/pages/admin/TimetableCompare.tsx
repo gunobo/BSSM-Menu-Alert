@@ -37,14 +37,36 @@ function formatDate(ymd: string) {
 type CellData = { subject: string; changed: boolean; baseSubject: string };
 type ClassGrid = CellData[][];  // [period][day]
 
+type Mode = "all" | "pick2";
+
+const thStyle: React.CSSProperties = {
+  border: "1px solid #e2e8f0",
+  padding: "7px 12px",
+  background: "#f1f5f9",
+  fontSize: "0.85rem",
+  textAlign: "center",
+  whiteSpace: "nowrap",
+};
+
+const tdStyle: React.CSSProperties = {
+  border: "1px solid #e2e8f0",
+  padding: "7px 10px",
+  textAlign: "center",
+  fontSize: "0.85rem",
+  verticalAlign: "middle",
+  minWidth: 76,
+};
+
 export default function TimetableCompare() {
   const [grade, setGrade] = useState(1);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [viewDay, setViewDay] = useState<number | null>(null); // null = all days
+  const [viewDay, setViewDay] = useState<number | null>(null);
+  const [mode, setMode] = useState<Mode>("all");
+  const [pickA, setPickA] = useState(1);
+  const [pickB, setPickB] = useState(2);
 
   const weekDays = useMemo(() => getWeekDays(selectedDate), [selectedDate]);
 
-  // class index => per-period, per-day data
   const [grids, setGrids] = useState<Record<number, ClassGrid | null>>({});
   const [loading, setLoading] = useState(false);
 
@@ -89,18 +111,75 @@ export default function TimetableCompare() {
     setSelectedDate(d);
   };
 
-  const displayDays = viewDay !== null ? [viewDay] : Array.from({ length: 5 }, (_, i) => i);
+  const displayDays = viewDay !== null ? [viewDay] : [0, 1, 2, 3, 4];
+
+  // 전체 비교 모드: 1~4반 열
+  const allClassCols = Array.from({ length: MAX_CLASSES }, (_, i) => i + 1);
+  // 2반 선택 모드
+  const pick2Cols = [pickA, pickB];
+
+  function renderTable(cols: number[], dayIdx: number) {
+    const colSubjects = cols.map((c) => {
+      return Array.from({ length: MAX_PERIODS }, (_, pi) => grids[c]?.[pi]?.[dayIdx]?.subject ?? "");
+    });
+
+    return (
+      <div className="compare-scroll" style={{ overflowX: "auto" }}>
+        <table style={{ borderCollapse: "collapse" }}>
+          <thead>
+            <tr>
+              <th style={{ ...thStyle, width: 48 }}>교시</th>
+              {cols.map((c) => (
+                <th key={c} style={thStyle}>{c}반</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: MAX_PERIODS }, (_, pi) => {
+              const rowSubjects = cols.map((c) => grids[c]?.[pi]?.[dayIdx]?.subject ?? "");
+              const allSame = rowSubjects.every((s) => s === rowSubjects[0]);
+              return (
+                <tr key={pi}>
+                  <td style={{ ...tdStyle, fontWeight: 700, background: "#f8fafc", width: 48 }}>{pi + 1}</td>
+                  {cols.map((c, ci) => {
+                    const cell = grids[c]?.[pi]?.[dayIdx];
+                    const isDiff = !allSame && !!cell?.subject;
+                    return (
+                      <td key={c} style={{
+                        ...tdStyle,
+                        background: cell?.changed ? "#fef9c3" : isDiff ? "#f0f9ff" : undefined,
+                      }}>
+                        <span style={{ fontWeight: cell?.changed ? 600 : undefined }}>
+                          {cell?.subject || "—"}
+                        </span>
+                        {cell?.changed && (
+                          <span style={{ display: "block", fontSize: "0.72rem", color: "#92400e" }}>
+                            기본: {cell.baseSubject}
+                          </span>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
 
   return (
     <div>
       <div className="admin-section">
         <h3>📊 학반별 시간표 비교</h3>
         <p style={{ color: "#64748b", marginBottom: 12, fontSize: "0.9rem" }}>
-          같은 학년 내 반별 시간표를 나란히 비교합니다. 노란 셀은 NEIS 기준 변경된 교시입니다.
+          같은 학년 내 반별 시간표를 나란히 비교합니다. 노란 셀은 NEIS 변경 교시, 파란 셀은 반간 차이입니다.
         </p>
 
-        {/* 선택 컨트롤 */}
-        <div className="tt-admin-selector" style={{ flexWrap: "wrap", gap: 8 }}>
+        {/* 컨트롤 */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+          {/* 학년 */}
           <div className="tt-admin-selector-group">
             <span className="tt-admin-selector-label">학년</span>
             {GRADES.map((g) => (
@@ -108,11 +187,15 @@ export default function TimetableCompare() {
                 onClick={() => setGrade(g)}>{g}학년</button>
             ))}
           </div>
+
+          {/* 주 이동 */}
           <div className="tt-admin-selector-group" style={{ alignItems: "center", gap: 8 }}>
             <button className="tt-admin-cls-btn" onClick={() => handleWeekMove(-1)}>◀</button>
             <span style={{ fontSize: "0.85rem", color: "#475569", fontWeight: 600 }}>{weekLabel(weekDays)}</span>
             <button className="tt-admin-cls-btn" onClick={() => handleWeekMove(1)}>▶</button>
           </div>
+
+          {/* 요일 */}
           <div className="tt-admin-selector-group">
             <span className="tt-admin-selector-label">요일</span>
             <button className={`tt-admin-cls-btn ${viewDay === null ? "active" : ""}`}
@@ -122,6 +205,39 @@ export default function TimetableCompare() {
                 onClick={() => setViewDay(i)}>{d}</button>
             ))}
           </div>
+
+          {/* 비교 모드 */}
+          <div className="tt-admin-selector-group">
+            <span className="tt-admin-selector-label">모드</span>
+            <button className={`tt-admin-cls-btn ${mode === "all" ? "active" : ""}`}
+              onClick={() => setMode("all")}>전체(1~4반)</button>
+            <button className={`tt-admin-cls-btn ${mode === "pick2" ? "active" : ""}`}
+              onClick={() => setMode("pick2")}>2반 선택</button>
+          </div>
+
+          {/* 2반 선택 */}
+          {mode === "pick2" && (
+            <div className="tt-admin-selector-group" style={{ gap: 6 }}>
+              <span className="tt-admin-selector-label">비교</span>
+              <select
+                value={pickA}
+                onChange={(e) => setPickA(Number(e.target.value))}
+                style={{ padding: "4px 8px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "0.85rem" }}
+              >
+                {allClassCols.map((c) => <option key={c} value={c}>{c}반</option>)}
+              </select>
+              <span style={{ fontSize: "0.85rem", color: "#475569" }}>vs</span>
+              <select
+                value={pickB}
+                onChange={(e) => setPickB(Number(e.target.value))}
+                style={{ padding: "4px 8px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: "0.85rem" }}
+              >
+                {allClassCols.map((c) => <option key={c} value={c}>{c}반</option>)}
+              </select>
+            </div>
+          )}
+
+          {/* 인쇄 */}
           <div className="tt-admin-selector-group" style={{ marginLeft: "auto" }}>
             <button
               onClick={() => window.print()}
@@ -136,65 +252,17 @@ export default function TimetableCompare() {
           <p style={{ textAlign: "center", padding: "40px 0", color: "#94a3b8" }}>불러오는 중...</p>
         ) : (
           <>
-            <style>{`
-              @media print {
-                .admin-sidebar, .admin-header, .tt-admin-selector, h3 + p, .admin-section > p { display: none !important; }
-                .compare-scroll { overflow: visible !important; }
-              }
-            `}</style>
             {displayDays.map((di) => (
               <div key={di} style={{ marginBottom: 24 }}>
                 <div style={{ fontWeight: 700, fontSize: "0.95rem", color: "#334155", marginBottom: 8 }}>
                   {DAY_NAMES[di]}요일 ({formatDate(weekDays[di])})
                 </div>
-                <div className="compare-scroll" style={{ overflowX: "auto" }}>
-                  <table style={{ borderCollapse: "collapse", minWidth: 480 }}>
-                    <thead>
-                      <tr>
-                        <th style={thStyle}>교시</th>
-                        {Array.from({ length: MAX_CLASSES }, (_, i) => i + 1).map((c) => (
-                          <th key={c} style={thStyle}>{c}반</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Array.from({ length: MAX_PERIODS }, (_, pi) => {
-                        const cells = Array.from({ length: MAX_CLASSES }, (_, ci) => grids[ci + 1]?.[pi]?.[di]);
-                        // 반별 과목이 다른지 확인 (변경 강조용)
-                        const subjects = cells.map((c) => c?.subject ?? "");
-                        const allSame = subjects.every((s) => s === subjects[0]);
-                        return (
-                          <tr key={pi}>
-                            <td style={{ ...tdStyle, fontWeight: 700, background: "#f8fafc", width: 48 }}>{pi + 1}</td>
-                            {cells.map((cell, ci) => {
-                              const isDiff = !allSame && cell?.subject;
-                              return (
-                                <td key={ci} style={{
-                                  ...tdStyle,
-                                  background: cell?.changed ? "#fef9c3" : isDiff ? "#f0f9ff" : undefined,
-                                }}>
-                                  <span style={{ fontWeight: cell?.changed ? 600 : undefined }}>
-                                    {cell?.subject || "—"}
-                                  </span>
-                                  {cell?.changed && (
-                                    <span style={{ display: "block", fontSize: "0.72rem", color: "#92400e" }}>
-                                      기본: {cell.baseSubject}
-                                    </span>
-                                  )}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                {renderTable(mode === "pick2" ? pick2Cols : allClassCols, di)}
               </div>
             ))}
-            <div style={{ marginTop: 8, fontSize: "0.78rem", color: "#64748b", display: "flex", gap: 16 }}>
+            <div style={{ marginTop: 4, fontSize: "0.78rem", color: "#64748b", display: "flex", gap: 16 }}>
               <span>🟡 노란 셀 = NEIS 기준 변경</span>
-              <span>🔵 파란 셀 = 같은 학년 다른 반과 과목 다름</span>
+              <span>🔵 파란 셀 = 반간 과목 다름</span>
             </div>
           </>
         )}
@@ -202,21 +270,3 @@ export default function TimetableCompare() {
     </div>
   );
 }
-
-const thStyle: React.CSSProperties = {
-  border: "1px solid #e2e8f0",
-  padding: "8px 12px",
-  background: "#f1f5f9",
-  fontSize: "0.85rem",
-  textAlign: "center",
-  whiteSpace: "nowrap",
-};
-
-const tdStyle: React.CSSProperties = {
-  border: "1px solid #e2e8f0",
-  padding: "8px 12px",
-  textAlign: "center",
-  fontSize: "0.85rem",
-  verticalAlign: "middle",
-  minWidth: 80,
-};
