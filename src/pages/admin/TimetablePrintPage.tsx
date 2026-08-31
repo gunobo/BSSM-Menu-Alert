@@ -329,7 +329,7 @@ function CompareTemplate({
       <div style={{ borderBottom: "3px solid #1e40af", paddingBottom: 8, marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
         <div>
           <div style={{ fontSize: 9, color: "#64748b", marginBottom: 2 }}>부산소프트웨어마이스터고등학교</div>
-          <div style={{ fontSize: 17, fontWeight: 700, color: "#0f172a" }}>{grade}학년 시간표 비교 ({classes.map(c => `${c}반`).join(" vs ")})</div>
+          <div style={{ fontSize: 17, fontWeight: 700, color: "#0f172a" }}>{grade}학년 시간표 비교 ({classes.map(c => `${c}반`).join(" / ")})</div>
         </div>
         <div style={{ textAlign: "right", fontSize: 9, color: "#64748b", lineHeight: 1.7 }}>
           <div>{weekLabel(weekDays)}</div>
