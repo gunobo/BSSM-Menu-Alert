@@ -116,7 +116,8 @@ export async function getTeacherList(): Promise<string[]> {
     const res = await fetch(`${API_BASE_URL}/timetable/teacher-list`);
     if (!res.ok) return [];
     const data = await res.json();
-    return data.teachers ?? [];
+    const list: { name: string }[] = Array.isArray(data) ? data : (data.teachers ?? []);
+    return list.map((t) => (typeof t === "string" ? t : t.name));
   } catch { return []; }
 }
 
@@ -125,7 +126,7 @@ export async function getTeacherSchedule(teacherName: string): Promise<TeacherSc
     const res = await fetch(`${API_BASE_URL}/timetable/teacher-schedule?name=${encodeURIComponent(teacherName)}`);
     if (!res.ok) return [];
     const data = await res.json();
-    return data.schedule ?? [];
+    return Array.isArray(data) ? data : (data.schedule ?? []);
   } catch { return []; }
 }
 
