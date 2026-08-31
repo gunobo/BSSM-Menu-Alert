@@ -165,11 +165,13 @@ function ClassTemplate({
                     background: cell.changed ? "#fffbeb" : "#fff",
                     borderColor: cell.changed ? "#fbbf24" : "#e2e8f0",
                   }}>
-                    <div style={{ fontSize: 10.5, fontWeight: cell.changed ? 700 : 500, color: "#0f172a" }}>
-                      {cell.subject || "—"}
+                    <div style={{ fontSize: 10.5, fontWeight: 500, color: "#0f172a" }}>
+                      {cell.changed ? cell.baseSubject : cell.subject || "—"}
                     </div>
                     {cell.changed && (
-                      <div style={{ fontSize: 8, color: "#b45309", marginTop: 2 }}>← {cell.baseSubject}</div>
+                      <div style={{ fontSize: 9, color: "#b45309", fontWeight: 700, marginTop: 3 }}>
+                        → {cell.subject}
+                      </div>
                     )}
                     {cell.teacher && (
                       <div style={{ fontSize: 8.5, color: "#64748b", marginTop: 2, borderTop: "1px dashed #e2e8f0", paddingTop: 2 }}>
