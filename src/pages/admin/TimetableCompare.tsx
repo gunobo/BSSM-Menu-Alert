@@ -34,7 +34,7 @@ function formatDate(ymd: string) {
   return `${parseInt(ymd.slice(4, 6))}/${parseInt(ymd.slice(6, 8))}`;
 }
 
-type CellData = { subject: string; changed: boolean; baseSubject: string };
+type CellData = { subject: string; changed: boolean; baseSubject: string; teacher: string };
 type ClassGrid = CellData[][];  // [period][day]
 
 type Mode = "all" | "pick2";
@@ -97,7 +97,8 @@ export default function TimetableCompare() {
             const changed = !!(neisSubjectRaw && baseSubjectRaw && neisSubjectRaw !== baseSubjectRaw);
             const subject = applyAlias(changed ? neisSubjectRaw : baseSubjectRaw);
             const baseSubject = applyAlias(baseSubjectRaw);
-            row.push({ subject, changed, baseSubject });
+            const teacher = base?.teachers?.[p]?.[d] ?? "";
+            row.push({ subject, changed, baseSubject, teacher });
           }
           grid.push(row);
         }
@@ -160,6 +161,11 @@ export default function TimetableCompare() {
                         {cell?.changed && (
                           <span style={{ display: "block", fontSize: "0.72rem", color: "#92400e" }}>
                             기본: {cell.baseSubject}
+                          </span>
+                        )}
+                        {cell?.teacher && (
+                          <span style={{ display: "block", fontSize: "0.72rem", color: "#94a3b8", marginTop: 2 }}>
+                            {cell.teacher}
                           </span>
                         )}
                       </td>
