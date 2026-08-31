@@ -75,7 +75,7 @@ export default function UserSearchPage() {
       const e = err as { response?: { status?: number; data?: unknown } };
       const status = e.response?.status;
       if (status === 403) alert("권한이 없습니다.");
-      else alert(e.response?.data || "권한 변경에 실패했습니다.");
+      else alert(typeof e.response?.data === "string" ? e.response.data : "권한 변경에 실패했습니다.");
     } finally {
       setRoleLoading(false);
     }
@@ -97,7 +97,7 @@ export default function UserSearchPage() {
           params: {
             status: isBanning,
             reason: isBanning ? "관리자 조치" : "",
-            min: isBanning ? 1440 : null,
+            ...(isBanning ? { min: 1440 } : {}),
           },
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -120,6 +120,7 @@ export default function UserSearchPage() {
   // 페이지 처음 로드 시 전체 사용자 목록
   useEffect(() => {
     handleSearch();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -147,7 +148,7 @@ export default function UserSearchPage() {
             placeholder="검색어를 입력하세요..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           />
           <button className="btn-refresh search-button" onClick={handleSearch}>
             검색
