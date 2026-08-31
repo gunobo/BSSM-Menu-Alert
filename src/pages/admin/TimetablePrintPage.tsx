@@ -166,11 +166,11 @@ function ClassTemplate({
                     borderColor: cell.changed ? "#fbbf24" : "#e2e8f0",
                   }}>
                     <div style={{ fontSize: 10.5, fontWeight: 500, color: "#0f172a" }}>
-                      {cell.changed ? cell.baseSubject : cell.subject || "—"}
+                      {cell.subject || "—"}
                     </div>
                     {cell.changed && (
-                      <div style={{ fontSize: 9, color: "#b45309", fontWeight: 700, marginTop: 3 }}>
-                        → {cell.subject}
+                      <div style={{ fontSize: 9, color: "#b45309", marginTop: 3 }}>
+                        {cell.baseSubject}
                       </div>
                     )}
                     {cell.teacher && (
