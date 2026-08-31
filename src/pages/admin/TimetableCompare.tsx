@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { getWeekTimetable } from "../../api/NeisApi";
-import { getPublicBaseTimetable } from "../../api/timetableApi";
+import { getPublicBaseTimetable, getPublicTeacherMap } from "../../api/timetableApi";
 
 const GRADES = [1, 2, 3];
 const MAX_CLASSES = 4;
@@ -78,21 +78,26 @@ export default function TimetableCompare() {
 
     Promise.all(
       Array.from({ length: MAX_CLASSES }, (_, i) => i + 1).map(async (c) => {
-        const [base, neis] = await Promise.all([
+        const [base, neis, tm] = await Promise.all([
           getPublicBaseTimetable(grade, c).catch(() => null),
           getWeekTimetable(grade, c, weekFrom, weekTo).catch(() => ({})),
+          getPublicTeacherMap(grade, c).catch(() => null),
         ]);
+        const alias: Record<string, string> = tm?.subjectAlias ?? {};
+        const applyAlias = (s: string) => alias[s] ?? s;
         const grid: ClassGrid = [];
         for (let p = 0; p < MAX_PERIODS; p++) {
           const row: CellData[] = [];
           for (let d = 0; d < 5; d++) {
             const date = weekDays[d];
-            const baseSubject = base?.subjects?.[p]?.[d] ?? "";
+            const baseSubjectRaw = base?.subjects?.[p]?.[d] ?? "";
             const neisSlots = (neis as Record<string, Array<{ period: number; subject: string }>>)[date] ?? [];
             const neisSlot = neisSlots.find((s) => s.period === p + 1);
-            const neisSubject = neisSlot?.subject ?? "";
-            const changed = !!(neisSubject && baseSubject && neisSubject !== baseSubject);
-            row.push({ subject: changed ? neisSubject : baseSubject, changed, baseSubject });
+            const neisSubjectRaw = neisSlot?.subject ?? "";
+            const changed = !!(neisSubjectRaw && baseSubjectRaw && neisSubjectRaw !== baseSubjectRaw);
+            const subject = applyAlias(changed ? neisSubjectRaw : baseSubjectRaw);
+            const baseSubject = applyAlias(baseSubjectRaw);
+            row.push({ subject, changed, baseSubject });
           }
           grid.push(row);
         }
