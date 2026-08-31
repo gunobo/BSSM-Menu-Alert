@@ -237,15 +237,6 @@ export default function TimetableCompare() {
             </div>
           )}
 
-          {/* 인쇄 */}
-          <div className="tt-admin-selector-group" style={{ marginLeft: "auto" }}>
-            <button
-              onClick={() => window.print()}
-              style={{ padding: "6px 14px", borderRadius: 8, background: "#f0f9ff", border: "1px solid #bae6fd", color: "#0369a1", cursor: "pointer", fontWeight: 600, fontSize: "0.85rem" }}
-            >
-              🖨️ 인쇄
-            </button>
-          </div>
         </div>
 
         {loading ? (
