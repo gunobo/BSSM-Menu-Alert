@@ -19,6 +19,7 @@ import TeacherMapManager from "./admin/TeacherMapManager";
 import TeacherRosterManager from "./admin/TeacherRosterManager";
 import OverrideManager from "./admin/OverrideManager";
 import TimetableCompare from "./admin/TimetableCompare";
+import TimetablePrintPage from "./admin/TimetablePrintPage";
 import "../styles/admin.css";
 
 export default function AdminPage() {
@@ -29,6 +30,8 @@ export default function AdminPage() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(["users", "user-search", "login-history"].includes(activeMenu));
   const [isPushMenuOpen, setIsPushMenuOpen] = useState(activeMenu.includes("push") || activeMenu.includes("stats"));
   const [isAppMenuOpen, setIsAppMenuOpen] = useState(activeMenu.includes("app"));
+  const TIMETABLE_MENUS = ["timetable", "class-period", "override", "compare", "timetable-print", "teacher-roster", "teacher-map", "exam-schedule"];
+  const [isTimetableOpen, setIsTimetableOpen] = useState(TIMETABLE_MENUS.includes(activeMenu));
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
 
   // ✅ 사용자 상태 관리
@@ -71,6 +74,7 @@ export default function AdminPage() {
       "timetable",           // 기본 시간표 관리
       "override",            // 변경 교시 교사 등록
       "compare",             // 학반별 시간표 비교
+      "timetable-print",     // 시간표 인쇄
       "teacher-roster",      // 교직원 관리
       "teacher-map",         // 교사 매핑 관리
       "class-period",        // 교시 시간 설정
@@ -250,60 +254,44 @@ export default function AdminPage() {
             )}
           </div>
 
-          {/* 📅 시간표 관리 */}
-          <button
-            className={activeMenu === "timetable" ? "active" : ""}
-            onClick={() => handleMenuClick("timetable")}
-          >
-            📅 기본 시간표 관리
-          </button>
-
-          {/* ⏰ 교시 설정 */}
-          <button
-            className={activeMenu === "class-period" ? "active" : ""}
-            onClick={() => handleMenuClick("class-period")}
-          >
-            ⏰ 교시 시간 설정
-          </button>
-
-          {/* 📝 변경 교시 교사 등록 */}
-          <button
-            className={activeMenu === "override" ? "active" : ""}
-            onClick={() => handleMenuClick("override")}
-          >
-            📝 변경 교시 교사 등록
-          </button>
-
-          {/* 📊 학반별 시간표 비교 */}
-          <button
-            className={activeMenu === "compare" ? "active" : ""}
-            onClick={() => handleMenuClick("compare")}
-          >
-            📊 학반별 시간표 비교
-          </button>
-
-          {/* 📋 교직원 관리 */}
-          <button
-            className={activeMenu === "teacher-roster" ? "active" : ""}
-            onClick={() => handleMenuClick("teacher-roster")}
-          >
-            📋 교직원 관리
-          </button>
-
-          {/* 👩‍🏫 교사 매핑 */}
-          <button
-            className={activeMenu === "teacher-map" ? "active" : ""}
-            onClick={() => handleMenuClick("teacher-map")}
-          >
-            👩‍🏫 교사 매핑 관리
-          </button>
-
-          <button
-            className={activeMenu === "exam-schedule" ? "active" : ""}
-            onClick={() => handleMenuClick("exam-schedule")}
-          >
-            📝 시험 일정 관리
-          </button>
+          {/* 📅 시간표 그룹 */}
+          <div className={`menu-group ${isTimetableOpen ? "open" : ""}`}>
+            <button
+              className={`group-title ${TIMETABLE_MENUS.includes(activeMenu) ? "active" : ""}`}
+              onClick={() => setIsTimetableOpen(!isTimetableOpen)}
+            >
+              📅 시간표 관리
+              <span className="arrow">{isTimetableOpen ? "▲" : "▼"}</span>
+            </button>
+            {isTimetableOpen && (
+              <div className="sub-menu-list">
+                <button className={activeMenu === "timetable" ? "active" : ""} onClick={() => handleMenuClick("timetable")}>
+                  └ 기본 시간표 관리
+                </button>
+                <button className={activeMenu === "class-period" ? "active" : ""} onClick={() => handleMenuClick("class-period")}>
+                  └ 교시 시간 설정
+                </button>
+                <button className={activeMenu === "override" ? "active" : ""} onClick={() => handleMenuClick("override")}>
+                  └ 변경 교시 교사 등록
+                </button>
+                <button className={activeMenu === "compare" ? "active" : ""} onClick={() => handleMenuClick("compare")}>
+                  └ 학반별 시간표 비교
+                </button>
+                <button className={activeMenu === "timetable-print" ? "active" : ""} onClick={() => handleMenuClick("timetable-print")}>
+                  └ 🖨️ 시간표 인쇄
+                </button>
+                <button className={activeMenu === "teacher-roster" ? "active" : ""} onClick={() => handleMenuClick("teacher-roster")}>
+                  └ 교직원 관리
+                </button>
+                <button className={activeMenu === "teacher-map" ? "active" : ""} onClick={() => handleMenuClick("teacher-map")}>
+                  └ 교사 매핑 관리
+                </button>
+                <button className={activeMenu === "exam-schedule" ? "active" : ""} onClick={() => handleMenuClick("exam-schedule")}>
+                  └ 시험 일정 관리
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* 📱 앱 관리 - 관리자만 노출 */}
           {canSeeAppMenu && (
@@ -345,6 +333,7 @@ export default function AdminPage() {
               activeMenu === "timetable" ? "기본 시간표 관리" :
               activeMenu === "override" ? "변경 교시 교사 등록" :
               activeMenu === "compare" ? "학반별 시간표 비교" :
+              activeMenu === "timetable-print" ? "시간표 인쇄" :
               activeMenu === "teacher-roster" ? "교직원 관리" :
               activeMenu === "teacher-map" ? "교사 매핑 관리" :
               activeMenu === "exam-schedule" ? "시험 일정 관리" :
@@ -369,6 +358,7 @@ export default function AdminPage() {
                 {activeMenu === "timetable" && <TimetableManager />}
                 {activeMenu === "override" && <OverrideManager />}
                 {activeMenu === "compare" && <TimetableCompare />}
+                {activeMenu === "timetable-print" && <TimetablePrintPage />}
                 {activeMenu === "teacher-roster" && <TeacherRosterManager />}
                 {activeMenu === "teacher-map" && <TeacherMapManager />}
                 {activeMenu === "exam-schedule" && <ExamScheduleManager />}
