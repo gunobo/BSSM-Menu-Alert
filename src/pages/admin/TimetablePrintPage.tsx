@@ -107,18 +107,18 @@ const A4_H = 1123;
 
 // ── ClassTemplate 디자인 토큰 ────────────────────────────────────────────────
 const CT = {
-  ink:      "#0c1520",   // 메인 잉크
-  navy:     "#1a3256",   // 헤더 배경
-  navyAlt:  "#142844",   // 헤더 교시 컬럼
-  period:   "#e8eef8",   // 교시 컬럼 셀
-  periodTx: "#4a6080",   // 교시 번호 색
+  ink:      "#0d1b2e",   // 메인 잉크
+  navy:     "#1c3f72",   // 헤더 배경 (선명한 BSSM 블루)
+  navyAlt:  "#152e55",   // 교시 헤더 컬럼 (더 진하게)
+  navyPeriod: "#17304e", // 교시 셀 배경 (다크)
+  periodTx: "#ffffff",   // 교시 번호 흰색
   cell:     "#ffffff",   // 일반 셀
-  cellAlt:  "#f9fafb",   // 짝수행 미세 오프셋
-  border:   "#dde3ec",   // 셀 구분선
-  amber:    "#d97706",   // 변경 셀 라인
-  amberBg:  "#fffbeb",   // 변경 셀 배경
-  amberTx:  "#92400e",   // 변경 원래 과목 텍스트
-  muted:    "#8a9db8",   // 교사명 / 보조 텍스트
+  cellAlt:  "#f5f8fd",   // 짝수행 극미세 블루틴트
+  border:   "#d0daea",   // 셀 구분선
+  amber:    "#e07b00",   // 변경 셀 라인
+  amberBg:  "#fff9f0",   // 변경 셀 배경
+  amberTx:  "#9a4500",   // 변경 원래 과목 텍스트
+  muted:    "#7a90aa",   // 교사명 / 보조 텍스트
   FF:       "'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif",
 };
 
@@ -143,13 +143,13 @@ function ClassTemplate({
       position: "relative",
     }}>
 
-      {/* ── 워터마크 ── */}
+      {/* ── 워터마크 (테이블 위에 z-index로 오버레이) ── */}
       <img src={bssmLogo} alt="" aria-hidden style={{
         position: "absolute", top: "50%", left: "50%",
         transform: "translate(-50%, -50%)",
-        width: 310, height: 310, objectFit: "contain",
-        opacity: 0.038, pointerEvents: "none", userSelect: "none",
-        zIndex: 0,
+        width: 340, height: 340, objectFit: "contain",
+        opacity: 0.055, pointerEvents: "none", userSelect: "none",
+        zIndex: 10,
       }} />
 
       {/* ── 가운데 제목 ── */}
@@ -217,12 +217,12 @@ function ClassTemplate({
               <tr key={pi}>
                 {/* 교시 번호 */}
                 <td style={{
-                  background: CT.period,
+                  background: CT.navyPeriod,
                   color: CT.periodTx,
                   fontWeight: 800, fontSize: 13,
                   textAlign: "center", verticalAlign: "middle",
                   border: `1px solid ${CT.border}`,
-                  borderRight: `2px solid #c8d4e8`,
+                  borderRight: `2px solid ${CT.navy}`,
                 }}>
                   {pi + 1}
                 </td>
