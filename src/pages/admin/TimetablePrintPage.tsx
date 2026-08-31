@@ -101,61 +101,83 @@ function ClassTemplate({
   const { grid, loading } = useClassData(grade, classNum, weekDays);
   if (loading) return <div style={{ padding: 40, textAlign: "center", color: "#94a3b8" }}>불러오는 중…</div>;
 
-  // ── ✏️ 여기서부터 학급별 시간표 디자인을 자유롭게 수정하세요 ─────────────
+  const wk = weekDays[0];
+  const wkEnd = weekDays[4];
+  const wkLabel = `${parseInt(wk.slice(4,6))}월 ${parseInt(wk.slice(6,8))}일 ~ ${parseInt(wkEnd.slice(4,6))}월 ${parseInt(wkEnd.slice(6,8))}일`;
+
   return (
-    <div style={{ width: "100%", height: "100%", boxSizing: "border-box", padding: "32px 28px", fontFamily: "'Apple SD Gothic Neo','Malgun Gothic',sans-serif" }}>
-      {/* 헤더 */}
-      <div style={{ borderBottom: "3px solid #1e40af", paddingBottom: 10, marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-        <div>
-          <div style={{ fontSize: 9, color: "#64748b", letterSpacing: "0.06em", marginBottom: 3 }}>부산소프트웨어마이스터고등학교</div>
-          <div style={{ fontSize: 20, fontWeight: 700, color: "#0f172a" }}>{grade}학년 {classNum}반 &nbsp;주간 시간표</div>
+    <div style={{
+      width: "100%", height: "100%",
+      boxSizing: "border-box",
+      padding: "48px 44px 36px",
+      fontFamily: "'Apple SD Gothic Neo','Malgun Gothic',sans-serif",
+      display: "flex", flexDirection: "column",
+    }}>
+      {/* ── 상단 타이틀 (가운데 정렬) ── */}
+      <div style={{ textAlign: "center", marginBottom: 32 }}>
+        <div style={{ fontSize: 34, fontWeight: 800, color: "#0f172a", letterSpacing: "-0.02em", lineHeight: 1.15 }}>
+          {grade}학년 {classNum}반 시간표
         </div>
-        <div style={{ textAlign: "right", fontSize: 9, color: "#64748b", lineHeight: 1.7 }}>
-          <div>{weekLabel(weekDays)}</div>
-          <div>출력일: {today()}</div>
+        <div style={{ fontSize: 14, color: "#64748b", marginTop: 8, fontWeight: 500 }}>
+          기간: {wkLabel}
         </div>
       </div>
 
-      {/* 시간표 테이블 */}
-      <table style={{ borderCollapse: "collapse", width: "100%", tableLayout: "fixed" }}>
-        <thead>
-          <tr>
-            <th style={TH_PERIOD}>교시</th>
-            {DAY_NAMES.map((d, i) => (
-              <th key={d} style={TH_DAY}>
-                {d}<br />
-                <span style={{ fontWeight: 400, fontSize: 8, opacity: 0.85 }}>{fmtDate(weekDays[i])}</span>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {grid.map((row, pi) => (
-            <tr key={pi}>
-              <td style={TD_PERIOD}>{pi + 1}교시</td>
-              {row.map((cell, di) => (
-                <td key={di} style={{ ...TD_CELL, background: cell.changed ? "#fffbeb" : pi % 2 === 1 ? "#f8fafc" : "#fff", borderColor: cell.changed ? "#fbbf24" : "#e2e8f0" }}>
-                  <div style={{ fontWeight: cell.changed ? 600 : 500, fontSize: 11 }}>{cell.subject || "—"}</div>
-                  {cell.changed && <div style={{ fontSize: 8, color: "#b45309", marginTop: 2 }}>← {cell.baseSubject}</div>}
-                  {cell.teacher && <div style={{ fontSize: 8.5, color: "#475569", borderTop: "1px dashed #e2e8f0", marginTop: 3, paddingTop: 3 }}>{cell.teacher}</div>}
-                </td>
+      {/* ── 시간표 테이블 ── */}
+      <div style={{ flex: 1 }}>
+        <table style={{ borderCollapse: "collapse", width: "100%", height: "100%", tableLayout: "fixed" }}>
+          <thead>
+            <tr>
+              <th style={{ background: "#0f172a", color: "#fff", fontWeight: 700, fontSize: 12, padding: "10px 4px", textAlign: "center", width: 52 }}>교시</th>
+              {DAY_NAMES.map((d, i) => (
+                <th key={d} style={{ background: "#0f172a", color: "#fff", fontWeight: 700, fontSize: 13, padding: "10px 4px", textAlign: "center" }}>
+                  {d}
+                  <div style={{ fontWeight: 400, fontSize: 10, color: "#64748b", marginTop: 2 }}>{fmtDate(weekDays[i])}</div>
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {grid.map((row, pi) => (
+              <tr key={pi}>
+                <td style={{ background: "#f1f5f9", color: "#475569", fontWeight: 700, fontSize: 11, textAlign: "center", border: "1px solid #e2e8f0", padding: "6px 4px" }}>
+                  {pi + 1}
+                </td>
+                {row.map((cell, di) => (
+                  <td key={di} style={{
+                    border: "1px solid #e2e8f0",
+                    padding: "8px 6px",
+                    textAlign: "center",
+                    verticalAlign: "middle",
+                    background: cell.changed ? "#fffbeb" : "#fff",
+                    borderColor: cell.changed ? "#fbbf24" : "#e2e8f0",
+                  }}>
+                    <div style={{ fontSize: 12, fontWeight: cell.changed ? 700 : 500, color: "#0f172a" }}>
+                      {cell.subject || "—"}
+                    </div>
+                    {cell.changed && (
+                      <div style={{ fontSize: 9, color: "#b45309", marginTop: 2 }}>← {cell.baseSubject}</div>
+                    )}
+                    {cell.teacher && (
+                      <div style={{ fontSize: 9.5, color: "#64748b", marginTop: 3, borderTop: "1px dashed #e2e8f0", paddingTop: 3 }}>
+                        {cell.teacher}
+                      </div>
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-      {/* 범례 */}
-      <div style={{ marginTop: 12, display: "flex", gap: 20, fontSize: 8, color: "#64748b", borderTop: "1px solid #e2e8f0", paddingTop: 8 }}>
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <span style={{ display: "inline-block", width: 10, height: 10, background: "#fffbeb", border: "1px solid #fbbf24", borderRadius: 2 }} />
-          NEIS 기준 변경 교시
-        </span>
-        <span style={{ marginLeft: "auto" }}>부산소프트웨어마이스터고 · {grade}학년 {classNum}반</span>
+      {/* ── 하단 브랜드 (가운데 정렬) ── */}
+      <div style={{ textAlign: "center", marginTop: 28 }}>
+        <div style={{ fontSize: 15, fontWeight: 800, color: "#0f172a", letterSpacing: "-0.01em" }}>BSSM급식알리미</div>
+        <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 3 }}>https://alert.bssm.dev</div>
       </div>
     </div>
   );
-  // ── ✏️ 여기까지 ────────────────────────────────────────────────────────────
 }
 
 // ── 시간표 비교 템플릿 ────────────────────────────────────────────────────────
