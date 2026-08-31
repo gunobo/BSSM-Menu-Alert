@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { getWeekTimetable } from "../../api/NeisApi";
-import { getPublicBaseTimetable, getPublicOverrides } from "../../api/timetableApi";
+import { getPublicBaseTimetable, getPublicOverrides, getPublicTeacherMap } from "../../api/timetableApi";
 import type { BaseTimetableData } from "../../api/timetableApi";
 import bssmLogo from "../../assets/bssmlogo_rmbg.png";
 
@@ -42,25 +42,32 @@ type NeisMap = Record<string, Array<{ period: number; subject: string }>>;
 type OverrideMap = Record<string, Record<number, { teacher: string; subject: string }>>;
 type CellInfo = { subject: string; teacher: string; changed: boolean; baseSubject: string };
 
+function applyAlias(name: string, alias: Record<string, string>) {
+  return alias[name] ?? name;
+}
+
 function buildGrid(
   base: BaseTimetableData | null,
   neis: NeisMap,
   overrides: OverrideMap,
   weekDays: string[],
+  alias: Record<string, string> = {},
 ): CellInfo[][] {
   return Array.from({ length: MAX_PERIODS }, (_, pi) =>
     weekDays.map((date, di) => {
-      const baseSubject = base?.subjects?.[pi]?.[di] ?? "";
+      const baseSubjectRaw = base?.subjects?.[pi]?.[di] ?? "";
       const neisSlots = neis[date] ?? [];
       const neisSlot = neisSlots.find((s) => s.period === pi + 1);
-      const neisSubject = neisSlot?.subject ?? "";
-      const changed = !!(neisSubject && baseSubject && neisSubject !== baseSubject);
+      const neisSubjectRaw = neisSlot?.subject ?? "";
+      const changed = !!(neisSubjectRaw && baseSubjectRaw && neisSubjectRaw !== baseSubjectRaw);
       const ovr = overrides[date]?.[pi + 1];
       const baseTeacher = base?.teachers?.[pi]?.[di] ?? "";
-      let subject = baseSubject;
+      let subjectRaw = baseSubjectRaw;
       let teacher = baseTeacher;
-      if (changed) { subject = neisSubject; teacher = ovr?.teacher ?? ""; }
-      else if (ovr?.subject !== undefined) { subject = ovr.subject || "수업없음"; }
+      if (changed) { subjectRaw = neisSubjectRaw; teacher = ovr?.teacher ?? ""; }
+      else if (ovr?.subject !== undefined) { subjectRaw = ovr.subject || "수업없음"; }
+      const subject = applyAlias(subjectRaw, alias);
+      const baseSubject = applyAlias(baseSubjectRaw, alias);
       return { subject, teacher, changed, baseSubject };
     })
   );
@@ -71,6 +78,7 @@ function useClassData(grade: number, classNum: number, weekDays: string[]) {
   const [base, setBase] = useState<BaseTimetableData | null>(null);
   const [neis, setNeis] = useState<NeisMap>({});
   const [overrides, setOverrides] = useState<OverrideMap>({});
+  const [alias, setAlias] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -80,14 +88,16 @@ function useClassData(grade: number, classNum: number, weekDays: string[]) {
       getPublicBaseTimetable(grade, classNum).catch(() => null),
       getWeekTimetable(grade, classNum, from, to).catch(() => ({})),
       getPublicOverrides(grade, classNum, from, to).catch(() => ({})),
-    ]).then(([b, n, o]) => {
+      getPublicTeacherMap(grade, classNum).catch(() => null),
+    ]).then(([b, n, o, tm]) => {
       setBase(b);
       setNeis(n as NeisMap);
       setOverrides(o as unknown as OverrideMap);
+      setAlias(tm?.subjectAlias ?? {});
     }).finally(() => setLoading(false));
   }, [grade, classNum, weekDays[0]]);
 
-  const grid = useMemo(() => buildGrid(base, neis, overrides, weekDays), [base, neis, overrides, weekDays]);
+  const grid = useMemo(() => buildGrid(base, neis, overrides, weekDays, alias), [base, neis, overrides, weekDays, alias]);
   return { base, grid, loading };
 }
 
@@ -138,14 +148,14 @@ function ClassTemplate({
 
       {/* ── 시간표 테이블 ── */}
       <div style={{ flex: 1 }}>
-        <table style={{ borderCollapse: "collapse", width: "100%", height: "100%", tableLayout: "fixed" }}>
+        <table style={{ borderCollapse: "collapse", width: "100%", tableLayout: "fixed" }}>
           <thead>
             <tr>
-              <th style={{ background: "#0f172a", color: "#fff", fontWeight: 700, fontSize: 10, padding: "8px 4px", textAlign: "center", width: 42 }}>교시</th>
+              <th style={{ background: "#0f172a", color: "#fff", fontWeight: 700, fontSize: 10, padding: "5px 4px", textAlign: "center", width: 42 }}>교시</th>
               {DAY_NAMES.map((d, i) => (
-                <th key={d} style={{ background: "#0f172a", color: "#fff", fontWeight: 700, fontSize: 11, padding: "8px 4px", textAlign: "center" }}>
+                <th key={d} style={{ background: "#0f172a", color: "#fff", fontWeight: 700, fontSize: 11, padding: "5px 4px", textAlign: "center" }}>
                   {d}
-                  <div style={{ fontWeight: 400, fontSize: 9, color: "#64748b", marginTop: 2 }}>{fmtDate(weekDays[i])}</div>
+                  <div style={{ fontWeight: 400, fontSize: 9, color: "#94a3b8", marginTop: 1 }}>{fmtDate(weekDays[i])}</div>
                 </th>
               ))}
             </tr>
@@ -153,13 +163,13 @@ function ClassTemplate({
           <tbody>
             {grid.map((row, pi) => (
               <tr key={pi}>
-                <td style={{ background: "#f1f5f9", color: "#475569", fontWeight: 700, fontSize: 9, textAlign: "center", border: "1px solid #e2e8f0", padding: "5px 3px" }}>
+                <td style={{ background: "#f1f5f9", color: "#475569", fontWeight: 700, fontSize: 9, textAlign: "center", border: "1px solid #e2e8f0", padding: "4px 3px" }}>
                   {pi + 1}
                 </td>
                 {row.map((cell, di) => (
                   <td key={di} style={{
                     border: "1px solid #e2e8f0",
-                    padding: "7px 5px",
+                    padding: "5px 5px",
                     textAlign: "center",
                     verticalAlign: "middle",
                     background: cell.changed ? "#fffbeb" : "#fff",
@@ -169,12 +179,12 @@ function ClassTemplate({
                       {cell.subject || "—"}
                     </div>
                     {cell.changed && (
-                      <div style={{ fontSize: 9, color: "#b45309", marginTop: 3 }}>
+                      <div style={{ fontSize: 9, color: "#b45309", marginTop: 2 }}>
                         {cell.baseSubject}
                       </div>
                     )}
                     {cell.teacher && (
-                      <div style={{ fontSize: 8.5, color: "#64748b", marginTop: 2, borderTop: "1px dashed #e2e8f0", paddingTop: 2 }}>
+                      <div style={{ fontSize: 8, color: "#64748b", marginTop: 1, borderTop: "1px dashed #e2e8f0", paddingTop: 1 }}>
                         {cell.teacher}
                       </div>
                     )}
