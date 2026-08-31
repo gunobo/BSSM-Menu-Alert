@@ -266,6 +266,7 @@ export default function OverrideManager() {
       {/* 인쇄 전용 스타일 */}
       <style>{`
         @media print {
+          @page { margin: 15mm 12mm; }
           body * { visibility: hidden !important; }
           #week-print-sheet, #week-print-sheet * { visibility: visible !important; }
           #week-print-sheet {
@@ -273,46 +274,118 @@ export default function OverrideManager() {
             left: 0 !important; top: 0 !important;
             width: 100% !important;
             background: #fff !important;
-            padding: 24px !important;
+            padding: 0 !important;
             box-sizing: border-box !important;
+            font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif !important;
           }
-          .print-tt { border-collapse: collapse; width: 100%; }
-          .print-tt th, .print-tt td { border: 1px solid #ccc; padding: 6px 8px; font-size: 11pt; }
-          .print-tt th { background: #f1f5f9; text-align: center; }
-          .print-tt td { text-align: center; vertical-align: middle; }
-          .print-changed { background: #fef9c3 !important; }
-          .print-changed-label { font-size: 8pt; color: #92400e; display: block; }
-          .print-teacher { font-size: 8.5pt; color: #475569; display: block; }
+          /* 헤더 */
+          .ps-header {
+            display: flex !important;
+            align-items: flex-end !important;
+            justify-content: space-between !important;
+            border-bottom: 3px solid #1e40af !important;
+            padding-bottom: 10px !important;
+            margin-bottom: 14px !important;
+          }
+          .ps-school { font-size: 9pt; color: #64748b; letter-spacing: 0.05em; }
+          .ps-title { font-size: 17pt; font-weight: 700; color: #0f172a; margin: 3px 0 0; }
+          .ps-week { font-size: 9pt; color: #475569; text-align: right; line-height: 1.6; }
+          /* 테이블 */
+          .print-tt { border-collapse: collapse; width: 100%; table-layout: fixed; }
+          .print-tt th {
+            background: #1e40af !important;
+            color: #fff !important;
+            font-size: 9.5pt !important;
+            font-weight: 600 !important;
+            padding: 7px 4px !important;
+            text-align: center !important;
+            border: 1px solid #1e3a8a !important;
+            letter-spacing: 0.03em !important;
+          }
+          .print-tt th.pt-period-h {
+            background: #0f172a !important;
+            border-color: #0f172a !important;
+            width: 38pt !important;
+          }
+          .print-tt td {
+            border: 1px solid #cbd5e1 !important;
+            padding: 8px 6px !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            font-size: 10pt !important;
+            line-height: 1.4 !important;
+          }
+          .print-tt tr:nth-child(even) td { background: #f8fafc !important; }
+          .pt-period-cell {
+            background: #1e293b !important;
+            color: #fff !important;
+            font-weight: 700 !important;
+            font-size: 10pt !important;
+            border-color: #0f172a !important;
+          }
+          .print-changed {
+            background: #fffbeb !important;
+            border: 1.5px solid #fbbf24 !important;
+          }
+          .pc-subj { display: block; font-weight: 600; }
+          .pc-base { display: block; font-size: 7.5pt; color: #b45309; margin-top: 2px; }
+          .pc-teacher { display: block; font-size: 8pt; color: #374151; margin-top: 2px; border-top: 1px dashed #d1d5db; padding-top: 2px; }
+          /* 범례 + 푸터 */
+          .ps-footer {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            margin-top: 12px !important;
+            padding-top: 8px !important;
+            border-top: 1px solid #e2e8f0 !important;
+            font-size: 7.5pt !important;
+            color: #64748b !important;
+          }
+          .ps-legend { display: flex; gap: 16px; align-items: center; }
+          .ps-legend-item { display: flex; align-items: center; gap: 4px; }
+          .ps-legend-box {
+            display: inline-block; width: 12px; height: 12px;
+            border-radius: 2px; border: 1px solid #e2e8f0;
+          }
         }
       `}</style>
 
       {/* 인쇄 전용 시트 */}
       <div id="week-print-sheet" style={{ display: "none" }}>
-        <div style={{ marginBottom: 12 }}>
-          <strong style={{ fontSize: "15pt" }}>{grade}학년 {classNum}반 — 주간 시간표</strong>
-          <span style={{ marginLeft: 16, fontSize: "10pt", color: "#64748b" }}>{weekLabel(weekDays)}</span>
+        {/* 헤더 */}
+        <div className="ps-header">
+          <div>
+            <div className="ps-school">부산소프트웨어마이스터고등학교</div>
+            <div className="ps-title">{grade}학년 {classNum}반 &nbsp;주간 시간표</div>
+          </div>
+          <div className="ps-week">
+            <div>{weekLabel(weekDays)}</div>
+            <div>출력일: {new Date().toLocaleDateString("ko-KR")}</div>
+          </div>
         </div>
+
+        {/* 시간표 */}
         <table className="print-tt">
           <thead>
             <tr>
-              <th style={{ width: 48 }}>교시</th>
+              <th className="pt-period-h">교시</th>
               {DAY_NAMES.map((d, i) => (
-                <th key={d}>{d} ({formatDate(weekDays[i])})</th>
+                <th key={d}>{d}<br /><span style={{ fontWeight: 400, fontSize: "8pt", opacity: 0.85 }}>{formatDate(weekDays[i])}</span></th>
               ))}
             </tr>
           </thead>
           <tbody>
             {printGrid.map((row, pi) => (
               <tr key={pi}>
-                <td><strong>{pi + 1}</strong></td>
+                <td className="pt-period-cell">{pi + 1}교시</td>
                 {row.map((cell, di) => (
                   <td key={di} className={cell.changed ? "print-changed" : ""}>
-                    {cell.subject || "—"}
+                    <span className="pc-subj">{cell.subject || "—"}</span>
                     {cell.changed && (
-                      <span className="print-changed-label">기본: {cell.baseSubject}</span>
+                      <span className="pc-base">← {cell.baseSubject}</span>
                     )}
                     {cell.teacher && (
-                      <span className="print-teacher">{cell.teacher}</span>
+                      <span className="pc-teacher">{cell.teacher}</span>
                     )}
                   </td>
                 ))}
@@ -320,8 +393,20 @@ export default function OverrideManager() {
             ))}
           </tbody>
         </table>
-        <div style={{ marginTop: 8, fontSize: "8.5pt", color: "#92400e" }}>
-          ★ 노란 셀 = NEIS 기준 변경된 교시 (기본 시간표 대비)
+
+        {/* 푸터 */}
+        <div className="ps-footer">
+          <div className="ps-legend">
+            <div className="ps-legend-item">
+              <span className="ps-legend-box" style={{ background: "#fffbeb", borderColor: "#fbbf24" }} />
+              변경된 교시 (NEIS 기준)
+            </div>
+            <div className="ps-legend-item">
+              <span className="ps-legend-box" style={{ background: "#fff" }} />
+              기본 시간표 유지
+            </div>
+          </div>
+          <div>부산소프트웨어마이스터고 · {grade}학년 {classNum}반</div>
         </div>
       </div>
 
