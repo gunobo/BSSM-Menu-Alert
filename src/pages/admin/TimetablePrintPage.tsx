@@ -105,6 +105,23 @@ function useClassData(grade: number, classNum: number, weekDays: string[]) {
 const A4_W = 794;   // px at 96dpi
 const A4_H = 1123;
 
+// ── ClassTemplate 디자인 토큰 ────────────────────────────────────────────────
+const CT = {
+  ink:      "#0c1520",   // 메인 잉크
+  navy:     "#1a3256",   // 헤더 배경
+  navyAlt:  "#142844",   // 헤더 교시 컬럼
+  period:   "#e8eef8",   // 교시 컬럼 셀
+  periodTx: "#4a6080",   // 교시 번호 색
+  cell:     "#ffffff",   // 일반 셀
+  cellAlt:  "#f9fafb",   // 짝수행 미세 오프셋
+  border:   "#dde3ec",   // 셀 구분선
+  amber:    "#d97706",   // 변경 셀 라인
+  amberBg:  "#fffbeb",   // 변경 셀 배경
+  amberTx:  "#92400e",   // 변경 원래 과목 텍스트
+  muted:    "#8a9db8",   // 교사명 / 보조 텍스트
+  FF:       "'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif",
+};
+
 function ClassTemplate({
   grade, classNum, weekDays,
 }: { grade: number; classNum: number; weekDays: string[] }) {
@@ -115,100 +132,142 @@ function ClassTemplate({
   const wkEnd = weekDays[4];
   const wkLabel = `${parseInt(wk.slice(4,6))}월 ${parseInt(wk.slice(6,8))}일 ~ ${parseInt(wkEnd.slice(4,6))}월 ${parseInt(wkEnd.slice(6,8))}일`;
 
-  const FF = "'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif";
-
   return (
     <div style={{
       width: "100%", height: "100%",
       boxSizing: "border-box",
-      padding: "40px 44px 28px",
-      fontFamily: FF,
+      padding: "38px 44px 22px",
+      fontFamily: CT.FF,
       display: "flex", flexDirection: "column",
-      position: "relative",
       background: "#fff",
+      position: "relative",
     }}>
-      {/* 워터마크 */}
+
+      {/* ── 워터마크 ── */}
       <img src={bssmLogo} alt="" aria-hidden style={{
         position: "absolute", top: "50%", left: "50%",
         transform: "translate(-50%, -50%)",
-        width: 300, height: 300, objectFit: "contain",
-        opacity: 0.04, pointerEvents: "none", userSelect: "none",
+        width: 310, height: 310, objectFit: "contain",
+        opacity: 0.038, pointerEvents: "none", userSelect: "none",
+        zIndex: 0,
       }} />
 
-      {/* 타이틀 */}
-      <div style={{ textAlign: "center", marginBottom: 24, flexShrink: 0 }}>
-        <div style={{ fontSize: 28, fontWeight: 800, color: "#0f172a", letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+      {/* ── 가운데 제목 ── */}
+      <div style={{ textAlign: "center", flexShrink: 0, marginBottom: 22, position: "relative", zIndex: 1 }}>
+        <div style={{
+          fontSize: 30, fontWeight: 900, color: CT.ink,
+          letterSpacing: "-0.03em", lineHeight: 1.1,
+        }}>
           {grade}학년 {classNum}반 시간표
         </div>
-        <div style={{ fontSize: 12, color: "#64748b", marginTop: 8, fontWeight: 400 }}>
+        <div style={{
+          fontSize: 12, fontWeight: 400, color: CT.muted,
+          marginTop: 8, letterSpacing: "0.02em",
+        }}>
           {wkLabel}
         </div>
       </div>
 
-      {/* 테이블 — flex: 1 로 남은 공간 전부 사용 */}
-      <div style={{ flex: 1, minHeight: 0 }}>
-      <table style={{
-        borderCollapse: "collapse",
-        width: "100%",
-        height: "100%",
-        tableLayout: "fixed",
-      }}>
-        <thead>
-          <tr>
-            <th style={{ background: "#0f172a", color: "#fff", fontWeight: 700, fontSize: 11, padding: "10px 4px", textAlign: "center", width: 44 }}>교시</th>
-            {DAY_NAMES.map((d, i) => (
-              <th key={d} style={{ background: "#0f172a", color: "#fff", fontWeight: 700, fontSize: 14, padding: "10px 6px", textAlign: "center" }}>
-                {d}
-                <div style={{ fontWeight: 400, fontSize: 10, color: "#94a3b8", marginTop: 2 }}>{fmtDate(weekDays[i])}</div>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {grid.map((row, pi) => (
-            <tr key={pi} style={{ height: `${100 / MAX_PERIODS}%` }}>
-              <td style={{
-                background: "#f1f5f9", color: "#475569",
-                fontWeight: 700, fontSize: 11,
-                textAlign: "center", verticalAlign: "middle",
-                border: "1px solid #e2e8f0",
-              }}>{pi + 1}</td>
-              {row.map((cell, di) => (
-                <td key={di} style={{
-                  border: "1px solid #e2e8f0",
-                  textAlign: "center", verticalAlign: "middle",
-                  background: cell.changed ? "#fffbeb" : "#fff",
-                  borderColor: cell.changed ? "#fbbf24" : "#e2e8f0",
-                  position: "relative",
+      {/* ── 테이블 wrapper (남은 공간 전부) ── */}
+      <div style={{ flex: 1, minHeight: 0, position: "relative", zIndex: 1 }}>
+        <table style={{
+          borderCollapse: "collapse",
+          width: "100%",
+          height: "100%",
+          tableLayout: "fixed",
+        }}>
+          {/* 열 너비 */}
+          <colgroup>
+            <col style={{ width: 46 }} />
+            {DAY_NAMES.map((_, i) => <col key={i} />)}
+          </colgroup>
+
+          {/* 헤더 */}
+          <thead>
+            <tr>
+              <th style={{
+                background: CT.navyAlt, color: "rgba(255,255,255,0.5)",
+                fontWeight: 700, fontSize: 9.5,
+                letterSpacing: "0.1em", textTransform: "uppercase",
+                padding: "10px 4px", textAlign: "center",
+                borderRight: "1px solid rgba(255,255,255,0.08)",
+              }}>교시</th>
+              {DAY_NAMES.map((d, i) => (
+                <th key={d} style={{
+                  background: CT.navy,
+                  color: "#fff",
+                  fontWeight: 700, fontSize: 15,
+                  padding: "10px 6px", textAlign: "center",
+                  borderRight: i < 4 ? "1px solid rgba(255,255,255,0.1)" : "none",
+                  letterSpacing: "0.02em",
                 }}>
-                  {cell.changed && (
-                    <span style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 3, background: "#d97706", borderRadius: "0 2px 2px 0" }} />
-                  )}
-                  <div style={{ fontSize: 13, fontWeight: 600, color: "#0f172a", lineHeight: 1.3 }}>
-                    {cell.subject || <span style={{ color: "#cbd5e1", fontWeight: 400 }}>—</span>}
-                  </div>
-                  {cell.changed && (
-                    <div style={{ fontSize: 10, color: "#b45309", marginTop: 3, fontWeight: 500 }}>
-                      ← {cell.baseSubject}
-                    </div>
-                  )}
-                  {cell.teacher && (
-                    <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 3 }}>
-                      {cell.teacher}
-                    </div>
-                  )}
-                </td>
+                  {d}
+                  <div style={{
+                    fontWeight: 400, fontSize: 10,
+                    color: "rgba(255,255,255,0.45)", marginTop: 2,
+                  }}>{fmtDate(weekDays[i])}</div>
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          {/* 바디 */}
+          <tbody>
+            {grid.map((row, pi) => (
+              <tr key={pi}>
+                {/* 교시 번호 */}
+                <td style={{
+                  background: CT.period,
+                  color: CT.periodTx,
+                  fontWeight: 800, fontSize: 13,
+                  textAlign: "center", verticalAlign: "middle",
+                  border: `1px solid ${CT.border}`,
+                  borderRight: `2px solid #c8d4e8`,
+                }}>
+                  {pi + 1}
+                </td>
+                {/* 과목 셀 */}
+                {row.map((cell, di) => (
+                  <td key={di} style={{
+                    border: `1px solid ${CT.border}`,
+                    textAlign: "center", verticalAlign: "middle",
+                    background: cell.changed ? CT.amberBg : pi % 2 === 1 ? CT.cellAlt : CT.cell,
+                    borderColor: cell.changed ? "#fcd34d" : CT.border,
+                    position: "relative",
+                    padding: "6px 8px",
+                  }}>
+                    {/* 변경 셀 좌측 라인 */}
+                    {cell.changed && (
+                      <span style={{
+                        position: "absolute", left: 0, top: 0, bottom: 0,
+                        width: 3, background: CT.amber,
+                      }} />
+                    )}
+                    <div style={{ fontSize: 14, fontWeight: 600, color: CT.ink, lineHeight: 1.25 }}>
+                      {cell.subject || <span style={{ color: "#d1d9e3", fontWeight: 400 }}>—</span>}
+                    </div>
+                    {cell.changed && (
+                      <div style={{ fontSize: 10.5, color: CT.amberTx, marginTop: 3, fontWeight: 500 }}>
+                        ← {cell.baseSubject}
+                      </div>
+                    )}
+                    {cell.teacher && (
+                      <div style={{ fontSize: 10.5, color: CT.muted, marginTop: 3, fontWeight: 400 }}>
+                        {cell.teacher}
+                      </div>
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      {/* 푸터 */}
-      <div style={{ textAlign: "center", marginTop: 20, flexShrink: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 800, color: "#0f172a" }}>BSSM급식알리미</div>
-        <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 2 }}>https://alert.bssm.dev</div>
+      {/* ── 하단 브랜드 ── */}
+      <div style={{ textAlign: "center", flexShrink: 0, marginTop: 18, position: "relative", zIndex: 1 }}>
+        <div style={{ fontSize: 14, fontWeight: 900, color: CT.ink, letterSpacing: "-0.01em" }}>BSSM급식알리미</div>
+        <div style={{ fontSize: 10, color: CT.muted, marginTop: 3 }}>https://alert.bssm.dev</div>
       </div>
     </div>
   );
