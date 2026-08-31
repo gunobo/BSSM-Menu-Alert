@@ -43,7 +43,6 @@ body {
 .admin-container {
   padding: calc(40px * var(--scale));
   background-color: var(--admin-bg);
-  min-height: 100vh;
   color: var(--text-main);
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
 }
