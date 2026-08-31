@@ -162,7 +162,13 @@ function ClassTemplate({
 function CompareTemplate({
   grade, classes, weekDays, viewDay,
 }: { grade: number; classes: number[]; weekDays: string[]; viewDay: number | null }) {
-  const grids = classes.map((c) => useClassData(grade, c, weekDays));
+  // 훅은 항상 고정 개수(4개)로 호출 — classes 길이에 무관하게
+  const d1 = useClassData(grade, 1, weekDays);
+  const d2 = useClassData(grade, 2, weekDays);
+  const d3 = useClassData(grade, 3, weekDays);
+  const d4 = useClassData(grade, 4, weekDays);
+  const allData = [d1, d2, d3, d4]; // index 0 = 1반, index 1 = 2반, ...
+  const grids = classes.map((c) => allData[c - 1]);
   const loading = grids.some((g) => g.loading);
   const days = viewDay !== null ? [viewDay] : [0, 1, 2, 3, 4];
 
@@ -223,7 +229,12 @@ function CompareTemplate({
 
 // ── 전체 학급 템플릿 ──────────────────────────────────────────────────────────
 function AllClassTemplate({ grade, weekDays }: { grade: number; weekDays: string[] }) {
-  const grids = Array.from({ length: MAX_CLASSES }, (_, i) => useClassData(grade, i + 1, weekDays));
+  // 훅은 항상 고정 4개
+  const d1 = useClassData(grade, 1, weekDays);
+  const d2 = useClassData(grade, 2, weekDays);
+  const d3 = useClassData(grade, 3, weekDays);
+  const d4 = useClassData(grade, 4, weekDays);
+  const grids = [d1, d2, d3, d4];
   const loading = grids.some((g) => g.loading);
   if (loading) return <div style={{ padding: 40, textAlign: "center", color: "#94a3b8" }}>불러오는 중…</div>;
 
