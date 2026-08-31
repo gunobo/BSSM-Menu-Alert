@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import { getWeekTimetable } from "../../api/NeisApi";
 import { getPublicBaseTimetable, getPublicOverrides } from "../../api/timetableApi";
 import type { BaseTimetableData } from "../../api/timetableApi";
+import bssmLogo from "../../assets/bssmlogo_rmbg.png";
 
 // ── 상수 ──────────────────────────────────────────────────────────────────────
 const GRADES = [1, 2, 3];
@@ -112,13 +113,25 @@ function ClassTemplate({
       padding: "48px 44px 36px",
       fontFamily: "'Apple SD Gothic Neo','Malgun Gothic',sans-serif",
       display: "flex", flexDirection: "column",
+      position: "relative",
     }}>
+      {/* 배경 워터마크 로고 */}
+      <img src={bssmLogo} alt="" aria-hidden style={{
+        position: "absolute",
+        top: "50%", left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: 320, height: 320,
+        objectFit: "contain",
+        opacity: 0.045,
+        pointerEvents: "none",
+        userSelect: "none",
+      }} />
       {/* ── 상단 타이틀 (가운데 정렬) ── */}
-      <div style={{ textAlign: "center", marginBottom: 32 }}>
-        <div style={{ fontSize: 34, fontWeight: 800, color: "#0f172a", letterSpacing: "-0.02em", lineHeight: 1.15 }}>
+      <div style={{ textAlign: "center", marginBottom: 20 }}>
+        <div style={{ fontSize: 24, fontWeight: 800, color: "#0f172a", letterSpacing: "-0.02em", lineHeight: 1.15 }}>
           {grade}학년 {classNum}반 시간표
         </div>
-        <div style={{ fontSize: 14, color: "#64748b", marginTop: 8, fontWeight: 500 }}>
+        <div style={{ fontSize: 11, color: "#64748b", marginTop: 6, fontWeight: 500 }}>
           기간: {wkLabel}
         </div>
       </div>
@@ -128,11 +141,11 @@ function ClassTemplate({
         <table style={{ borderCollapse: "collapse", width: "100%", height: "100%", tableLayout: "fixed" }}>
           <thead>
             <tr>
-              <th style={{ background: "#0f172a", color: "#fff", fontWeight: 700, fontSize: 12, padding: "10px 4px", textAlign: "center", width: 52 }}>교시</th>
+              <th style={{ background: "#0f172a", color: "#fff", fontWeight: 700, fontSize: 10, padding: "8px 4px", textAlign: "center", width: 42 }}>교시</th>
               {DAY_NAMES.map((d, i) => (
-                <th key={d} style={{ background: "#0f172a", color: "#fff", fontWeight: 700, fontSize: 13, padding: "10px 4px", textAlign: "center" }}>
+                <th key={d} style={{ background: "#0f172a", color: "#fff", fontWeight: 700, fontSize: 11, padding: "8px 4px", textAlign: "center" }}>
                   {d}
-                  <div style={{ fontWeight: 400, fontSize: 10, color: "#64748b", marginTop: 2 }}>{fmtDate(weekDays[i])}</div>
+                  <div style={{ fontWeight: 400, fontSize: 9, color: "#64748b", marginTop: 2 }}>{fmtDate(weekDays[i])}</div>
                 </th>
               ))}
             </tr>
@@ -140,26 +153,26 @@ function ClassTemplate({
           <tbody>
             {grid.map((row, pi) => (
               <tr key={pi}>
-                <td style={{ background: "#f1f5f9", color: "#475569", fontWeight: 700, fontSize: 11, textAlign: "center", border: "1px solid #e2e8f0", padding: "6px 4px" }}>
+                <td style={{ background: "#f1f5f9", color: "#475569", fontWeight: 700, fontSize: 9, textAlign: "center", border: "1px solid #e2e8f0", padding: "5px 3px" }}>
                   {pi + 1}
                 </td>
                 {row.map((cell, di) => (
                   <td key={di} style={{
                     border: "1px solid #e2e8f0",
-                    padding: "8px 6px",
+                    padding: "7px 5px",
                     textAlign: "center",
                     verticalAlign: "middle",
                     background: cell.changed ? "#fffbeb" : "#fff",
                     borderColor: cell.changed ? "#fbbf24" : "#e2e8f0",
                   }}>
-                    <div style={{ fontSize: 12, fontWeight: cell.changed ? 700 : 500, color: "#0f172a" }}>
+                    <div style={{ fontSize: 10.5, fontWeight: cell.changed ? 700 : 500, color: "#0f172a" }}>
                       {cell.subject || "—"}
                     </div>
                     {cell.changed && (
-                      <div style={{ fontSize: 9, color: "#b45309", marginTop: 2 }}>← {cell.baseSubject}</div>
+                      <div style={{ fontSize: 8, color: "#b45309", marginTop: 2 }}>← {cell.baseSubject}</div>
                     )}
                     {cell.teacher && (
-                      <div style={{ fontSize: 9.5, color: "#64748b", marginTop: 3, borderTop: "1px dashed #e2e8f0", paddingTop: 3 }}>
+                      <div style={{ fontSize: 8.5, color: "#64748b", marginTop: 2, borderTop: "1px dashed #e2e8f0", paddingTop: 2 }}>
                         {cell.teacher}
                       </div>
                     )}
