@@ -232,8 +232,99 @@ export default function OverrideManager() {
 
   const todayStr = useMemo(() => toYMD(new Date()), []);
 
+  // 인쇄용 전체 주간 시간표 계산
+  const printGrid = useMemo(() => {
+    const grid: Array<Array<{ subject: string; teacher: string; changed: boolean; baseSubject: string }>> = [];
+    for (let p = 0; p < MAX_PERIODS; p++) {
+      const row = [];
+      for (let d = 0; d < 5; d++) {
+        const date = weekDays[d];
+        const baseSubject = baseTimetable?.subjects?.[p]?.[d] ?? "";
+        const neisSlots = neisTimetable[date] ?? [];
+        const neisSlot = neisSlots.find((s) => s.period === p + 1);
+        const neisSubject = neisSlot?.subject ?? "";
+        const k = key(date, p + 1);
+        const override = savedOverrides[k];
+        const changed = !!(neisSubject && baseSubject && neisSubject !== baseSubject);
+        let subject = baseSubject;
+        let teacher = baseTimetable?.teachers?.[p]?.[d] ?? "";
+        if (changed) {
+          subject = neisSubject;
+          teacher = override?.teacher ?? "";
+        } else if (override?.overrideSubject !== null && override?.overrideSubject !== undefined) {
+          subject = override.overrideSubject === "" ? "수업없음" : (override.overrideSubject ?? baseSubject);
+        }
+        row.push({ subject, teacher, changed, baseSubject });
+      }
+      grid.push(row);
+    }
+    return grid;
+  }, [baseTimetable, neisTimetable, weekDays, savedOverrides]);
+
   return (
     <div>
+      {/* 인쇄 전용 스타일 */}
+      <style>{`
+        @media print {
+          body * { visibility: hidden !important; }
+          #week-print-sheet, #week-print-sheet * { visibility: visible !important; }
+          #week-print-sheet {
+            position: fixed !important;
+            left: 0 !important; top: 0 !important;
+            width: 100% !important;
+            background: #fff !important;
+            padding: 24px !important;
+            box-sizing: border-box !important;
+          }
+          .print-tt { border-collapse: collapse; width: 100%; }
+          .print-tt th, .print-tt td { border: 1px solid #ccc; padding: 6px 8px; font-size: 11pt; }
+          .print-tt th { background: #f1f5f9; text-align: center; }
+          .print-tt td { text-align: center; vertical-align: middle; }
+          .print-changed { background: #fef9c3 !important; }
+          .print-changed-label { font-size: 8pt; color: #92400e; display: block; }
+          .print-teacher { font-size: 8.5pt; color: #475569; display: block; }
+        }
+      `}</style>
+
+      {/* 인쇄 전용 시트 */}
+      <div id="week-print-sheet" style={{ display: "none" }}>
+        <div style={{ marginBottom: 12 }}>
+          <strong style={{ fontSize: "15pt" }}>{grade}학년 {classNum}반 — 주간 시간표</strong>
+          <span style={{ marginLeft: 16, fontSize: "10pt", color: "#64748b" }}>{weekLabel(weekDays)}</span>
+        </div>
+        <table className="print-tt">
+          <thead>
+            <tr>
+              <th style={{ width: 48 }}>교시</th>
+              {DAY_NAMES.map((d, i) => (
+                <th key={d}>{d} ({formatDate(weekDays[i])})</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {printGrid.map((row, pi) => (
+              <tr key={pi}>
+                <td><strong>{pi + 1}</strong></td>
+                {row.map((cell, di) => (
+                  <td key={di} className={cell.changed ? "print-changed" : ""}>
+                    {cell.subject || "—"}
+                    {cell.changed && (
+                      <span className="print-changed-label">기본: {cell.baseSubject}</span>
+                    )}
+                    {cell.teacher && (
+                      <span className="print-teacher">{cell.teacher}</span>
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div style={{ marginTop: 8, fontSize: "8.5pt", color: "#92400e" }}>
+          ★ 노란 셀 = NEIS 기준 변경된 교시 (기본 시간표 대비)
+        </div>
+      </div>
+
       {/* ── NEIS 변경 교시 교사 등록 ── */}
       <div className="admin-section">
         <h3>📝 변경 교시 교사 등록</h3>
@@ -278,6 +369,19 @@ export default function OverrideManager() {
             <button className="tt-admin-cls-btn" onClick={() => handleWeekMove(-1)}>◀</button>
             <span style={{ fontSize: "0.85rem", color: "#475569", fontWeight: 600 }}>{weekLabel(weekDays)}</span>
             <button className="tt-admin-cls-btn" onClick={() => handleWeekMove(1)}>▶</button>
+          </div>
+          <div className="tt-admin-selector-group" style={{ marginLeft: "auto" }}>
+            <button
+              onClick={() => {
+                const sheet = document.getElementById("week-print-sheet");
+                if (sheet) sheet.style.display = "block";
+                window.print();
+                if (sheet) sheet.style.display = "none";
+              }}
+              style={{ padding: "6px 14px", borderRadius: 8, background: "#f0f9ff", border: "1px solid #bae6fd", color: "#0369a1", cursor: "pointer", fontWeight: 600, fontSize: "0.85rem" }}
+            >
+              🖨️ 인쇄
+            </button>
           </div>
         </div>
 

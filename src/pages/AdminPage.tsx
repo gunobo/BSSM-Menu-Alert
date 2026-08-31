@@ -18,6 +18,7 @@ import ExamScheduleManager from "./admin/ExamScheduleManager";
 import TeacherMapManager from "./admin/TeacherMapManager";
 import TeacherRosterManager from "./admin/TeacherRosterManager";
 import OverrideManager from "./admin/OverrideManager";
+import TimetableCompare from "./admin/TimetableCompare";
 import "../styles/admin.css";
 
 export default function AdminPage() {
@@ -69,6 +70,7 @@ export default function AdminPage() {
       "announcement-manage", // 공지 관리
       "timetable",           // 기본 시간표 관리
       "override",            // 변경 교시 교사 등록
+      "compare",             // 학반별 시간표 비교
       "teacher-roster",      // 교직원 관리
       "teacher-map",         // 교사 매핑 관리
       "class-period",        // 교시 시간 설정
@@ -272,6 +274,14 @@ export default function AdminPage() {
             📝 변경 교시 교사 등록
           </button>
 
+          {/* 📊 학반별 시간표 비교 */}
+          <button
+            className={activeMenu === "compare" ? "active" : ""}
+            onClick={() => handleMenuClick("compare")}
+          >
+            📊 학반별 시간표 비교
+          </button>
+
           {/* 📋 교직원 관리 */}
           <button
             className={activeMenu === "teacher-roster" ? "active" : ""}
@@ -334,6 +344,7 @@ export default function AdminPage() {
               activeMenu === "app-upload" ? "앱 설치 파일 관리" :
               activeMenu === "timetable" ? "기본 시간표 관리" :
               activeMenu === "override" ? "변경 교시 교사 등록" :
+              activeMenu === "compare" ? "학반별 시간표 비교" :
               activeMenu === "teacher-roster" ? "교직원 관리" :
               activeMenu === "teacher-map" ? "교사 매핑 관리" :
               activeMenu === "exam-schedule" ? "시험 일정 관리" :
@@ -357,6 +368,7 @@ export default function AdminPage() {
                 {activeMenu === "app-upload" && <AppFileManager />}
                 {activeMenu === "timetable" && <TimetableManager />}
                 {activeMenu === "override" && <OverrideManager />}
+                {activeMenu === "compare" && <TimetableCompare />}
                 {activeMenu === "teacher-roster" && <TeacherRosterManager />}
                 {activeMenu === "teacher-map" && <TeacherMapManager />}
                 {activeMenu === "exam-schedule" && <ExamScheduleManager />}
