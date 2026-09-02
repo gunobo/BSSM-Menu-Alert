@@ -1,0 +1,262 @@
+.te-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 16px 60px;
+}
+
+.te-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.te-header h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+.te-user {
+  font-size: 0.85rem;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+/* 학년/반 선택 */
+.te-selectors {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.te-selector-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.te-btn {
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.te-btn.active {
+  background: #1c3f72;
+  border-color: #1c3f72;
+  color: #fff;
+}
+
+.te-saved-msg {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.te-loading {
+  text-align: center;
+  padding: 60px 0;
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+/* 시간표 테이블 */
+.te-table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.te-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 360px;
+}
+.te-th-period {
+  width: 36px;
+  background: #1c3f72;
+}
+.te-th-day {
+  background: #1c3f72;
+  color: #fff;
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+.te-date {
+  font-size: 0.72rem;
+  font-weight: 400;
+  opacity: 0.75;
+  margin-top: 2px;
+}
+.te-td-period {
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  background: #17304e;
+  padding: 0 4px;
+  width: 36px;
+}
+.te-td-cell {
+  padding: 10px 8px;
+  text-align: center;
+  vertical-align: middle;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: background 0.12s;
+  min-width: 64px;
+}
+.te-td-cell:hover {
+  background: #eff6ff;
+}
+.te-td-cell.changed {
+  background: #fff9f0;
+  border-left: 3px solid #e07b00;
+}
+.te-td-cell.changed:hover {
+  background: #fff3e0;
+}
+.te-cell-subject {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.3;
+}
+.te-cell-teacher {
+  font-size: 0.7rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+.te-cell-orig {
+  font-size: 0.65rem;
+  color: #b45309;
+  margin-top: 2px;
+}
+.te-cell-empty {
+  color: #cbd5e1;
+  font-size: 0.9rem;
+}
+
+.te-hint {
+  margin-top: 12px;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  text-align: center;
+}
+
+/* 모달 */
+.te-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+  padding: 0;
+}
+@media (min-width: 600px) {
+  .te-modal-overlay {
+    align-items: center;
+  }
+}
+.te-modal {
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  padding: 24px 20px 36px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
+}
+@media (min-width: 600px) {
+  .te-modal {
+    border-radius: 16px;
+    padding: 28px 28px 24px;
+  }
+}
+.te-modal-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.te-modal-sub {
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: #64748b;
+}
+.te-modal-label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
+  margin-top: 14px;
+}
+.te-modal-select {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  color: #1e293b;
+  background: #fff;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.te-modal-select:focus {
+  border-color: #1c3f72;
+}
+.te-modal-btns {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+.te-btn-cancel {
+  flex: 1;
+  padding: 13px;
+  border-radius: 10px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+}
+.te-btn-save {
+  flex: 2;
+  padding: 13px;
+  border-radius: 10px;
+  border: none;
+  background: #1c3f72;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.te-btn-save:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+.te-btn-save:not(:disabled):hover {
+  background: #152e55;
+}

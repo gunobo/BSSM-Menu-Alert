@@ -25,6 +25,7 @@ import PrivacyPolicy from "./pages/Privacypolicy";
 import DeleteAccount from "./pages/Deleteaccount";
 import TimetablePage from "./pages/Timetable";
 import TeacherTimetablePage from "./pages/TeacherTimetable";
+import TeacherEditPage from "./pages/TeacherEdit";
 import ReportList from "./pages/ReportList";
 import ReportDetail from "./pages/ReportDetail";
 import SchedulePage from "./pages/Schedule";
@@ -149,6 +150,7 @@ export default function App() {
       <Route path="/delete-account" element={<DeleteAccount />} />
       <Route path="/timetable" element={<TimetablePage />} />
       <Route path="/timetable/t" element={<TeacherTimetablePage />} />
+      <Route path="/teacher/edit" element={<TeacherEditPage />} />
       <Route path="/schedule" element={<SchedulePage />} />
       <Route path="/my-report" element={<ReportList />} />
       <Route path="/my-report/:id" element={<ReportDetail />} />
