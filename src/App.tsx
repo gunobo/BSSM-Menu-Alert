@@ -16,6 +16,7 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import MyPage from "./pages/MyPage";
 import AdminRoute from "./Routes/AdminRoute";
+import TeacherRoute from "./Routes/TeacherRoute";
 import AdminPage from "./pages/AdminPage";
 import Announcements from "./pages/Announcements";
 import AnnouncementDetail from "./pages/AnnouncementDetail";
@@ -150,7 +151,11 @@ export default function App() {
       <Route path="/delete-account" element={<DeleteAccount />} />
       <Route path="/timetable" element={<TimetablePage />} />
       <Route path="/timetable/t" element={<TeacherTimetablePage />} />
-      <Route path="/teacher/edit" element={<TeacherEditPage />} />
+      <Route path="/teacher" element={
+        <TeacherRoute>
+          <TeacherEditPage />
+        </TeacherRoute>
+      } />
       <Route path="/schedule" element={<SchedulePage />} />
       <Route path="/my-report" element={<ReportList />} />
       <Route path="/my-report/:id" element={<ReportDetail />} />

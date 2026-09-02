@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import Footer from "./footer";
 import {
@@ -7,7 +6,7 @@ import {
   getPublicTeacherMap,
   patchTimetableCell,
 } from "../api/timetableApi";
-import { getWeekTimetable, getWeekRange } from "../api/NeisApi";
+import { getWeekTimetable, getWeekRange, getGradeSubjects } from "../api/NeisApi";
 import { getUser } from "../api/auth";
 import "../styles/teacher-edit.css";
 
@@ -32,19 +31,14 @@ function getWeekDays() {
   });
 }
 
-type CellInfo = {
-  subject: string;
-  teacher: string;
-  changed: boolean;
-  baseSubject: string;
-};
+type CellInfo = { subject: string; teacher: string; changed: boolean; baseSubject: string };
 
 export default function TeacherEdit() {
-  const navigate = useNavigate();
   const [grade, setGrade] = useState(1);
   const [classNum, setClassNum] = useState(1);
   const [grid, setGrid] = useState<CellInfo[][]>([]);
   const [subjectOptions, setSubjectOptions] = useState<string[]>([]);
+  const [optionsLoading, setOptionsLoading] = useState(false);
   const [teacherMap, setTeacherMap] = useState<Record<string, string[]>>({});
   const [alias, setAlias] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -58,37 +52,36 @@ export default function TeacherEdit() {
   const [savedMsg, setSavedMsg] = useState("");
 
   useEffect(() => {
-    getUser().then((u) => {
-      if (!u) { navigate("/login"); return; }
-      const role = u.role ?? "";
-      if (!["ROLE_TEACHER", "ROLE_MODERATOR", "ROLE_ADMIN", "TEACHER", "MODERATOR", "ADMIN"].includes(role)) {
-        alert("시간표 담당 교사 또는 관리자만 접근할 수 있습니다.");
-        navigate("/");
-        return;
-      }
-      setUserName(u.name ?? "");
-    });
-  }, [navigate]);
+    getUser().then((u) => { if (u?.name) setUserName(u.name); });
+  }, []);
 
   const weekDays = getWeekDays();
   const { start, end } = getWeekRange();
 
-  const applyAlias = useCallback((s: string) => alias[s] ?? s, [alias]);
+  // 학년/반 바뀔 때 과목 목록 로드 (TimetableManager와 동일)
+  useEffect(() => {
+    setOptionsLoading(true);
+    setSubjectOptions([]);
+    getGradeSubjects(grade, classNum)
+      .then(setSubjectOptions)
+      .catch(() => setSubjectOptions([]))
+      .finally(() => setOptionsLoading(false));
+
+    getPublicTeacherMap(grade, classNum)
+      .then((tm) => {
+        setAlias(tm?.subjectAlias ?? {});
+        setTeacherMap(tm?.teacherMap ?? {});
+      })
+      .catch(() => { setAlias({}); setTeacherMap({}); });
+  }, [grade, classNum]);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [base, neis, tm] = await Promise.all([
+      const [base, neis] = await Promise.all([
         getPublicBaseTimetable(grade, classNum).catch(() => null),
         getWeekTimetable(grade, classNum, start, end).catch(() => ({})),
-        getPublicTeacherMap(grade, classNum).catch(() => null),
       ]);
-
-      const al = tm?.subjectAlias ?? {};
-      setAlias(al);
-      setSubjectOptions(Object.keys(al).length ? Object.keys(al) : []);
-      // teacherMap: { subject: string[] } — 과목별 교사 목록
-      setTeacherMap(tm?.teacherMap ?? {});
 
       const newGrid: CellInfo[][] = [];
       for (let pi = 0; pi < MAX_PERIODS; pi++) {
@@ -97,45 +90,33 @@ export default function TeacherEdit() {
           const baseSubjectRaw = base?.subjects?.[pi]?.[di] ?? "";
           const baseTeacher = base?.teachers?.[pi]?.[di] ?? "";
           const neisSlots =
-            (neis as Record<string, Array<{ period: number; subject: string }>>)[
-              weekDays[di]
-            ] ?? [];
+            (neis as Record<string, Array<{ period: number; subject: string }>>)[weekDays[di]] ?? [];
           const neisSlot = neisSlots.find((s) => s.period === pi + 1);
           const neisSubjectRaw = neisSlot?.subject ?? "";
-          const changed = !!(
-            neisSubjectRaw &&
-            baseSubjectRaw &&
-            neisSubjectRaw !== baseSubjectRaw
-          );
+          const changed = !!(neisSubjectRaw && baseSubjectRaw && neisSubjectRaw !== baseSubjectRaw);
           const subjectRaw = changed ? neisSubjectRaw : baseSubjectRaw;
           row.push({
-            subject: (al[subjectRaw] ?? subjectRaw),
+            subject: alias[subjectRaw] ?? subjectRaw,
             teacher: changed ? "" : baseTeacher,
             changed,
-            baseSubject: al[baseSubjectRaw] ?? baseSubjectRaw,
+            baseSubject: alias[baseSubjectRaw] ?? baseSubjectRaw,
           });
         }
         newGrid.push(row);
       }
       setGrid(newGrid);
-
-      // 과목 목록 = base 시간표에 있는 과목 + alias keys
-      const baseSubjs = new Set<string>();
-      (base?.subjects ?? []).forEach((row: string[]) =>
-        row.forEach((s) => { if (s) baseSubjs.add(s); })
-      );
-      Object.keys(al).forEach((s) => baseSubjs.add(s));
-      setSubjectOptions([...baseSubjs].sort((a, b) => a.localeCompare(b, "ko")));
     } finally {
       setLoading(false);
     }
-  }, [grade, classNum, start, end, weekDays.join(",")]);
+  }, [grade, classNum, start, end, alias]);
 
   useEffect(() => { load(); }, [load]);
 
   const openModal = (pi: number, di: number) => {
     const cell = grid[pi]?.[di];
-    const rawSubject = Object.entries(alias).find(([, v]) => v === cell?.subject)?.[0] ?? cell?.subject ?? "";
+    // alias 역방향 — 표시명 → 원본명
+    const rawSubject =
+      Object.entries(alias).find(([, v]) => v === cell?.subject)?.[0] ?? cell?.subject ?? "";
     setEditSubject(rawSubject);
     setEditTeacher(cell?.teacher ?? "");
     setModal({ pi, di });
@@ -167,6 +148,8 @@ export default function TeacherEdit() {
   };
 
   const editTeacherOptions = teacherMap[editSubject] ?? [];
+  // 현재 editSubject가 subjectOptions에 없으면 extra로 추가
+  const extraSubject = editSubject && !subjectOptions.includes(editSubject) ? editSubject : null;
 
   return (
     <>
@@ -197,7 +180,6 @@ export default function TeacherEdit() {
 
         {savedMsg && <div className="te-saved-msg">✅ {savedMsg}</div>}
 
-        {/* 이번 주 시간표 */}
         {loading ? (
           <div className="te-loading">불러오는 중...</div>
         ) : (
@@ -209,7 +191,7 @@ export default function TeacherEdit() {
                   {DAY_NAMES.map((d, di) => (
                     <th key={d} className="te-th-day">
                       <div>{d}</div>
-                      <div className="te-date">{weekDays[di].slice(4, 6)}/{weekDays[di].slice(6, 8)}</div>
+                      <div className="te-date">{weekDays[di].slice(4,6)}/{weekDays[di].slice(6,8)}</div>
                     </th>
                   ))}
                 </tr>
@@ -221,8 +203,7 @@ export default function TeacherEdit() {
                     {Array.from({ length: 5 }, (_, di) => {
                       const cell = grid[pi]?.[di];
                       return (
-                        <td
-                          key={di}
+                        <td key={di}
                           className={`te-td-cell ${cell?.changed ? "changed" : ""}`}
                           onClick={() => openModal(pi, di)}
                         >
@@ -230,9 +211,7 @@ export default function TeacherEdit() {
                             <>
                               <div className="te-cell-subject">{cell.subject}</div>
                               {cell.teacher && <div className="te-cell-teacher">{cell.teacher}</div>}
-                              {cell.changed && (
-                                <div className="te-cell-orig">← {cell.baseSubject}</div>
-                              )}
+                              {cell.changed && <div className="te-cell-orig">← {cell.baseSubject}</div>}
                             </>
                           ) : (
                             <span className="te-cell-empty">—</span>
@@ -261,19 +240,23 @@ export default function TeacherEdit() {
             </div>
 
             <label className="te-modal-label">과목</label>
-            <select
-              className="te-modal-select"
-              value={editSubject}
-              onChange={(e) => { setEditSubject(e.target.value); setEditTeacher(""); }}
-            >
-              <option value="">— 수업없음 —</option>
-              {editSubject && !subjectOptions.includes(editSubject) && (
-                <option value={editSubject}>{alias[editSubject] ?? editSubject}</option>
-              )}
-              {subjectOptions.map((s) => (
-                <option key={s} value={s}>{alias[s] ?? s}</option>
-              ))}
-            </select>
+            {optionsLoading ? (
+              <div className="te-options-loading">NEIS 과목 불러오는 중...</div>
+            ) : (
+              <select
+                className="te-modal-select"
+                value={editSubject}
+                onChange={(e) => { setEditSubject(e.target.value); setEditTeacher(""); }}
+              >
+                <option value="">— 수업없음 —</option>
+                {extraSubject && (
+                  <option value={extraSubject}>{alias[extraSubject] ?? extraSubject}</option>
+                )}
+                {subjectOptions.map((s) => (
+                  <option key={s} value={s}>{alias[s] ?? s}</option>
+                ))}
+              </select>
+            )}
 
             {editSubject && (
               <>
@@ -283,7 +266,7 @@ export default function TeacherEdit() {
                   value={editTeacher}
                   onChange={(e) => setEditTeacher(e.target.value)}
                 >
-                  <option value="">선택</option>
+                  <option value="">선택 안함</option>
                   {editTeacher && !editTeacherOptions.includes(editTeacher) && (
                     <option value={editTeacher}>{editTeacher}</option>
                   )}
