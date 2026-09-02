@@ -30,7 +30,10 @@ export const logout = async (fcmToken?: string): Promise<void> => {
   localStorage.removeItem("accessToken");
   window.dispatchEvent(new Event("authChange"));
   try {
-    await axios.post("/user/logout-device", { token: fcmToken });
+    await Promise.all([
+      axios.post(`${API_BASE_URL}/auth/logout`, {}, { withCredentials: true }),
+      fcmToken ? axios.post("/user/logout-device", { token: fcmToken }) : Promise.resolve(),
+    ]);
   } finally {
     window.location.href = "/";
   }
