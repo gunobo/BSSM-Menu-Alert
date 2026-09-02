@@ -48,7 +48,7 @@ export default function App() {
 
   useEffect(() => {
     (window as unknown as Record<string, unknown>).onDeepLink = (date: string) => {
-      if (date) navigate(`/?date=${date}`);
+      if (date) navigate(`/meal?date=${date}`);
     };
 
     checkAppUpdate();
@@ -121,7 +121,7 @@ export default function App() {
             notification.onclick = (event) => {
               event.preventDefault();
               window.focus();
-              navigate(targetDate ? `/?date=${targetDate}` : "/");
+              navigate(targetDate ? `/meal?date=${targetDate}` : "/");
               notification.close();
             };
           }
@@ -138,7 +138,8 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<TimetablePage />} />
+      <Route path="/meal" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/mypage" element={<MyPage />} />
       <Route path="/announcements" element={<Announcements />} />

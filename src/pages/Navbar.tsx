@@ -99,19 +99,19 @@ export default function Navbar({ selectedDate, setSelectedDate }: NavbarProps) {
         <div className="nav-left">
           <div className="nav-logo" style={{ cursor: 'pointer' }}>
             <img src={bssmLogo} alt="BSSM 홈페이지 이동" onClick={handleLogoClick} />
-            <h2 onClick={() => navigate("/")}>BSSM 급식알리미</h2>
+            <h2 onClick={() => navigate("/")}>BSSM 시간표</h2>
           </div>
           <div className="nav-menu">
-            <button className={`menu-item ${isActive("/")}`} onClick={() => navigate("/")}>급식확인</button>
-            <button className={`menu-item ${isActive("/timetable")}`} onClick={() => navigate("/timetable")}>시간표</button>
+            <button className={`menu-item ${location.pathname === "/" || location.pathname.startsWith("/timetable") ? "active" : ""}`} onClick={() => navigate("/")}>시간표</button>
+            <button className={`menu-item ${isActive("/meal")}`} onClick={() => navigate("/meal")}>급식확인</button>
             <button className={`menu-item ${isActive("/schedule")}`} onClick={() => navigate("/schedule")}>학사일정</button>
             <button className={`menu-item ${isActive("/announcements")}`} onClick={() => navigate("/announcements")}>공지게시판</button>
           </div>
         </div>
 
         <div className="nav-right">
-          {/* 급식확인 페이지("/")에서만 날짜 선택기를 보여줌 */}
-          {location.pathname === "/" && selectedDate && (
+          {/* 급식확인 페이지("/meal")에서만 날짜 선택기를 보여줌 */}
+          {location.pathname === "/meal" && selectedDate && (
             <input
               type="date"
               value={selectedDate as string}

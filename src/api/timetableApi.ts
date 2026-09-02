@@ -59,6 +59,21 @@ export async function getPublicBaseTimetable(grade: number, classNum: number): P
   } catch { return null; }
 }
 
+export async function patchTimetableCell(
+  grade: number, classNum: number,
+  periodIdx: number, dayIdx: number,
+  subject: string, teacher: string
+): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/admin/timetable/cell`, {
+    method: "PATCH", headers: authHeaders(),
+    body: JSON.stringify({ grade, classNum, periodIdx, dayIdx, subject, teacher }),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`HTTP ${res.status}${text ? `: ${text}` : ""}`);
+  }
+}
+
 export async function saveBaseTimetable(
   grade: number, classNum: number, subjects: string[][],
   adminName: string, teachers: string[][] | null = null

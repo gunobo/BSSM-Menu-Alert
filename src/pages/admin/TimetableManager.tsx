@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   getBaseTimetable,
   saveBaseTimetable,
+  patchTimetableCell,
   getChangeLog,
   getPublicTeacherMap,
   deleteAllTimetables,
@@ -49,6 +50,12 @@ export default function TimetableManager() {
   const [message, setMessage] = useState<StatusMessage | null>(null);
   const [changeLog, setChangeLog] = useState<ChangeLogEntry[]>([]);
   const [logLoading, setLogLoading] = useState(false);
+
+  // 셀 빠른 수정 모달
+  const [cellModal, setCellModal] = useState<{ pi: number; di: number } | null>(null);
+  const [cellSubject, setCellSubject] = useState("");
+  const [cellTeacher, setCellTeacher] = useState("");
+  const [cellSaving, setCellSaving] = useState(false);
 
   const savedSubjectsRef = useRef(makeEmpty());
 
@@ -174,6 +181,38 @@ export default function TimetableManager() {
     }
   };
 
+  const openCellModal = (pi: number, di: number) => {
+    setCellSubject(subjects[pi]?.[di] ?? "");
+    setCellTeacher(teachers[pi]?.[di] ?? "");
+    setCellModal({ pi, di });
+  };
+
+  const handleCellSave = async () => {
+    if (!cellModal) return;
+    setCellSaving(true);
+    try {
+      await patchTimetableCell(grade, classNum, cellModal.pi, cellModal.di, cellSubject, cellTeacher);
+      setSubjects((prev) => {
+        const next = prev.map((r) => [...r]);
+        next[cellModal.pi][cellModal.di] = cellSubject;
+        return next;
+      });
+      setTeachers((prev) => {
+        const next = prev.map((r) => [...r]);
+        next[cellModal.pi][cellModal.di] = cellTeacher;
+        return next;
+      });
+      savedSubjectsRef.current = subjects.map((r) => [...r]);
+      savedSubjectsRef.current[cellModal.pi][cellModal.di] = cellSubject;
+      setCellModal(null);
+      await loadChangeLog();
+    } catch (err) {
+      alert((err as Error)?.message ?? "저장 실패");
+    } finally {
+      setCellSaving(false);
+    }
+  };
+
   const handleClear = () => {
     if (!window.confirm(`${grade}학년 ${classNum}반 시간표를 모두 초기화할까요?`)) return;
     setSubjects(makeEmpty());
@@ -267,7 +306,8 @@ export default function TimetableManager() {
                         const needTeacherSelect = teacherOptions.length >= 1 || !!extraTeacher;
 
                         return (
-                          <td key={di} className="tt-admin-subject-cell">
+                          <td key={di} className="tt-admin-subject-cell" title="더블클릭으로 빠른 수정"
+                            onDoubleClick={() => openCellModal(pi, di)}>
                             <div className="tt-admin-cell-with-teacher">
                               {/* 과목 선택 */}
                               <select
@@ -364,6 +404,60 @@ export default function TimetableManager() {
           </div>
         )}
       </div>
+
+      {/* 셀 빠른 수정 모달 */}
+      {cellModal && (
+        <div className="modal-overlay" onClick={() => setCellModal(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 360 }}>
+            <h3 className="modal-title">
+              {DAY_NAMES[cellModal.di]}요일 {cellModal.pi + 1}교시 수정
+              <span style={{ fontSize: "0.8rem", fontWeight: 400, color: "#64748b", marginLeft: 8 }}>
+                {grade}학년 {classNum}반
+              </span>
+            </h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, margin: "16px 0" }}>
+              <div>
+                <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#475569", display: "block", marginBottom: 4 }}>과목</label>
+                <select
+                  className="tt-admin-select"
+                  style={{ width: "100%" }}
+                  value={cellSubject}
+                  onChange={(e) => { setCellSubject(e.target.value); setCellTeacher(""); }}
+                >
+                  <option value="">- 수업없음 -</option>
+                  {cellSubject && !subjectOptions.includes(cellSubject) && (
+                    <option value={cellSubject}>{cellSubject}</option>
+                  )}
+                  {subjectOptions.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+              {cellSubject && (
+                <div>
+                  <label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#475569", display: "block", marginBottom: 4 }}>담당 교사</label>
+                  <select
+                    className="tt-admin-select"
+                    style={{ width: "100%" }}
+                    value={cellTeacher}
+                    onChange={(e) => setCellTeacher(e.target.value)}
+                  >
+                    <option value="">선생님 선택</option>
+                    {cellTeacher && !(subjectTeacherMap[cellSubject] ?? []).includes(cellTeacher) && (
+                      <option value={cellTeacher}>{cellTeacher}</option>
+                    )}
+                    {(subjectTeacherMap[cellSubject] ?? []).map((t) => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </div>
+              )}
+            </div>
+            <div className="modal-buttons">
+              <button className="btn-modal-cancel" onClick={() => setCellModal(null)} disabled={cellSaving}>취소</button>
+              <button className="btn-modal-confirm" onClick={handleCellSave} disabled={cellSaving}>
+                {cellSaving ? "저장 중..." : "저장"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
