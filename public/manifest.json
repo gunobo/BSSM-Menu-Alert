@@ -1,6 +1,6 @@
 {
-  "short_name": "BSSM급식",
-  "name": "BSSM 급식알리미",
+  "short_name": "BSSM시간표",
+  "name": "BSSM 시간표",
   "icons": [
     {
       "src": "favicon.ico",
