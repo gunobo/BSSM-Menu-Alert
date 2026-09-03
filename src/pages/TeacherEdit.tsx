@@ -15,21 +15,6 @@ const MAX_PERIODS = 7;
 const GRADES = [1, 2, 3];
 const MAX_CLASSES = 4;
 
-function toYMD(d: Date) {
-  return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-    .toISOString().slice(0, 10).replace(/-/g, "");
-}
-function getWeekDays() {
-  const today = new Date();
-  const day = today.getDay();
-  const mon = new Date(today);
-  mon.setDate(today.getDate() + (day === 0 ? -6 : 1 - day));
-  return Array.from({ length: 5 }, (_, i) => {
-    const d = new Date(mon);
-    d.setDate(mon.getDate() + i);
-    return toYMD(d);
-  });
-}
 
 type CellInfo = { subject: string; teacher: string; changed: boolean; baseSubject: string };
 
@@ -51,37 +36,29 @@ export default function TeacherEdit() {
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState("");
 
+  const weekDays = getWeekRange().days;
+
   useEffect(() => {
     getUser().then((u) => { if (u?.name) setUserName(u.name); });
   }, []);
 
-  const weekDays = getWeekDays();
-  const { start, end } = getWeekRange();
-
-  // 학년/반 바뀔 때 과목 목록 로드 (TimetableManager와 동일)
-  useEffect(() => {
-    setOptionsLoading(true);
-    setSubjectOptions([]);
-    getGradeSubjects(grade, classNum)
-      .then(setSubjectOptions)
-      .catch(() => setSubjectOptions([]))
-      .finally(() => setOptionsLoading(false));
-
-    getPublicTeacherMap(grade, classNum)
-      .then((tm) => {
-        setAlias(tm?.subjectAlias ?? {});
-        setTeacherMap(tm?.teacherMap ?? {});
-      })
-      .catch(() => { setAlias({}); setTeacherMap({}); });
-  }, [grade, classNum]);
-
   const load = useCallback(async () => {
+    const { start, end, days: wd } = getWeekRange();
     setLoading(true);
+    setOptionsLoading(true);
     try {
-      const [base, neis] = await Promise.all([
+      const [base, neis, tm, subjects] = await Promise.all([
         getPublicBaseTimetable(grade, classNum).catch(() => null),
         getWeekTimetable(grade, classNum, start, end).catch(() => ({})),
+        getPublicTeacherMap(grade, classNum).catch(() => null),
+        getGradeSubjects(grade, classNum).catch(() => [] as string[]),
       ]);
+
+      const al = tm?.subjectAlias ?? {};
+      const tm2 = tm?.teacherMap ?? {};
+      setAlias(al);
+      setTeacherMap(tm2);
+      setSubjectOptions(subjects);
 
       const newGrid: CellInfo[][] = [];
       for (let pi = 0; pi < MAX_PERIODS; pi++) {
@@ -90,16 +67,16 @@ export default function TeacherEdit() {
           const baseSubjectRaw = base?.subjects?.[pi]?.[di] ?? "";
           const baseTeacher = base?.teachers?.[pi]?.[di] ?? "";
           const neisSlots =
-            (neis as Record<string, Array<{ period: number; subject: string }>>)[weekDays[di]] ?? [];
+            (neis as Record<string, Array<{ period: number; subject: string }>>)[wd[di]] ?? [];
           const neisSlot = neisSlots.find((s) => s.period === pi + 1);
           const neisSubjectRaw = neisSlot?.subject ?? "";
           const changed = !!(neisSubjectRaw && baseSubjectRaw && neisSubjectRaw !== baseSubjectRaw);
           const subjectRaw = changed ? neisSubjectRaw : baseSubjectRaw;
           row.push({
-            subject: alias[subjectRaw] ?? subjectRaw,
+            subject: al[subjectRaw] ?? subjectRaw,
             teacher: changed ? "" : baseTeacher,
             changed,
-            baseSubject: alias[baseSubjectRaw] ?? baseSubjectRaw,
+            baseSubject: al[baseSubjectRaw] ?? baseSubjectRaw,
           });
         }
         newGrid.push(row);
@@ -107,8 +84,9 @@ export default function TeacherEdit() {
       setGrid(newGrid);
     } finally {
       setLoading(false);
+      setOptionsLoading(false);
     }
-  }, [grade, classNum, start, end, alias]);
+  }, [grade, classNum]);
 
   useEffect(() => { load(); }, [load]);
 
